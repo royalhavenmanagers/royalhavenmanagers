@@ -11,6 +11,7 @@ import Testimonials from './components/Testimonials';
 import ContactModal from './components/ContactModal';
 import WhatsAppWidget from './components/WhatsAppWidget';
 import Footer from './components/Footer';
+import { companyData } from './data/companyData';
 
 export default function App() {
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -28,7 +29,10 @@ export default function App() {
         <Hero onOpenContact={handleOpenContact} />
         <About />
         <Services onOpenContact={handleOpenContact} />
-        <PropertySlider onOpenContact={handleOpenContact} />
+        
+        {/* Render Property Slider only if showPortfolio is explicitly enabled */}
+        {companyData.showPortfolio && <PropertySlider onOpenContact={handleOpenContact} />}
+        
         <ProcessTimeline onOpenContact={handleOpenContact} />
         <Leadership onOpenContact={handleOpenContact} />
         <WhyChooseUs onOpenContact={handleOpenContact} />

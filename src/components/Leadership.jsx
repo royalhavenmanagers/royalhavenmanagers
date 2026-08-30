@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, Quote, CheckCircle, Mail, Phone } from 'lucide-react';
+import { Award, Quote } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Leadership({ onOpenContact }) {
@@ -18,15 +18,15 @@ export default function Leadership({ onOpenContact }) {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-semibold">
-            <Award className="w-3.5 h-3.5 mr-1" />
-            <span>EXECUTIVE GOVERNANCE</span>
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-bold">
+            <Award className="w-4 h-4 mr-1.5" />
+            <span>COMPANY LEADERSHIP</span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Our <span className="text-gold-gradient">Leadership Team</span>
           </h2>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Guided by seasoned real estate professionals committed to integrity, client accountability, and royalty-grade property management standards.
+          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
+            Guided by dedicated real estate professionals committed to integrity, transparency, and royalty-grade property management.
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export default function Leadership({ onOpenContact }) {
                 
                 {/* CEO Image Container with Toggle View */}
                 <div className="relative group shrink-0">
-                  <div className="w-36 h-44 rounded-2xl overflow-hidden border-2 border-gold-500/40 shadow-gold-md">
+                  <div className="w-40 h-48 rounded-2xl overflow-hidden border-2 border-gold-500/40 shadow-gold-md">
                     <img 
                       src={ceo.images[ceoImageIdx]} 
                       alt={ceo.name} 
@@ -58,7 +58,7 @@ export default function Leadership({ onOpenContact }) {
                   {ceo.images.length > 1 && (
                     <button
                       onClick={() => setCeoImageIdx((prev) => (prev === 0 ? 1 : 0))}
-                      className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-obsidian-900 border border-gold-500/50 text-[10px] text-amber-200 px-3.5 py-0.5 rounded-full font-bold uppercase shadow-gold-sm hover:bg-gold-500 hover:text-obsidian-900 transition-colors"
+                      className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-obsidian-900 border border-gold-500/50 text-xs text-amber-200 px-3.5 py-1 rounded-full font-bold uppercase shadow-gold-sm hover:bg-gold-gradient hover:text-obsidian-900 transition-colors"
                     >
                       Switch View
                     </button>
@@ -67,35 +67,35 @@ export default function Leadership({ onOpenContact }) {
 
                 {/* Info */}
                 <div className="space-y-2 text-center sm:text-left">
-                  <div className="inline-block px-3 py-1 rounded-md bg-gold-500/10 border border-gold-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider">
+                  <div className="inline-block px-3 py-1 rounded-md bg-gold-500/10 border border-gold-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
                     {ceo.title}
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-white">{ceo.name}</h3>
-                  <p className="text-xs text-gold-400 font-medium">{ceo.role}</p>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">{ceo.name}</h3>
+                  <p className="text-sm text-gold-400 font-semibold">{ceo.role}</p>
 
                   <div className="pt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                    <span className="text-[10px] bg-obsidian-900 px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">Strategic Vision</span>
-                    <span className="text-[10px] bg-obsidian-900 px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">Portfolio Governance</span>
+                    <span className="text-xs bg-obsidian-900 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">Strategic Leadership</span>
+                    <span className="text-xs bg-obsidian-900 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">Client Relations</span>
                   </div>
                 </div>
               </div>
 
               {/* Bio & Quote */}
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pt-4 border-t border-white/5">
+              <p className="text-base text-slate-200 leading-relaxed pt-4 border-t border-white/10">
                 {ceo.bio}
               </p>
 
-              <blockquote className="bg-obsidian-900/80 p-4 rounded-xl border-l-4 border-gold-500 text-amber-200 text-xs sm:text-sm italic flex items-start space-x-3">
-                <Quote className="w-5 h-5 text-gold-500 shrink-0" />
+              <blockquote className="bg-obsidian-900/80 p-5 rounded-2xl border-l-4 border-gold-500 text-amber-200 text-base italic flex items-start space-x-3">
+                <Quote className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
                 <span>"{ceo.quote}"</span>
               </blockquote>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-white/5 flex items-center justify-between">
-              <span className="text-xs text-slate-400">Direct Executive Desk</span>
+            <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
+              <span className="text-sm text-slate-300 font-medium">Executive Office</span>
               <button
                 onClick={onOpenContact}
-                className="px-4 py-2 text-xs uppercase tracking-wider font-bold text-obsidian-900 bg-gold-gradient rounded-lg shadow-gold-sm hover:brightness-110 transition-all"
+                className="px-5 py-2.5 text-xs uppercase tracking-wider font-bold text-obsidian-900 bg-gold-gradient rounded-xl shadow-gold-sm hover:brightness-110 transition-all"
               >
                 Schedule Meeting
               </button>
@@ -114,7 +114,7 @@ export default function Leadership({ onOpenContact }) {
               <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                 
                 {/* Partner Image */}
-                <div className="w-36 h-44 rounded-2xl overflow-hidden border-2 border-gold-500/40 shadow-gold-md shrink-0">
+                <div className="w-40 h-48 rounded-2xl overflow-hidden border-2 border-gold-500/40 shadow-gold-md shrink-0">
                   <img 
                     src={partner.images[0]} 
                     alt={partner.name} 
@@ -124,35 +124,35 @@ export default function Leadership({ onOpenContact }) {
 
                 {/* Info */}
                 <div className="space-y-2 text-center sm:text-left">
-                  <div className="inline-block px-3 py-1 rounded-md bg-gold-500/10 border border-gold-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider">
+                  <div className="inline-block px-3 py-1 rounded-md bg-gold-500/10 border border-gold-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
                     {partner.title}
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-white">{partner.name}</h3>
-                  <p className="text-xs text-gold-400 font-medium">{partner.role}</p>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">{partner.name}</h3>
+                  <p className="text-sm text-gold-400 font-semibold">{partner.role}</p>
 
                   <div className="pt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                    <span className="text-[10px] bg-obsidian-900 px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">Client Operations</span>
-                    <span className="text-[10px] bg-obsidian-900 px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">Tenancy Vetting</span>
+                    <span className="text-xs bg-obsidian-900 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">Operations</span>
+                    <span className="text-xs bg-obsidian-900 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">Property Oversight</span>
                   </div>
                 </div>
               </div>
 
               {/* Bio & Quote */}
-              <p className="text-xs text-slate-300 leading-relaxed pt-4 border-t border-white/5">
+              <p className="text-base text-slate-200 leading-relaxed pt-4 border-t border-white/10">
                 {partner.bio}
               </p>
 
-              <blockquote className="bg-obsidian-900/80 p-4 rounded-xl border-l-4 border-gold-500 text-amber-200 text-xs italic flex items-start space-x-3">
-                <Quote className="w-4 h-4 text-gold-500 shrink-0" />
+              <blockquote className="bg-obsidian-900/80 p-5 rounded-2xl border-l-4 border-gold-500 text-amber-200 text-base italic flex items-start space-x-3">
+                <Quote className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
                 <span>"{partner.quote}"</span>
               </blockquote>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-white/5 flex items-center justify-between">
-              <span className="text-xs text-slate-400">Operations & Advisory</span>
+            <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
+              <span className="text-sm text-slate-300 font-medium">Operations Desk</span>
               <button
                 onClick={onOpenContact}
-                className="px-4 py-2 text-xs uppercase tracking-wider font-bold text-slate-200 border border-gold-500/40 rounded-lg hover:bg-gold-500/10 transition-colors"
+                className="px-5 py-2.5 text-xs uppercase tracking-wider font-bold text-slate-200 border border-gold-500/40 rounded-xl hover:bg-gold-500/10 transition-colors"
               >
                 Inquire Operations
               </button>
