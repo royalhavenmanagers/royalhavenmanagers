@@ -1,0 +1,65 @@
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+@import 'swiper/css/effect-fade';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-gold-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500;
+  }
+  .bg-gold-gradient {
+    @apply bg-gradient-to-r from-amber-200 via-gold-500 to-amber-600;
+  }
+  .border-gold-glow {
+    @apply border border-gold-500/30 hover:border-gold-500/80 transition-all duration-300 shadow-gold-sm hover:shadow-gold-md;
+  }
+  .glass-card {
+    @apply bg-obsidian-800/80 backdrop-blur-xl border border-gold-500/20 rounded-2xl;
+  }
+}
+
+/* Custom Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #08080A;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #D4AF37 0%, #755418 100%);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F3E5AB;
+}
+
+/* Swiper custom pagination & navigation overrides */
+.swiper-pagination-bullet {
+  background: rgba(212, 175, 55, 0.4) !important;
+  opacity: 0.7 !important;
+  transition: all 0.3s ease;
+}
+.swiper-pagination-bullet-active {
+  background: #D4AF37 !important;
+  opacity: 1 !important;
+  width: 24px !important;
+  border-radius: 6px !important;
+}
+
+.swiper-button-next, .swiper-button-prev {
+  color: #D4AF37 !important;
+  background: rgba(16, 16, 20, 0.7) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  backdrop-filter: blur(8px);
+}
+.swiper-button-next:after, .swiper-button-prev:after {
+  font-size: 18px !important;
+  font-weight: bold;
+}
