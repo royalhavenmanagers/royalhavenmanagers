@@ -153,8 +153,11 @@ export const blogStore = {
   },
 
   login: (email, password) => {
-    if (email.trim().toLowerCase() === "admin@royalhaven.com.ng" || email.trim() !== "" && password === "royalhaven2026") {
+    const validEmails = ["royalhavenrealtyproperty@gmail.com", "admin@royalhaven.com.ng"];
+    const normalizedEmail = email.trim().toLowerCase();
+    if ((validEmails.includes(normalizedEmail) || normalizedEmail !== "") && password === "royalhaven2026") {
       localStorage.setItem(AUTH_KEY, "true");
+      localStorage.setItem("royalhaven_admin_email", normalizedEmail);
       return { success: true };
     }
     return { success: false, error: "Invalid admin email or password." };
@@ -162,5 +165,6 @@ export const blogStore = {
 
   logout: () => {
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem("royalhaven_admin_email");
   }
 };

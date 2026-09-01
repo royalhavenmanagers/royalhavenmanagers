@@ -167,7 +167,7 @@ export default function AdminPortal({ onReturnHome }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@royalhaven.com.ng"
+                placeholder="royalhavenrealtyproperty@gmail.com"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
               />
             </div>
@@ -284,7 +284,7 @@ export default function AdminPortal({ onReturnHome }) {
           </div>
 
           <span className="text-xs text-slate-500 font-mono">
-            Logged in as: <strong className="text-slate-800">admin@royalhaven.com.ng</strong>
+            Logged in as: <strong className="text-slate-800">{localStorage.getItem("royalhaven_admin_email") || "royalhavenrealtyproperty@gmail.com"}</strong>
           </span>
         </div>
 
