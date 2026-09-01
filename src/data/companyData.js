@@ -1,13 +1,13 @@
 export const companyData = {
   name: "Royal Haven Realty & Property Managers Ltd.",
   shortName: "Royal Haven",
-  domain: "royalhavenpropertymanager.com.ng",
+  domain: "royalhaven.com.ng",
   tagline: "Excellence in Property. Royalty in Service.",
   motto: "Building Trust. Managing Excellence. Creating Value.",
   phones: ["08153785297", "08120850733"],
   formattedPhones: ["+234 815 378 5297", "+234 812 085 0733"],
   whatsapp: "2348153785297",
-  email: "info@royalhavenpropertymanager.com.ng",
+  email: "info@royalhaven.com.ng",
   locations: [
     { city: "Lagos", state: "Lagos State", country: "Nigeria", region: "Lagos State & Surrounding Environs" },
     { city: "Ogun", state: "Ogun State", country: "Nigeria", region: "Ogun State & Surrounding Environs" }

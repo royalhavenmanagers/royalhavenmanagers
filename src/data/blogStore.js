@@ -153,7 +153,6 @@ export const blogStore = {
   },
 
   login: (email, password) => {
-    // Default admin credentials (can be customized or linked to Supabase)
     if (email.trim().toLowerCase() === "admin@royalhaven.com.ng" || email.trim() !== "" && password === "royalhaven2026") {
       localStorage.setItem(AUTH_KEY, "true");
       return { success: true };
