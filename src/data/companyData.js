@@ -17,7 +17,6 @@ export const companyData = {
     instagram: "https://instagram.com/royalhavenrealty",
     linkedin: "https://linkedin.com/company/royalhavenrealty"
   },
-  // Feature flag to keep property sales / portfolio section hidden as requested
   showPortfolio: false,
 
   pillars: [
@@ -123,7 +122,7 @@ export const companyData = {
       name: "Managing Director / CEO",
       title: "Chief Executive Officer",
       role: "Strategic Vision & Executive Leadership",
-      images: ["/images/team/ceo-1.jpg", "/images/team/ceo-2.jpg"],
+      images: ["/images/team/ceo-navy-suit.jpg", "/images/team/ceo-taupe-suit.jpg"],
       bio: "Leading Royal Haven Realty & Property Managers Ltd. with dedication to excellence, transparency, and client satisfaction across Nigeria.",
       quote: "Every property under our care is managed with the same level of commitment as if it were our own."
     },
@@ -131,7 +130,7 @@ export const companyData = {
       name: "Associate Partner",
       title: "Associate Partner",
       role: "Operations & Client Relations",
-      images: ["/images/team/partner.jpg"],
+      images: ["/images/team/associate-partner.jpg"],
       bio: "Overseeing management operations, client relations, and ensuring professional service delivery on all client properties.",
       quote: "Your Property. Our Responsibility. Your Peace of Mind."
     }
