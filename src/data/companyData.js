@@ -59,6 +59,44 @@ export const companyData = {
       description: "We put our clients' needs first and exceed expectations."
     }
   ],
+  partners: [
+    {
+      name: "Access Bank Plc",
+      category: "Financial Institution",
+      logoText: "ACCESS",
+      iconColor: "text-orange-600"
+    },
+    {
+      name: "Guaranty Trust Bank (GTCO)",
+      category: "Banking & Custody",
+      logoText: "GTBank",
+      iconColor: "text-amber-600"
+    },
+    {
+      name: "Lekki Gardens Development",
+      category: "Estate Infrastructure",
+      logoText: "LEKKI GARDENS",
+      iconColor: "text-blue-600"
+    },
+    {
+      name: "Ogun State Housing Corporation",
+      category: "State Infrastructure",
+      logoText: "OSHC",
+      iconColor: "text-emerald-700"
+    },
+    {
+      name: "Prime Alliance Properties",
+      category: "Commercial Development",
+      logoText: "PRIME ALLIANCE",
+      iconColor: "text-gold-600"
+    },
+    {
+      name: "Zenith Bank Plc",
+      category: "Financial Institution",
+      logoText: "ZENITH",
+      iconColor: "text-red-600"
+    }
+  ],
   services: [
     {
       id: "property-management",

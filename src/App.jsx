@@ -7,6 +7,7 @@ import PropertySlider from './components/PropertySlider';
 import ProcessTimeline from './components/ProcessTimeline';
 import Leadership from './components/Leadership';
 import WhyChooseUs from './components/WhyChooseUs';
+import PartnersSection from './components/PartnersSection';
 import Testimonials from './components/Testimonials';
 import BlogSection from './components/BlogSection';
 import AdminPortal from './components/AdminPortal';
@@ -60,6 +61,9 @@ export default function App() {
         <Leadership onOpenContact={handleOpenContact} />
         <WhyChooseUs onOpenContact={handleOpenContact} />
         
+        {/* Partners & Corporate Clients Section */}
+        <PartnersSection />
+
         {/* Public Blog & Insights Section */}
         <BlogSection onOpenContact={handleOpenContact} />
         
