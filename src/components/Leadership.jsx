@@ -108,7 +108,7 @@ export default function Leadership({ onOpenContact }) {
 
                 {/* Action Bar */}
                 <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
-                  <span className="text-xs text-slate-300 font-medium">
+                  <span className="text-xs text-amber-200 font-bold tracking-wide">
                     Office of the Managing Director • Lagos & Ogun State
                   </span>
                   <button

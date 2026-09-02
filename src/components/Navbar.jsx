@@ -52,7 +52,7 @@ export default function Navbar({ onOpenContact }) {
               <Mail className="w-4 h-4 text-gold-400 mr-1.5" />
               <span>{companyData.email}</span>
             </a>
-            <a href="#admin" className="flex items-center text-amber-300 hover:text-white transition-colors font-medium border-l border-slate-800 pl-4">
+            <a href="/admin" className="flex items-center text-amber-300 hover:text-white transition-colors font-medium border-l border-slate-800 pl-4">
               <Lock className="w-3.5 h-3.5 mr-1 text-gold-400" />
               <span>Admin Portal</span>
             </a>
@@ -151,7 +151,7 @@ export default function Navbar({ onOpenContact }) {
               ))}
               
               <a
-                href="#admin"
+                href="/admin"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-lg font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-2 pt-2"
               >

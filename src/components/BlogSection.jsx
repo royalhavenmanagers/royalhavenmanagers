@@ -39,10 +39,10 @@ export default function BlogSection({ onOpenContact }) {
             <span>REAL ESTATE INSIGHTS & ARTICLES</span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
-            Royal Haven <span className="text-gold-gradient">Blog & Insights</span>
+            Royal Haven <span className="text-gold-gradient-light">Blog & Insights</span>
           </h2>
-          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            Expert articles, market trends, and practical guidance on property management, tenant vetting, and real estate investments across Nigeria.
+          <p className="text-slate-800 text-base sm:text-lg font-medium leading-relaxed">
+            Expert articles, market trends, and practical guidance on property management, tenant vetting, and asset protection across Nigeria.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export default function BlogSection({ onOpenContact }) {
 
                   {/* Body Content */}
                   <div className="p-6 space-y-3">
-                    <div className="flex items-center space-x-4 text-xs text-slate-500 font-medium">
+                    <div className="flex items-center space-x-4 text-xs text-slate-700 font-semibold">
                       <span className="flex items-center">
                         <Calendar className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
                         {post.date}
@@ -128,7 +128,7 @@ export default function BlogSection({ onOpenContact }) {
                       {post.title}
                     </h3>
 
-                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                    <p className="text-sm text-slate-700 font-normal leading-relaxed line-clamp-3">
                       {post.summary}
                     </p>
                   </div>

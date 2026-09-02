@@ -21,26 +21,41 @@ export default function App() {
   const [currentRoute, setCurrentRoute] = useState('home');
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash === 'admin') {
+    const handleRouteChange = () => {
+      const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      const searchParams = new URLSearchParams(window.location.search);
+      
+      if (path === '/admin' || hash === 'admin' || searchParams.get('route') === 'admin') {
         setCurrentRoute('admin');
       } else {
         setCurrentRoute('home');
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   const handleOpenContact = () => setIsContactOpen(true);
   const handleCloseContact = () => setIsContactOpen(false);
 
+  const handleReturnHome = () => {
+    if (window.location.pathname === '/admin') {
+      window.history.pushState(null, '', '/');
+    }
+    window.location.hash = '';
+    setCurrentRoute('home');
+  };
+
   // If viewing admin route, render AdminPortal
   if (currentRoute === 'admin') {
-    return <AdminPortal onReturnHome={() => { window.location.hash = ''; setCurrentRoute('home'); }} />;
+    return <AdminPortal onReturnHome={handleReturnHome} />;
   }
 
   return (

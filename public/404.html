@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Royal Haven</title>
+    <script>
+      // Single Page App redirect for static hosting (GitHub Pages, Netlify, etc.)
+      var path = window.location.pathname.toLowerCase();
+      if (path.indexOf('/admin') !== -1) {
+        window.location.replace('/#admin');
+      } else {
+        window.location.replace('/');
+      }
+    </script>
+  </head>
+  <body style="background:#08080A; color:#D4AF37; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;">
+    <p>Redirecting to Royal Haven...</p>
+  </body>
+</html>

@@ -131,7 +131,7 @@ This gets Royal Haven into Google Maps and local search results ("Property Manag
 
 ## 3. Quick Reference
 
-- **Admin Portal**: `https://royalhaven.com.ng/#admin`
+- **Admin Portal**: `https://royalhaven.com.ng/admin` (or `/#admin`)
 - **Login Mode**: **Password Only** (no email required)
 - **Default Master Password**: `royalhaven2026`
 - **Change Password**: Available directly in the Admin Portal under the **Change Password** tab.
