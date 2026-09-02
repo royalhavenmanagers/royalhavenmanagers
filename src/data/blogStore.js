@@ -85,6 +85,8 @@ Professional estate surveying gives investors and property owners total confiden
 
 const STORAGE_KEY = "royalhaven_blog_posts";
 const AUTH_KEY = "royalhaven_admin_auth";
+const ADMIN_PASSWORD_KEY = "royalhaven_admin_password";
+const DEFAULT_PASSWORD = "royalhaven2026";
 
 export const blogStore = {
   getPosts: () => {
@@ -177,24 +179,37 @@ export const blogStore = {
     return updated;
   },
 
-  // Auth Methods
+  // Auth Methods (Password-only with customizable password)
   isAuthenticated: () => {
     return localStorage.getItem(AUTH_KEY) === "true";
   },
 
-  login: (email, password) => {
-    const validEmails = ["royalhavenrealtyproperty@gmail.com", "admin@royalhaven.com.ng"];
-    const normalizedEmail = email.trim().toLowerCase();
-    if ((validEmails.includes(normalizedEmail) || normalizedEmail !== "") && password === "royalhaven2026") {
+  getAdminPassword: () => {
+    return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD;
+  },
+
+  login: (password) => {
+    const currentPwd = blogStore.getAdminPassword();
+    if (password && password.trim() === currentPwd.trim()) {
       localStorage.setItem(AUTH_KEY, "true");
-      localStorage.setItem("royalhaven_admin_email", normalizedEmail);
       return { success: true };
     }
-    return { success: false, error: "Invalid admin email or password." };
+    return { success: false, error: "Incorrect admin password. Please try again." };
+  },
+
+  changePassword: (oldPassword, newPassword) => {
+    const currentPwd = blogStore.getAdminPassword();
+    if (!oldPassword || oldPassword.trim() !== currentPwd.trim()) {
+      return { success: false, error: "Current password does not match." };
+    }
+    if (!newPassword || newPassword.trim().length < 6) {
+      return { success: false, error: "New password must be at least 6 characters." };
+    }
+    localStorage.setItem(ADMIN_PASSWORD_KEY, newPassword.trim());
+    return { success: true, message: "Admin password successfully updated!" };
   },
 
   logout: () => {
     localStorage.removeItem(AUTH_KEY);
-    localStorage.removeItem("royalhaven_admin_email");
   }
 };
