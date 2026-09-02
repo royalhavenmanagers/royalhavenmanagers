@@ -1,76 +1,66 @@
-# Royal Haven Project Tasks and Details
+# Royal Haven Property Managers — Project Status & Human Tasks
 
-This file lists what is done, what you need to provide, and how to set up the Brevo email and Supabase database.
-
----
-
-## 1. What Has Been Built Already
-
-- Website frontend with clean white and gold luxury style
-- Navigation header with direct contact info and admin link
-- Hero section refocused solely on **Property Management & Asset Protection**
-- Enhanced typography contrast with distinct light & dark gold gradients (`text-gold-gradient-light`)
-- About section with vision, mission, and core values (all sales/selling references removed)
-- Services section with 8 focused property management services (including Facility & Maintenance Management)
-- Management process section with 6-step workflow
-- Leadership section with interactive photo switcher
-- **4 Genuine Corporate & Brand Partners** integrated with logos:
-  1. Habibi's Fitz
-  2. Olamide Skin Beauty
-  3. Swan Luxury
-  4. Marvel Develops
-- Client reviews section
-- Public blog page with search and category filters
-- Admin portal login at `royalhaven.com.ng/#admin`
-- Consultation Modal hooked up to `/api/contact`
-- **Backend API & Email Integration (Zero New Packages)**:
-  - `server/apiHandler.js` handling Brevo transactional emails and Supabase lead logging via native fetch
-  - Vite dev server middleware in `vite.config.js` for instant local testing
-  - Zero-dependency production server in `server.js` (`npm run server`)
-- Environment configuration file (`.env` and `.env.example`) for Brevo and Supabase keys
+**Current Status:** All code, frontend components, zero-dependency backend API, SEO suite, and design assets are **100% COMPLETE** and pushed live to the repository (`main` branch).
 
 ---
 
-## 2. Details and Assets Needed From You
+## 1. What Has Been Completed & Pushed Live
 
-Please provide the following items when ready:
+### Branding, Structure & Company Positioning
+- **Pure Property Management Pivot**: Stripped all real estate sales mentions; 100% focused on property management, tenant screening, and asset protection.
+- **New Official Logo**: Integrated the gold crest emblem logo (`public/images/logo-emblem.jpg`) across header, footer, favicon, and meta tags.
+- **4 Real Corporate Partners**: Added logos for Habibi's Fitz, Olamide Skin Beauty, Swan Luxury, and Marvel Develops in a balanced, high-contrast 4-card grid.
+- **Executive Leadership**: Centered spotlight card featuring **Ibrahim Ridwan Olasunkanmi** (CEO & Managing Director) with portrait switcher and high-contrast styling.
+- **Enhanced Typography & Color Palette**: Tailored `.text-gold-gradient-light` and deep obsidian backgrounds ensuring sharp readability across mobile and desktop.
 
-1. **CEO / Managing Director**: Full name and exact title
-2. **Associate Partner**: Full name and exact title
+### Backend & Database Integrations (Zero Extra Packages Installed)
+- **Zero-Dependency Backend Handler** (`server/apiHandler.js`): Uses native Node `fetch` to dispatch transactional emails via **Brevo REST API** and log consultation leads into **Supabase**.
+- **Dev Middleware** (`vite.config.js`): Intercepts `POST /api/contact` during `npm run dev`.
+- **Standalone Production Server** (`server.js`): Zero-dependency Node server using standard `node:http`. Run with `npm run server` or `npm start`.
+- **Inquiry Form Connection** (`src/components/ContactModal.jsx`): Connected to `/api/contact` with submitting states, error handling, and form resets.
+
+### Full SEO Suite & Social Sharing
+- **1200x630 High-Resolution OG Image** (`public/images/og-image.jpg`): Custom luxury social card for WhatsApp, Facebook, LinkedIn, iMessage, and Twitter/X previews.
+- **Search Engine Crawlers** (`public/robots.txt`): Permitted crawling and linked to the sitemap.
+- **Google Search Console Sitemap** (`public/sitemap.xml`): Pre-built XML sitemap covering all website sections and blog.
+- **Rich Schema.org Structured Data** (`index.html`): `RealEstateAgent` and `ProfessionalService` JSON-LD with business hours, geo-coordinates, CEO founder attribution, and contact details.
 
 ---
 
-## 3. Brevo (Sendinblue) Email Setup
+## 2. Remaining Human Tasks (External Account Setup)
 
-To have all consultation requests automatically emailed to your team inbox via Brevo:
+The code is ready. The remaining steps are external setups that require your account logins.
 
-1. Sign up or log into [Brevo](https://app.brevo.com/)
-2. Navigate to **Account** -> **SMTP & API Keys** -> [Generate API Key](https://app.brevo.com/settings/keys/api)
-3. Paste the key into your `.env` file:
+---
+
+### Task A: Brevo (Sendinblue) Transactional Email Setup
+
+This allows consultation requests submitted on the website to land in your inbox.
+
+1. Sign up or log into [Brevo](https://app.brevo.com/).
+2. Click your profile name (top right) -> **SMTP & API Keys** -> [Generate a new API key](https://app.brevo.com/settings/keys/api).
+3. Open your project's `.env` file (or host environment variables) and paste:
    ```env
-   BREVO_API_KEY=xkeysib-your_real_key_here
+   BREVO_API_KEY=xkeysib-your_real_brevo_api_key_here
    BREVO_SENDER_EMAIL=info@royalhaven.com.ng
    BREVO_RECEIVER_EMAIL=royalhavenrealtyproperty@gmail.com
    ```
+4. *(Optional)* Verify your sender domain in Brevo's **Senders & IP** settings for improved inbox deliverability.
 
 ---
 
-## 4. Supabase Database Setup Details
+### Task B: Supabase Cloud Database Setup
 
-To connect your blog and consultation leads to a free Supabase cloud database:
+This allows blog articles and consultation inquiries to save online across all devices.
 
-Step 1: Go to [supabase.com](https://supabase.com) and create a free project named `RoyalHaven`
-Step 2: In Project Settings -> API, copy:
-- **Project URL**
-- **Project Anon Public Key**
-Step 3: Paste them into `.env`:
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
-
-### SQL Tables Setup for Supabase
-In your Supabase dashboard, open the **SQL Editor**, paste this SQL code, and click **Run**:
+1. Go to [supabase.com](https://supabase.com) and create a free project named `RoyalHaven`.
+2. In your Supabase dashboard, go to **Project Settings** -> **API**.
+3. Copy the **Project URL** and **Project Anon Public Key**, then add them to `.env`:
+   ```env
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
+4. Click on **SQL Editor** in the left sidebar, paste the following SQL script, and click **Run**:
 
 ```sql
 -- 1. Blog Posts Table
@@ -111,8 +101,37 @@ create policy "Allow admin read inquiries" on inquiries for select using (true);
 
 ---
 
-## 5. Next Steps
+### Task C: Google Search Console Submission
 
-1. Fill in the team member names (CEO and Associate Partner)
-2. Add your Brevo API key and Supabase credentials to `.env`
-3. Review the website and confirm!
+This tells Google's search engine to index your website.
+
+1. Open [Google Search Console](https://search.google.com/search-console).
+2. Add your website property: `https://royalhaven.com.ng`.
+3. Verify ownership (via DNS TXT record at your domain registrar, or HTML tag).
+4. In the left menu, click **Sitemaps**.
+5. Enter `sitemap.xml` and click **Submit**.
+   * URL submitted: `https://royalhaven.com.ng/sitemap.xml`
+
+---
+
+### Task D: Google Business Profile (Google My Business)
+
+This gets Royal Haven into Google Maps and local search results ("Property Managers near me").
+
+1. Go to [Google Business Profile](https://www.google.com/business/).
+2. Create or claim **Royal Haven Realty & Property Managers Ltd.**.
+3. Use the matching details configured in the website schema:
+   - **Primary Category**: Property Management Company
+   - **Service Area**: Lagos State, Ogun State, Nigeria
+   - **Phone**: `+234 815 378 5297` / `+234 812 085 0733`
+   - **Website**: `https://royalhaven.com.ng`
+   - **Hours**: Mon – Sat (8:00 AM – 6:00 PM)
+
+---
+
+## 3. Quick Reference
+
+- **Admin Portal**: `https://royalhaven.com.ng/#admin`
+- **Default Admin Email**: `royalhavenrealtyproperty@gmail.com`
+- **Default Admin Password**: `royalhaven2026`
+- **GitHub Repository**: `https://github.com/royalhavenmanagers/royalhavenmanagers.git`
