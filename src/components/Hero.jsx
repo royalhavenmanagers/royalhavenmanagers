@@ -34,13 +34,13 @@ export default function Hero({ onOpenContact }) {
             {/* Main Headline */}
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
               Building Trust. <br />
-              <span className="text-gold-gradient">Managing Excellence.</span> <br />
+              <span className="text-gold-gradient-light">Managing Excellence.</span> <br />
               Creating Value.
             </h1>
 
             {/* Subtitle */}
-            <p className="text-slate-700 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
-              Professional property management, tenant screening, leasing, estate surveying, valuation, and real estate advisory across <span className="text-amber-900 font-semibold">Lagos State, Ogun State,</span> and surrounding environs.
+            <p className="text-slate-800 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed">
+              Premier property management, thorough tenant screening, proactive facility upkeep, and transparent rent remittance across <span className="text-amber-900 font-bold">Lagos State, Ogun State,</span> and surrounding environs.
             </p>
 
             {/* Feature Pills */}

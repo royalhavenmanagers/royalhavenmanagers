@@ -27,11 +27,11 @@ export const companyData = {
   ],
   about: {
     title: "ABOUT ROYAL HAVEN",
-    subtitle: "Professional Property Management & Real Estate Solutions",
-    description: "Royal Haven Realty & Property Managers Ltd. is a professional real estate and property management company committed to delivering reliable, transparent, and value-driven property solutions.",
+    subtitle: "Professional Property Management & Asset Protection Solutions",
+    description: "Royal Haven Realty & Property Managers Ltd. is a dedicated property management company committed to delivering reliable, transparent, and value-driven management solutions for landlords and property owners.",
     quote: "Building Trust. Managing Excellence. Creating Value.",
-    vision: "To be the most trusted and preferred real estate and property management company in Nigeria, setting the standard for excellence, innovation, and value creation in the industry.",
-    mission: "To deliver world-class real estate and property management solutions that maximize value, protect investments, ensure peace of mind, and build long-term relationships with our clients."
+    vision: "To be the most trusted and preferred property management company in Nigeria, setting the standard for excellence, transparency, and reliable rent remittance.",
+    mission: "To deliver world-class property management solutions that maximize rental yield, protect investments, ensure peace of mind, and build enduring relationships with property owners."
   },
   values: [
     {
@@ -61,40 +61,24 @@ export const companyData = {
   ],
   partners: [
     {
-      name: "Access Bank Plc",
-      category: "Financial Institution",
-      logoText: "ACCESS",
-      iconColor: "text-orange-600"
+      name: "Habibi's Fitz",
+      category: "Fashion & Lifestyle Partner",
+      logo: "/images/partners/habibis-fitz.jpg"
     },
     {
-      name: "Guaranty Trust Bank (GTCO)",
-      category: "Banking & Custody",
-      logoText: "GTBank",
-      iconColor: "text-amber-600"
+      name: "Olamide Skin Beauty",
+      category: "Beauty & Wellness Partner",
+      logo: "/images/partners/olamide-skin-beauty.jpg"
     },
     {
-      name: "Lekki Gardens Development",
-      category: "Estate Infrastructure",
-      logoText: "LEKKI GARDENS",
-      iconColor: "text-blue-600"
+      name: "Swan Luxury",
+      category: "Lifestyle & Brand Partner",
+      logo: "/images/partners/swan-luxury.jpg"
     },
     {
-      name: "Ogun State Housing Corporation",
-      category: "State Infrastructure",
-      logoText: "OSHC",
-      iconColor: "text-emerald-700"
-    },
-    {
-      name: "Prime Alliance Properties",
-      category: "Commercial Development",
-      logoText: "PRIME ALLIANCE",
-      iconColor: "text-gold-600"
-    },
-    {
-      name: "Zenith Bank Plc",
-      category: "Financial Institution",
-      logoText: "ZENITH",
-      iconColor: "text-red-600"
+      name: "Marvel Develops",
+      category: "Software & Digital Partner",
+      logo: "/images/partners/marvel-develops.svg"
     }
   ],
   services: [
@@ -106,11 +90,11 @@ export const companyData = {
       features: ["Professional upkeep & care", "Day-to-day oversight", "Regular property reporting", "Peace of mind for owners"]
     },
     {
-      id: "property-sales",
-      title: "PROPERTY SALES",
-      icon: "Home",
-      description: "We help you buy or sell properties quickly and at the best value through effective marketing and industry expertise.",
-      features: ["Targeted property marketing", "Buyer & seller connections", "Best value negotiation", "Industry expertise"]
+      id: "facility-maintenance",
+      title: "FACILITY & MAINTENANCE MANAGEMENT",
+      icon: "Wrench",
+      description: "We coordinate routine upkeep, rapid repair response, and vetted artisan supervision to ensure your property remains in pristine condition.",
+      features: ["Routine property upkeep", "Vetted contractor supervision", "Prompt emergency repairs", "Cost-effective asset care"]
     },
     {
       id: "lettings-leasing",
@@ -148,29 +132,21 @@ export const companyData = {
       features: ["Regular physical inspections", "Detailed condition reports", "Preventative maintenance", "Standard enforcement"]
     },
     {
-      id: "real-estate-advisory",
-      title: "REAL ESTATE ADVISORY",
+      id: "property-advisory",
+      title: "PROPERTY MANAGEMENT ADVISORY",
       icon: "TrendingUp",
-      description: "We provide expert advice on real estate investments, market trends, and strategies to grow your portfolio.",
-      features: ["Expert investment advice", "Market trend analysis", "Portfolio growth strategies", "Tailored guidance"]
+      description: "We provide expert advice on rental yield maximization, tenant retention strategies, and optimizing your property ROI.",
+      features: ["Rental yield optimization", "Tenant retention strategies", "Preventative care planning", "Tailored owner guidance"]
     }
   ],
   leadership: [
     {
-      name: "Managing Director / CEO",
-      title: "Chief Executive Officer",
-      role: "Strategic Vision & Executive Leadership",
+      name: "Ibrahim Ridwan Olasunkanmi",
+      title: "CEO & Managing Director",
+      role: "Strategic Vision & Executive Oversight",
       images: ["/images/team/ceo-navy-suit.jpg", "/images/team/ceo-taupe-suit.jpg"],
-      bio: "Leading Royal Haven Realty & Property Managers Ltd. with dedication to excellence, transparency, and client satisfaction across Nigeria.",
+      bio: "Leading Royal Haven Realty & Property Managers Ltd. with dedication to excellence, transparency, and royalty-grade property management across Lagos State, Ogun State, and surrounding environs.",
       quote: "Every property under our care is managed with the same level of commitment as if it were our own."
-    },
-    {
-      name: "Associate Partner",
-      title: "Associate Partner",
-      role: "Operations & Client Relations",
-      images: ["/images/team/associate-partner.jpg"],
-      bio: "Overseeing management operations, client relations, and ensuring professional service delivery on all client properties.",
-      quote: "Your Property. Our Responsibility. Your Peace of Mind."
     }
   ],
   process: [

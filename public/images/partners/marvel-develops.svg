@@ -1,0 +1,22 @@
+<svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="barGradient2" x1="20" y1="0" x2="198" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="55%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="textGradient2" x1="230" y1="0" x2="560" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="700" height="220" fill="#0A0F1E"/>
+  <rect x="20"  y="55"  width="26" height="140" rx="6" fill="url(#barGradient2)"/>
+  <rect x="58"  y="95"  width="26" height="100" rx="6" fill="url(#barGradient2)"/>
+  <rect x="96"  y="135" width="26" height="60"  rx="6" fill="url(#barGradient2)"/>
+  <rect x="134" y="75"  width="26" height="120" rx="6" fill="url(#barGradient2)"/>
+  <rect x="172" y="15"  width="26" height="180" rx="6" fill="url(#barGradient2)"/>
+  <path d="M 71 100 L 109 180 L 185 40" fill="none" stroke="#F59E0B" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="230" y="115" font-family="Poppins" font-weight="700" font-size="72" fill="url(#textGradient2)">MARVEL</text>
+  <text x="230" y="180" font-family="Poppins" font-weight="700" font-size="50" fill="#F59E0B" letter-spacing="2">DEVELOPS</text>
+</svg>

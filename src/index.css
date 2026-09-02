@@ -9,7 +9,10 @@
 
 @layer utilities {
   .text-gold-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-300 to-amber-500;
+  }
+  .text-gold-gradient-light {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-700 via-gold-600 to-amber-900;
   }
   .bg-gold-gradient {
     @apply bg-gradient-to-r from-amber-200 via-gold-500 to-amber-600;
@@ -18,7 +21,7 @@
     @apply border border-gold-500/30 hover:border-gold-500/80 transition-all duration-300 shadow-gold-sm hover:shadow-gold-md;
   }
   .glass-card {
-    @apply bg-obsidian-800/80 backdrop-blur-xl border border-gold-500/20 rounded-2xl;
+    @apply bg-obsidian-800/90 backdrop-blur-xl border border-gold-500/25 rounded-2xl;
   }
 }
 

@@ -1,3 +1,5 @@
+import { supabaseApi } from './supabaseApi';
+
 // Initial verified articles based on Royal Haven Realty & Property Managers Ltd. profile
 const DEFAULT_ARTICLES = [
   {
@@ -6,7 +8,7 @@ const DEFAULT_ARTICLES = [
     slug: "key-things-about-tenant-screening-lagos-ogun",
     category: "Tenant Screening",
     coverImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80",
-    author: "Royal Haven Advisory Team",
+    author: "Ibrahim Ridwan Olasunkanmi (CEO & MD)",
     date: "2026-08-28",
     readTime: "4 min read",
     status: "published",
@@ -34,7 +36,7 @@ By partnering with professional property managers, landlords ensure peace of min
     slug: "how-professional-property-management-maximizes-rental-yield",
     category: "Property Management",
     coverImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-    author: "Managing Director / CEO",
+    author: "Ibrahim Ridwan Olasunkanmi (CEO & MD)",
     date: "2026-08-25",
     readTime: "5 min read",
     status: "published",
@@ -98,21 +100,38 @@ export const blogStore = {
     return DEFAULT_ARTICLES;
   },
 
+  // Async load that checks Supabase first, then syncs local storage
+  fetchPostsAsync: async () => {
+    if (supabaseApi.isAvailable()) {
+      const cloudPosts = await supabaseApi.fetchPosts();
+      if (cloudPosts && cloudPosts.length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudPosts));
+        return cloudPosts;
+      }
+    }
+    return blogStore.getPosts();
+  },
+
   getPublishedPosts: () => {
     const posts = blogStore.getPosts();
     return posts.filter(p => p.status === "published");
   },
 
-  savePost: (postData) => {
+  savePost: async (postData) => {
     const posts = blogStore.getPosts();
     let updated;
+    let targetPost;
     
     if (postData.id) {
       // Edit existing
-      updated = posts.map(p => p.id === postData.id ? { ...p, ...postData, date: new Date().toISOString().split('T')[0] } : p);
+      targetPost = { ...postData, date: new Date().toISOString().split('T')[0] };
+      updated = posts.map(p => p.id === postData.id ? targetPost : p);
+      if (supabaseApi.isAvailable()) {
+        supabaseApi.updatePost(targetPost);
+      }
     } else {
       // Create new
-      const newPost = {
+      targetPost = {
         ...postData,
         id: `blog-${Date.now()}`,
         slug: postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
@@ -121,29 +140,40 @@ export const blogStore = {
         status: postData.status || "published",
         author: postData.author || "Royal Haven Management Team"
       };
-      updated = [newPost, ...posts];
+      updated = [targetPost, ...posts];
+      if (supabaseApi.isAvailable()) {
+        supabaseApi.insertPost(targetPost);
+      }
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return updated;
   },
 
-  deletePost: (id) => {
+  deletePost: async (id) => {
     const posts = blogStore.getPosts();
     const updated = posts.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (supabaseApi.isAvailable()) {
+      supabaseApi.deletePost(id);
+    }
     return updated;
   },
 
-  togglePublishStatus: (id) => {
+  togglePublishStatus: async (id) => {
     const posts = blogStore.getPosts();
+    let target;
     const updated = posts.map(p => {
       if (p.id === id) {
-        return { ...p, status: p.status === "published" ? "draft" : "published" };
+        target = { ...p, status: p.status === "published" ? "draft" : "published" };
+        return target;
       }
       return p;
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (supabaseApi.isAvailable() && target) {
+      supabaseApi.updatePost(target);
+    }
     return updated;
   },
 

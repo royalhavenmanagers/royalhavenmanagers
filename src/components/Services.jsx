@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Building2, Home, Key, Compass, UserCheck, 
-  FileText, ClipboardCheck, TrendingUp, ChevronRight, CheckCircle2 
+  FileText, ClipboardCheck, TrendingUp, ChevronRight, CheckCircle2, Wrench 
 } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
@@ -10,7 +10,7 @@ export default function Services({ onOpenContact }) {
   const getIcon = (iconName) => {
     switch (iconName) {
       case 'Building2': return <Building2 className="w-8 h-8" />;
-      case 'Home': return <Home className="w-8 h-8" />;
+      case 'Wrench': return <Wrench className="w-8 h-8" />;
       case 'Key': return <Key className="w-8 h-8" />;
       case 'Compass': return <Compass className="w-8 h-8" />;
       case 'UserCheck': return <UserCheck className="w-8 h-8" />;
@@ -37,7 +37,7 @@ export default function Services({ onOpenContact }) {
             Our Professional <span className="text-gold-gradient">Services</span>
           </h2>
           <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            We offer a comprehensive range of real estate and property management services tailored to meet the needs of property owners, investors, tenants, and businesses.
+            We offer a comprehensive range of professional property management and asset protection services tailored to meet the needs of property owners, landlords, and corporate clients.
           </p>
         </div>
 

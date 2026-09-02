@@ -71,9 +71,9 @@ export default function Navbar({ onOpenContact }) {
           {/* Logo */}
           <a href="#home" className="flex items-center space-x-3.5 group">
             <img 
-              src="/images/logo-gold.jpg" 
+              src="/images/logo-emblem.jpg" 
               alt="Royal Haven Logo" 
-              className="h-12 sm:h-14 w-auto object-contain rounded-xl border border-amber-300/60 group-hover:scale-105 transition-transform duration-300 shadow-sm"
+              className="h-12 sm:h-14 w-auto object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col">
               <span className="font-serif text-xl sm:text-2xl font-bold tracking-wider text-gold-gradient leading-tight">
@@ -126,7 +126,7 @@ export default function Navbar({ onOpenContact }) {
           <div>
             <div className="flex items-center justify-between pb-6 border-b border-slate-200">
               <div className="flex items-center space-x-3">
-                <img src="/images/logo-gold.jpg" alt="Logo" className="h-12 w-auto object-contain rounded-lg" />
+                <img src="/images/logo-emblem.jpg" alt="Logo" className="h-12 w-auto object-contain rounded-lg" />
                 <span className="font-serif text-xl font-bold text-gold-gradient">ROYAL HAVEN</span>
               </div>
               <button 

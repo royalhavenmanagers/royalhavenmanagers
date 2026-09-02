@@ -21,9 +21,9 @@ export default function Footer({ onOpenContact }) {
           <div className="lg:col-span-5 space-y-5">
             <a href="#home" className="flex items-center space-x-3.5 group">
               <img 
-                src="/images/logo-gold.jpg" 
+                src="/images/logo-emblem.jpg" 
                 alt="Royal Haven Logo" 
-                className="h-12 w-auto object-contain rounded-xl border border-gold-500/30"
+                className="h-12 w-auto object-contain rounded-xl"
               />
               <div className="flex flex-col">
                 <span className="font-serif text-xl font-bold text-gold-gradient">ROYAL HAVEN</span>
@@ -32,7 +32,7 @@ export default function Footer({ onOpenContact }) {
             </a>
 
             <p className="text-slate-300 leading-relaxed max-w-md text-base">
-              A professional real estate and property management company committed to delivering reliable, transparent, and value-driven property solutions across Nigeria.
+              A premier property management and asset protection company committed to delivering reliable, transparent, and value-driven solutions for property owners across Nigeria.
             </p>
 
             <div className="flex items-center space-x-3 text-gold-400 font-semibold text-sm">

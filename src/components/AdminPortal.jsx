@@ -39,6 +39,11 @@ export default function AdminPortal({ onReturnHome }) {
 
   const loadPosts = () => {
     setPosts(blogStore.getPosts());
+    blogStore.fetchPostsAsync().then((cloudPosts) => {
+      if (cloudPosts) {
+        setPosts(cloudPosts);
+      }
+    });
   };
 
   const handleLogin = (e) => {
@@ -218,7 +223,7 @@ export default function AdminPortal({ onReturnHome }) {
       <header className="bg-slate-900 text-white border-b border-amber-500/30 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src="/images/logo-gold.jpg" alt="Logo" className="h-10 w-auto rounded-lg" />
+            <img src="/images/logo-emblem.jpg" alt="Logo" className="h-10 w-auto rounded-lg" />
             <div>
               <h1 className="font-serif text-lg font-bold text-gold-gradient">ROYAL HAVEN ADMIN PORTAL</h1>
               <p className="text-[10px] text-slate-400">Content & Blog Management System</p>

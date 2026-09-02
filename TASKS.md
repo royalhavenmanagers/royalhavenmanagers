@@ -1,67 +1,118 @@
-# 📋 Royal Haven Website Project Task Tracker
+# Royal Haven Project Tasks and Details
 
-This document tracks all completed features, ongoing tasks, and upcoming milestones for **Royal Haven Realty & Property Managers Ltd.** (`royalhaven.com.ng`).
-
----
-
-## 🚀 1. Completed Tasks (Done)
-
-- [x] **Repository Setup & GitHub Remote:**
-  - Initialized Git repository and set upstream remote to `https://github.com/royalhavenmanagers/royalhavenmanagers.git`.
-  - Configured `.gitignore` to protect build artifacts and dependencies.
-- [x] **Official Domain Integration:**
-  - Configured canonical domain to `royalhaven.com.ng`.
-  - Updated contact emails to `info@royalhaven.com.ng` and `royalhavenrealtyproperty@gmail.com`.
-  - Configured Schema.org `RealEstateAgent` JSON-LD structured data for SEO.
-- [x] **Frontend Architecture & Light Luxury Theme:**
-  - Implemented high-contrast Light Luxury White Theme (`#FFFFFF` background, deep charcoal `#0F172A` typography, `#D4AF37` metallic gold accents).
-  - Built **Navbar & Header** with sticky glass effect, quick contact hotlines, and `#admin` portal shortcut.
-  - Built **Hero Banner** with company pillars (*"Building Trust. Managing Excellence. Creating Value."*), quick CTAs, and trust badges.
-  - Built **About Section** with interactive tabs (*Overview, Vision & Mission, Core Values*).
-  - Built **8 Core Services** grid (*Property Management, Sales, Lettings, Surveying/Valuation, Tenant Screening, Legal Documentation, Inspection, Advisory*).
-  - Built **6-Step Management Process** workflow timeline.
-  - Built **Leadership Showcase** featuring executive cards with an interactive portrait view switcher.
-  - Built **Why Choose Us** value proposition cards.
-  - Built **Partnerships & Corporate Clients Section** (`<PartnersSection />`).
-  - Built **Client Testimonials Carousel** with star ratings.
-  - Built **Consultation Booking Modal** with form fields for inquiries.
-  - Built **Floating WhatsApp Direct Chat Widget**.
-  - Built **Footer** with full sitemap, contact channels, and domain info.
-- [x] **Blog Engine & Admin CMS (Frontend & Local Store):**
-  - Built public **Blog & Insights Section** (`#blog`) with search bar, category filters, and full article reader modal.
-  - Built **Admin Portal (`#admin`)** with secure authentication (`royalhavenrealtyproperty@gmail.com` / `royalhaven2026`).
-  - Built Rich Text Article Editor with category selector and local image file uploader.
-  - Built Article Management Table with live Publish/Draft toggle, Edit (✏️), and Delete (🗑️) buttons.
-- [x] **Asset Cleaning & Renaming:**
-  - Renamed all executive photos and logos to clean, standardized filenames in `public/images/team/` and `public/images/`.
+This file lists what is done, what you need to provide, and how to set up the Brevo email and Supabase database.
 
 ---
 
-## ⏳ 2. Current & Upcoming Tasks (Pending Inputs & Next Steps)
+## 1. What Has Been Built Already
 
-### A. Brand Identity & Leadership Team (Awaiting User Assets)
-- [ ] **Receive & Integrate New Official Logo:**
-  - Awaiting new high-resolution logo image (transparent PNG / SVG) to replace placeholder.
-- [ ] **Update Executive Leadership Names:**
-  - [ ] Add real full name & exact title of **CEO / Managing Director** (for navy / taupe suit portraits).
-  - [ ] Add real full name & exact title of **Associate Partner** (for pink suit portrait).
+- Website frontend with clean white and gold luxury style
+- Navigation header with direct contact info and admin link
+- Hero section refocused solely on **Property Management & Asset Protection**
+- Enhanced typography contrast with distinct light & dark gold gradients (`text-gold-gradient-light`)
+- About section with vision, mission, and core values (all sales/selling references removed)
+- Services section with 8 focused property management services (including Facility & Maintenance Management)
+- Management process section with 6-step workflow
+- Leadership section with interactive photo switcher
+- **4 Genuine Corporate & Brand Partners** integrated with logos:
+  1. Habibi's Fitz
+  2. Olamide Skin Beauty
+  3. Swan Luxury
+  4. Marvel Develops
+- Client reviews section
+- Public blog page with search and category filters
+- Admin portal login at `royalhaven.com.ng/#admin`
+- Consultation Modal hooked up to `/api/contact`
+- **Backend API & Email Integration (Zero New Packages)**:
+  - `server/apiHandler.js` handling Brevo transactional emails and Supabase lead logging via native fetch
+  - Vite dev server middleware in `vite.config.js` for instant local testing
+  - Zero-dependency production server in `server.js` (`npm run server`)
+- Environment configuration file (`.env` and `.env.example`) for Brevo and Supabase keys
 
-### B. Partners & Corporate Clients List (Awaiting User Assets)
-- [ ] **Receive Official Partner Details:**
-  - [ ] List of partner/client company names.
-  - [ ] Partner company logo files/links to populate `<PartnersSection />`.
+---
 
-### C. Cloud Database & Backend Persistence (To Be Configured)
-- [ ] **Cloud Database Integration (Supabase / Firebase):**
-  - Connect `blogStore.js` to a free cloud PostgreSQL database (Supabase) so articles created by the admin persist in the cloud across all devices and browsers globally.
-  - Set up automated image storage bucket (Supabase Storage / Cloudinary) for blog cover photos.
+## 2. Details and Assets Needed From You
 
-### D. Production Deployment & Hosting
-- [ ] **Connect Domain & Deploy Live:**
-  - Connect GitHub repository `royalhavenmanagers/royalhavenmanagers` to **Vercel** or **Netlify**.
-  - Configure DNS records for `royalhaven.com.ng` (A records & CNAME).
-  - Enable SSL certificate (HTTPS).
+Please provide the following items when ready:
 
-### E. Final Polish & SEO Optimization
-- [ ] Set up Google Search Console verification & XML Sitemap generation.
-- [ ] Verify social media links (Instagram, Facebook, LinkedIn).
+1. **CEO / Managing Director**: Full name and exact title
+2. **Associate Partner**: Full name and exact title
+
+---
+
+## 3. Brevo (Sendinblue) Email Setup
+
+To have all consultation requests automatically emailed to your team inbox via Brevo:
+
+1. Sign up or log into [Brevo](https://app.brevo.com/)
+2. Navigate to **Account** -> **SMTP & API Keys** -> [Generate API Key](https://app.brevo.com/settings/keys/api)
+3. Paste the key into your `.env` file:
+   ```env
+   BREVO_API_KEY=xkeysib-your_real_key_here
+   BREVO_SENDER_EMAIL=info@royalhaven.com.ng
+   BREVO_RECEIVER_EMAIL=royalhavenrealtyproperty@gmail.com
+   ```
+
+---
+
+## 4. Supabase Database Setup Details
+
+To connect your blog and consultation leads to a free Supabase cloud database:
+
+Step 1: Go to [supabase.com](https://supabase.com) and create a free project named `RoyalHaven`
+Step 2: In Project Settings -> API, copy:
+- **Project URL**
+- **Project Anon Public Key**
+Step 3: Paste them into `.env`:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### SQL Tables Setup for Supabase
+In your Supabase dashboard, open the **SQL Editor**, paste this SQL code, and click **Run**:
+
+```sql
+-- 1. Blog Posts Table
+create table if not exists posts (
+  id text primary key,
+  title text not null,
+  slug text not null,
+  category text not null,
+  cover_image text,
+  author text,
+  date text,
+  read_time text,
+  status text default 'published',
+  summary text,
+  content text
+);
+
+alter table posts enable row level security;
+create policy "Allow public read access" on posts for select using (true);
+create policy "Allow all actions for admin" on posts for all using (true);
+
+-- 2. Consultation Leads Table
+create table if not exists inquiries (
+  id bigint generated always as identity primary key,
+  name text not null,
+  phone text not null,
+  email text not null,
+  service text,
+  location text,
+  notes text,
+  created_at timestamptz default now()
+);
+
+alter table inquiries enable row level security;
+create policy "Allow public insert" on inquiries for insert with check (true);
+create policy "Allow admin read inquiries" on inquiries for select using (true);
+```
+
+---
+
+## 5. Next Steps
+
+1. Fill in the team member names (CEO and Associate Partner)
+2. Add your Brevo API key and Supabase credentials to `.env`
+3. Review the website and confirm!

@@ -11,6 +11,11 @@ export default function BlogSection({ onOpenContact }) {
 
   useEffect(() => {
     setPosts(blogStore.getPublishedPosts());
+    blogStore.fetchPostsAsync().then((allPosts) => {
+      if (allPosts) {
+        setPosts(allPosts.filter(p => p.status === 'published'));
+      }
+    });
   }, []);
 
   const categories = ['All', 'Property Management', 'Tenant Screening', 'Estate Surveying', 'Real Estate Advisory'];

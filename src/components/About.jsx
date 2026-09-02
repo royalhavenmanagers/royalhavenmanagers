@@ -35,7 +35,7 @@ export default function About() {
               className={`flex-1 py-3 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
                 activeTab === 'overview'
                   ? 'bg-gold-gradient text-obsidian-900 shadow-gold-sm'
-                  : 'text-slate-300 hover:text-white'
+                  : 'text-slate-200 hover:text-white'
               }`}
             >
               Overview
@@ -45,7 +45,7 @@ export default function About() {
               className={`flex-1 py-3 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
                 activeTab === 'vision-mission'
                   ? 'bg-gold-gradient text-obsidian-900 shadow-gold-sm'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-200 hover:text-white'
               }`}
             >
               Vision & Mission
@@ -55,7 +55,7 @@ export default function About() {
               className={`flex-1 py-3 text-xs sm:text-sm uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
                 activeTab === 'values'
                   ? 'bg-gold-gradient text-obsidian-900 shadow-gold-sm'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-200 hover:text-white'
               }`}
             >
               Core Values
@@ -78,11 +78,11 @@ export default function About() {
                 </blockquote>
 
                 <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-                  We specialize in property management, property sales, lettings and leasing, tenant screening, estate surveying and valuation, property inspections, documentation and verification, and real estate advisory services.
+                  We specialize strictly in professional property management, thorough tenant screening, lettings and leasing oversight, facility maintenance, routine property inspections, and transparent rent remittance.
                 </p>
 
                 <p className="text-slate-300 text-base leading-relaxed">
-                  Our mission is to protect our clients' investments while providing exceptional service built on integrity, professionalism, and accountability. Every property under our care is managed with the same level of commitment as if it were our own.
+                  Our mission is to protect landlord investments while providing exceptional service built on integrity, professionalism, and accountability. Every property under our care is managed with the same level of commitment as if it were our own.
                 </p>
               </div>
 
