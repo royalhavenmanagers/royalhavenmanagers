@@ -203,9 +203,6 @@ export default function AdminPortal({ onReturnHome }) {
                 placeholder="Enter admin password"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
               />
-              <p className="text-[11px] text-slate-500 mt-2">
-                Default password: <span className="font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">royalhaven2026</span>
-              </p>
             </div>
 
             <button
@@ -621,7 +618,7 @@ export default function AdminPortal({ onReturnHome }) {
                   required
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
-                  placeholder="Enter current password (default: royalhaven2026)"
+                  placeholder="Enter current password"
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
                 />
               </div>
