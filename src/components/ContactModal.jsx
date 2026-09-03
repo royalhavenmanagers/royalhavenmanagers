@@ -91,7 +91,7 @@ export default function ContactModal({ isOpen, onClose }) {
                 Contact <span className="text-gold-gradient">Royal Haven</span>
               </h3>
               <p className="text-sm sm:text-base text-slate-300">
-                Send us a message below for inquiries on property management, leasing, or advisory services.
+                Send us a message below for inquiries.
               </p>
             </div>
 
@@ -158,6 +158,7 @@ export default function ContactModal({ isOpen, onClose }) {
                     <option value="Property Documentation">Property Documentation</option>
                     <option value="Routine Property Inspection">Routine Property Inspection</option>
                     <option value="Property Management Advisory">Property Management Advisory</option>
+                    <option value="Other / Not Sure">Other / Not Sure</option>
                   </select>
                 </div>
               </div>
