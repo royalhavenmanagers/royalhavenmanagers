@@ -8,7 +8,7 @@ export default function Leadership({ onOpenContact }) {
   const ceo = companyData.leadership[0];
 
   return (
-    <section id="leadership" className="py-24 bg-obsidian-950 relative overflow-hidden">
+    <section id="leadership" className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
       {/* Background Decorative Radial */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gold-glow pointer-events-none blur-3xl opacity-25"></div>
 

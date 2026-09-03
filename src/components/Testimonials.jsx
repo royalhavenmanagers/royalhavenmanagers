@@ -6,7 +6,7 @@ import { companyData } from '../data/companyData';
 
 export default function Testimonials() {
   return (
-    <section className="py-24 bg-obsidian-950 relative overflow-hidden">
+    <section className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
       {/* Background Decorative */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold-glow pointer-events-none blur-3xl opacity-20"></div>
 

@@ -22,7 +22,7 @@ export default function Services({ onOpenContact }) {
   };
 
   return (
-    <section id="services" className="py-24 bg-obsidian-900 relative overflow-hidden">
+    <section id="services" className="py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
       {/* Background Glow */}
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gold-glow pointer-events-none blur-3xl opacity-20"></div>
 

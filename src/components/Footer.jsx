@@ -8,7 +8,7 @@ export default function Footer({ onOpenContact }) {
   };
 
   return (
-    <footer id="contact" className="bg-obsidian-950 border-t border-gold-500/20 pt-20 pb-12 relative overflow-hidden text-slate-200 text-sm">
+    <footer id="contact" className="bg-obsidian-950 bg-[#060608] border-t border-gold-500/20 pt-20 pb-12 relative overflow-hidden text-slate-200 text-sm">
       {/* Background Decorative */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gold-glow pointer-events-none blur-3xl opacity-15"></div>
 

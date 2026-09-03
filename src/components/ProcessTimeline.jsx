@@ -17,7 +17,7 @@ export default function ProcessTimeline({ onOpenContact }) {
   };
 
   return (
-    <section id="process" className="py-24 bg-obsidian-900 relative overflow-hidden">
+    <section id="process" className="py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}

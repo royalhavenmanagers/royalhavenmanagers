@@ -7,7 +7,7 @@ export default function About() {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <section id="about" className="py-24 bg-obsidian-950 relative overflow-hidden">
+    <section id="about" className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
       {/* Background Subtle Gradient */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gold-glow pointer-events-none blur-3xl opacity-20"></div>
 

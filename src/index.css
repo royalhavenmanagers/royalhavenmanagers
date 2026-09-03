@@ -21,7 +21,18 @@
     @apply border border-gold-500/30 hover:border-gold-500/80 transition-all duration-300 shadow-gold-sm hover:shadow-gold-md;
   }
   .glass-card {
-    @apply bg-obsidian-800/90 backdrop-blur-xl border border-gold-500/25 rounded-2xl;
+    background-color: rgba(18, 18, 23, 0.95);
+    backdrop-filter: blur(16px);
+    @apply border border-gold-500/25 rounded-2xl;
+  }
+  .bg-obsidian-950 {
+    background-color: #060608 !important;
+  }
+  .bg-obsidian-900 {
+    background-color: #0a0a0e !important;
+  }
+  .bg-obsidian-800 {
+    background-color: #121217 !important;
   }
 }
 
