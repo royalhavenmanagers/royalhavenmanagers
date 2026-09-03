@@ -19,14 +19,8 @@ Your canonical website is https://www.royalhaven.com.ng/
 6. Website: https://www.royalhaven.com.ng/
 7. Complete the phone or video verification
 
-### 3. Resend Email Activation
-1. Go to https://resend.com/api-keys
-2. Create an API key named Royal Haven
-3. Copy the key starting with re_
-4. Paste it into your .env file as RESEND_API_KEY=re_your_key
-5. If hosted online on Vercel or Netlify, also paste RESEND_API_KEY into your hosting environment variables
 
-### 4. Supabase Database Activation
+### 3. Supabase Database Activation
 1. Go to https://supabase.com/dashboard/project/pspftbflzfkbpndvhike/sql/new
 2. Open supabase_schema.sql from the project
 3. Copy all lines and paste into the Supabase SQL box
