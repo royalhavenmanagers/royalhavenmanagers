@@ -73,26 +73,6 @@ export default function Leadership({ onOpenContact }) {
                   <h3 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
                     {ceo.name}
                   </h3>
-                  <p className="text-sm sm:text-base text-gold-400 font-semibold flex items-center justify-center md:justify-start space-x-2">
-                    <ShieldCheck className="w-4 h-4 text-gold-500" />
-                    <span>{ceo.role}</span>
-                  </p>
-                </div>
-
-                {/* Focus Badges */}
-                <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-1">
-                  <span className="text-xs bg-obsidian-900/90 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">
-                    Strategic Vision
-                  </span>
-                  <span className="text-xs bg-obsidian-900/90 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">
-                    Executive Oversight
-                  </span>
-                  <span className="text-xs bg-obsidian-900/90 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">
-                    Landlord Relations
-                  </span>
-                  <span className="text-xs bg-obsidian-900/90 px-3 py-1 rounded-lg border border-white/10 text-slate-200 font-medium">
-                    Asset Protection
-                  </span>
                 </div>
 
                 {/* Bio */}

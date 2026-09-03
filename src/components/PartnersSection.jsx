@@ -22,16 +22,9 @@ export default function PartnersSection() {
         {/* Section Header with Navigation Controls */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/10">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-amber-500/40 bg-amber-950/60 text-amber-300 text-xs uppercase tracking-widest font-bold">
-              <Handshake className="w-4 h-4 mr-1.5 text-gold-400 shrink-0" />
-              <span>STRATEGIC ALLIANCES & PARTNERS</span>
-            </div>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
               Companies & Partners We <span className="text-gold-gradient">Work With</span>
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Collaborating with trusted lifestyle brands, wellness partners, and digital innovators to deliver royalty-grade service.
-            </p>
           </div>
 
           {/* Swipe Hint & Nav Buttons */}

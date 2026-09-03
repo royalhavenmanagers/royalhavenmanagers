@@ -28,9 +28,6 @@ export default function ProcessTimeline({ onOpenContact }) {
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Our Property <span className="text-gold-gradient">Management Process</span>
           </h2>
-          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            Our proven process ensures that every property is professionally managed with transparency, efficiency, and accountability.
-          </p>
         </div>
 
         {/* Process Timeline Grid */}
@@ -63,30 +60,8 @@ export default function ProcessTimeline({ onOpenContact }) {
                   {item.description}
                 </p>
               </div>
-
-              <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-                <span className="flex items-center text-gold-400 font-semibold">
-                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                  Verified Process
-                </span>
-                <span className="text-slate-400 font-mono font-medium">Step {idx + 1} of 6</span>
-              </div>
             </motion.div>
           ))}
-        </div>
-
-        {/* Bottom Quote Banner */}
-        <div className="mt-16 bg-gradient-to-r from-obsidian-800 via-obsidian-700 to-obsidian-800 rounded-2xl p-8 border border-gold-500/30 text-center max-w-4xl mx-auto shadow-gold-sm">
-          <blockquote className="font-serif text-xl sm:text-2xl text-amber-200 italic mb-6 leading-relaxed">
-            "We manage your property like it's our own. Your investment. Our priority."
-          </blockquote>
-
-          <button
-            onClick={onOpenContact}
-            className="px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-xl text-obsidian-900 bg-gold-gradient hover:brightness-110 shadow-gold-md transition-all"
-          >
-            Start Management Onboarding
-          </button>
         </div>
 
       </div>

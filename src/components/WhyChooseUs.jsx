@@ -48,9 +48,6 @@ export default function WhyChooseUs({ onOpenContact }) {
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Why Choose <span className="text-gold-gradient">Royal Haven</span>
           </h2>
-          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            We are committed to delivering exceptional property management and real estate solutions with integrity, professionalism, and a client-first approach.
-          </p>
         </div>
 
         {/* 6 Grid Cards */}
@@ -79,21 +76,6 @@ export default function WhyChooseUs({ onOpenContact }) {
               </div>
             </motion.div>
           ))}
-        </div>
-
-        {/* CTA Bar */}
-        <div className="mt-16 bg-obsidian-950 p-8 sm:p-10 rounded-2xl border border-gold-500/30 text-center flex flex-col sm:flex-row items-center justify-between shadow-gold-md gap-6">
-          <div className="text-left max-w-xl">
-            <h4 className="font-serif text-xl sm:text-2xl font-bold text-white">Your Property is Not Just Managed — It's Protected.</h4>
-            <p className="text-sm sm:text-base text-slate-300 mt-2 leading-relaxed">At Royal Haven Realty & Property Managers Ltd., your property is handled with the highest level of care.</p>
-          </div>
-          
-          <button
-            onClick={onOpenContact}
-            className="px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-xl text-obsidian-900 bg-gold-gradient hover:brightness-110 transition-all shrink-0"
-          >
-            Speak With Us Today
-          </button>
         </div>
 
       </div>

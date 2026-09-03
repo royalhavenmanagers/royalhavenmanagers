@@ -36,9 +36,6 @@ export default function Services({ onOpenContact }) {
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Our Professional <span className="text-gold-gradient">Services</span>
           </h2>
-          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            We offer a comprehensive range of professional property management and asset protection services tailored to meet the needs of property owners, landlords, and corporate clients.
-          </p>
         </div>
 
         {/* Services Grid */}
@@ -75,35 +72,8 @@ export default function Services({ onOpenContact }) {
                   ))}
                 </ul>
               </div>
-
-              <div className="pt-6">
-                <button
-                  onClick={onOpenContact}
-                  className="w-full py-3 rounded-xl border border-gold-500/40 text-gold-300 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-obsidian-900 transition-all duration-300 flex items-center justify-center group-hover:border-transparent"
-                >
-                  <span>Inquire Now</span>
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </button>
-              </div>
             </motion.div>
           ))}
-        </div>
-
-        {/* Bottom Banner */}
-        <div className="mt-16 glass-card p-8 text-center sm:flex items-center justify-between border-gold-glow">
-          <div className="text-left max-w-xl mb-6 sm:mb-0">
-            <h4 className="font-serif text-xl sm:text-2xl font-bold text-white">Our Commitment</h4>
-            <p className="text-sm sm:text-base text-slate-200 mt-2 leading-relaxed">
-              Our commitment is to deliver professional, reliable, and value-driven property solutions that protect your investment and maximize returns.
-            </p>
-          </div>
-
-          <button
-            onClick={onOpenContact}
-            className="px-8 py-4 text-xs uppercase tracking-widest font-bold rounded-xl text-obsidian-900 bg-gold-gradient hover:brightness-110 shadow-gold-md transition-all shrink-0"
-          >
-            Contact Our Team
-          </button>
         </div>
 
       </div>
