@@ -43,22 +43,6 @@ export default function Hero({ onOpenContact }) {
               Premier property management, thorough tenant screening, proactive facility upkeep, and transparent rent remittance across <span className="text-amber-900 font-bold">Lagos State, Ogun State,</span> and surrounding environs.
             </p>
 
-            {/* Feature Pills */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3.5 pt-2">
-              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
-                <span>Professional Property Management</span>
-              </div>
-              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
-                <span>Thorough Tenant Screening</span>
-              </div>
-              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
-                <span>Transparent Reporting & Remittance</span>
-              </div>
-            </div>
-
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               <button

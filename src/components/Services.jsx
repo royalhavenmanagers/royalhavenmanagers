@@ -1,26 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Building2, Home, Key, Compass, UserCheck, 
-  FileText, ClipboardCheck, TrendingUp, ChevronRight, CheckCircle2, Wrench 
-} from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Services({ onOpenContact }) {
-  const getIcon = (iconName) => {
-    switch (iconName) {
-      case 'Building2': return <Building2 className="w-8 h-8" />;
-      case 'Wrench': return <Wrench className="w-8 h-8" />;
-      case 'Key': return <Key className="w-8 h-8" />;
-      case 'Compass': return <Compass className="w-8 h-8" />;
-      case 'UserCheck': return <UserCheck className="w-8 h-8" />;
-      case 'FileText': return <FileText className="w-8 h-8" />;
-      case 'ClipboardCheck': return <ClipboardCheck className="w-8 h-8" />;
-      case 'TrendingUp': return <TrendingUp className="w-8 h-8" />;
-      default: return <Building2 className="w-8 h-8" />;
-    }
-  };
-
   return (
     <section id="services" className="py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
       {/* Background Glow */}
@@ -47,10 +30,6 @@ export default function Services({ onOpenContact }) {
               className="glass-card p-7 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 border-gold-glow relative overflow-hidden"
             >
               <div className="space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 group-hover:bg-gold-gradient group-hover:text-obsidian-900 transition-colors duration-300 shadow-gold-sm">
-                  {getIcon(svc.icon)}
-                </div>
-
                 <h3 className="font-serif text-xl font-bold text-white group-hover:text-amber-200 transition-colors">
                   {svc.title}
                 </h3>

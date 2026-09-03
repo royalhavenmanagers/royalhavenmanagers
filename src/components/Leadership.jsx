@@ -19,9 +19,6 @@ export default function Leadership({ onOpenContact }) {
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Executive <span className="text-gold-gradient">Leadership</span>
           </h2>
-          <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            Guided by dedicated leadership committed to integrity, transparency, and royalty-grade property management.
-          </p>
         </div>
 
         {/* Centered CEO / MD Spotlight Card */}

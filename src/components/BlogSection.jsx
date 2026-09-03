@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Calendar, User, Clock, ArrowRight, X, BookOpen, Share2 } from 'lucide-react';
+import { Search, Calendar, Clock, ArrowRight, X, BookOpen } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 
 export default function BlogSection({ onOpenContact }) {
@@ -18,6 +18,27 @@ export default function BlogSection({ onOpenContact }) {
     });
   }, []);
 
+  // Listen for Escape key to close modal and lock body scroll
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActivePost(null);
+      }
+    };
+
+    if (activePost) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activePost]);
+
   const categories = ['All', 'Property Management', 'Tenant Screening', 'Estate Surveying', 'Real Estate Advisory'];
 
   const filteredPosts = posts.filter(post => {
@@ -27,6 +48,106 @@ export default function BlogSection({ onOpenContact }) {
                           post.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Helper to parse and render formatted content cleanly without raw markdown symbols
+  const renderFormattedContent = (rawContent) => {
+    if (!rawContent) return null;
+
+    const lines = rawContent.split('\n');
+    const elements = [];
+    let currentList = [];
+
+    const flushList = () => {
+      if (currentList.length > 0) {
+        elements.push(
+          <ul key={`list-${elements.length}`} className="space-y-2.5 my-4 pl-1">
+            {currentList.map((item, idx) => (
+              <li key={idx} className="flex items-start text-slate-800 text-sm sm:text-base leading-relaxed">
+                <span className="w-2 h-2 rounded-full bg-gold-600 mt-2 mr-3 shrink-0"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        );
+        currentList = [];
+      }
+    };
+
+    const parseInlineFormatting = (text) => {
+      const parts = [];
+      let remaining = text;
+      let keyIdx = 0;
+
+      while (remaining.length > 0) {
+        const match = remaining.match(/\*\*(.+?)\*\*/);
+        if (!match) {
+          parts.push(remaining);
+          break;
+        }
+        const matchIndex = match.index;
+        if (matchIndex > 0) {
+          parts.push(remaining.substring(0, matchIndex));
+        }
+        parts.push(
+          <strong key={keyIdx++} className="font-bold text-slate-950">
+            {match[1]}
+          </strong>
+        );
+        remaining = remaining.substring(matchIndex + match[0].length);
+      }
+      return parts;
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        flushList();
+        return;
+      }
+
+      // Heading 3: ### Title
+      if (trimmed.startsWith('### ')) {
+        flushList();
+        const title = trimmed.replace(/^###\s+/, '');
+        elements.push(
+          <h3 key={idx} className="font-serif text-xl sm:text-2xl font-bold text-slate-950 mt-6 mb-3">
+            {title}
+          </h3>
+        );
+        return;
+      }
+
+      // Heading 4: #### Subtitle
+      if (trimmed.startsWith('#### ')) {
+        flushList();
+        const title = trimmed.replace(/^####\s+/, '');
+        elements.push(
+          <h4 key={idx} className="font-serif text-lg sm:text-xl font-bold text-amber-900 mt-5 mb-2">
+            {title}
+          </h4>
+        );
+        return;
+      }
+
+      // List items: 1. or - or *
+      const listMatch = trimmed.match(/^(\d+\.|\-|\*)\s+(.+)/);
+      if (listMatch) {
+        currentList.push(parseInlineFormatting(listMatch[2]));
+        return;
+      }
+
+      // Standard paragraph
+      flushList();
+      elements.push(
+        <p key={idx} className="text-slate-800 text-sm sm:text-base leading-relaxed mb-3">
+          {parseInlineFormatting(trimmed)}
+        </p>
+      );
+    });
+
+    flushList();
+    return elements;
+  };
 
   return (
     <section id="blog" className="py-24 bg-gradient-to-b from-amber-50/40 via-white to-amber-50/30 relative overflow-hidden">
@@ -134,7 +255,7 @@ export default function BlogSection({ onOpenContact }) {
                 <div className="p-6 pt-0">
                   <button
                     onClick={() => setActivePost(post)}
-                    className="w-full py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm"
+                    className="w-full py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
                   >
                     <span>Read Full Article</span>
                     <ArrowRight className="w-4 h-4" />
@@ -147,20 +268,30 @@ export default function BlogSection({ onOpenContact }) {
 
         {/* Article Full View Modal */}
         {activePost && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto animate-fadeIn">
-            <div className="relative w-full max-w-3xl bg-white rounded-3xl border border-amber-200/80 shadow-2xl p-6 sm:p-10 my-8 overflow-hidden">
+          <div 
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setActivePost(null);
+              }
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-fadeIn"
+          >
+            <div className="relative w-full max-w-3xl bg-white rounded-3xl border border-amber-200 shadow-2xl p-5 sm:p-10 my-6 overflow-hidden max-h-[90vh] flex flex-col">
               
-              {/* Close Button */}
+              {/* Prominent High-Contrast Close Button */}
               <button
                 onClick={() => setActivePost(null)}
-                className="absolute top-6 right-6 p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200"
+                aria-label="Close article modal"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 p-2.5 text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 shadow-sm cursor-pointer flex items-center space-x-1"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
+                <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Close</span>
               </button>
 
-              <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
+              {/* Scrollable Article Body */}
+              <div className="space-y-6 overflow-y-auto pr-2 overscroll-contain">
                 {/* Meta Badge */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 pt-2 sm:pt-0 pr-14">
                   <span className="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                     {activePost.category}
                   </span>
@@ -191,30 +322,41 @@ export default function BlogSection({ onOpenContact }) {
                 </div>
 
                 {/* Featured Image */}
-                <div className="h-64 sm:h-80 rounded-2xl overflow-hidden border border-slate-200">
+                <div className="h-56 sm:h-80 rounded-2xl overflow-hidden border border-slate-200">
                   <img src={activePost.coverImage} alt={activePost.title} className="w-full h-full object-cover" />
                 </div>
 
-                {/* Article Body Content */}
-                <div className="prose prose-slate max-w-none text-slate-900 text-base leading-relaxed space-y-4 whitespace-pre-line font-normal">
-                  {activePost.content}
+                {/* Formatted Article Body Content */}
+                <div className="prose prose-slate max-w-none text-slate-900 leading-relaxed font-normal">
+                  {renderFormattedContent(activePost.content)}
                 </div>
 
-                {/* Bottom CTA Banner */}
-                <div className="mt-8 bg-amber-50 p-6 rounded-2xl border border-amber-300 text-center sm:flex items-center justify-between gap-4">
-                  <div className="text-left mb-4 sm:mb-0">
-                    <h4 className="font-serif text-lg font-bold text-slate-950">Have Questions About Your Property?</h4>
+                {/* Bottom Action Banner */}
+                <div className="mt-8 bg-amber-50 p-5 sm:p-6 rounded-2xl border border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-left w-full sm:w-auto">
+                    <h4 className="font-serif text-base sm:text-lg font-bold text-slate-950">Have Questions About Your Property?</h4>
                     <p className="text-xs text-slate-800 font-medium">Speak directly with our property managers and advisory team.</p>
                   </div>
-                  <button
-                    onClick={() => {
-                      setActivePost(null);
-                      onOpenContact();
-                    }}
-                    className="px-6 py-3 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all shrink-0"
-                  >
-                    Request Consultation
-                  </button>
+
+                  <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setActivePost(null)}
+                      className="px-5 py-3 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-800 bg-white hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer"
+                    >
+                      Close
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActivePost(null);
+                        onOpenContact();
+                      }}
+                      className="px-6 py-3 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all shrink-0 cursor-pointer"
+                    >
+                      Consultation
+                    </button>
+                  </div>
                 </div>
               </div>
 
