@@ -16,7 +16,7 @@ export const companyData = {
     tiktok: "https://www.tiktok.com/@royalhavenng",
     instagram: "https://www.instagram.com/royalhaven_realty",
     twitter: "https://x.com/royalhavenng",
-    linkedin: "" // Pending user providing link
+    linkedin: "https://surl.li/fpiyul"
   },
   showPortfolio: false,
 
