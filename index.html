@@ -98,9 +98,23 @@
       "description": "Professional property management, thorough tenant screening, proactive facility upkeep, and transparent rent remittance across Lagos State, Ogun State, and Nigeria."
     }
     </script>
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#08080A" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Royal Haven" />
+    <link rel="apple-touch-icon" href="/images/logo-emblem.jpg" />
   </head>
   <body class="bg-white text-slate-900 font-sans antialiased selection:bg-gold-500 selection:text-slate-950 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+      }
+    </script>
   </body>
 </html>

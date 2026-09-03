@@ -1,0 +1,51 @@
+{
+  "name": "Royal Haven Management & Admin Portal",
+  "short_name": "Royal Haven",
+  "description": "Royal Haven Realty & Property Managers Ltd. Management and Blog Portal",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08080A",
+  "theme_color": "#08080A",
+  "icons": [
+    {
+      "src": "/images/logo-emblem.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo-emblem.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Admin Portal",
+      "short_name": "Admin",
+      "description": "Access blog post editor and property inquiries",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/images/logo-emblem.jpg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Website Home",
+      "short_name": "Home",
+      "description": "Royal Haven Official Website",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/images/logo-emblem.jpg",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
