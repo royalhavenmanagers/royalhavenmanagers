@@ -84,16 +84,16 @@ export default function PartnersSection() {
             {sliderPartners.map((partner, idx) => (
               <SwiperSlide key={idx} className="h-auto">
                 <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-4 sm:p-5 rounded-2xl flex flex-col items-center justify-center text-center space-y-3 group hover:-translate-y-1.5 transition-all duration-300 shadow-md h-full cursor-grab active:cursor-grabbing">
-                  {/* Compact Logo container filling square edge-to-edge */}
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-950 p-0.5 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-sm shrink-0">
+                  {/* Responsive Logo Container - Supports both square and wide horizontal logos */}
+                  <div className="w-full max-w-[220px] h-28 sm:h-32 rounded-2xl bg-slate-950 p-2 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-sm shrink-0">
                     {partner.logo ? (
                       <img 
                         src={partner.logo} 
                         alt={partner.name} 
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-contain rounded-xl"
                       />
                     ) : (
-                      <Building className="w-10 h-10 text-gold-400" />
+                      <Building className="w-12 h-12 text-gold-400" />
                     )}
                   </div>
 
