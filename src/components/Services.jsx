@@ -58,10 +58,6 @@ export default function Services({ onOpenContact }) {
                   {svc.title}
                 </h3>
 
-                <p className="text-sm text-slate-200 leading-relaxed">
-                  {svc.description}
-                </p>
-
                 {/* Feature Bullet Points */}
                 <ul className="space-y-2.5 pt-3 border-t border-white/10">
                   {svc.features.map((feat, fIdx) => (
