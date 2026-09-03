@@ -118,3 +118,42 @@ Key Benefits of Professional Management:
 At Royal Haven Realty & Property Managers Ltd., every property under our care is managed with the exact level of commitment as if it were our own.'
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- ------------------------------------------------------------
+-- 3. PROPERTIES TABLE (Portfolio & Property Listings)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.properties (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  location TEXT NOT NULL,
+  price TEXT NOT NULL,
+  property_type TEXT NOT NULL,
+  listing_type TEXT NOT NULL DEFAULT 'For Rent',
+  bedrooms INT DEFAULT 0,
+  bathrooms INT DEFAULT 0,
+  cover_image TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'Available',
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public properties read" 
+ON public.properties FOR SELECT 
+USING (true);
+
+CREATE POLICY "Public properties insert" 
+ON public.properties FOR INSERT 
+WITH CHECK (true);
+
+CREATE POLICY "Public properties update" 
+ON public.properties FOR UPDATE 
+USING (true);
+
+CREATE POLICY "Public properties delete" 
+ON public.properties FOR DELETE 
+USING (true);
+

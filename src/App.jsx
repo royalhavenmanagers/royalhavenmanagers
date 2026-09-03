@@ -68,8 +68,8 @@ export default function App() {
         <About />
         <Services onOpenContact={handleOpenContact} />
         
-        {/* Render Property Slider only if showPortfolio is explicitly enabled */}
-        {companyData.showPortfolio && <PropertySlider onOpenContact={handleOpenContact} />}
+        {/* Dynamic Managed Properties Slider (Renders automatically when properties exist) */}
+        <PropertySlider onOpenContact={handleOpenContact} />
         
         <Leadership onOpenContact={handleOpenContact} />
         <WhyChooseUs onOpenContact={handleOpenContact} />
