@@ -4,7 +4,6 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Services from './components/Services';
 import PropertySlider from './components/PropertySlider';
-import ProcessTimeline from './components/ProcessTimeline';
 import Leadership from './components/Leadership';
 import WhyChooseUs from './components/WhyChooseUs';
 import PartnersSection from './components/PartnersSection';
@@ -72,7 +71,6 @@ export default function App() {
         {/* Render Property Slider only if showPortfolio is explicitly enabled */}
         {companyData.showPortfolio && <PropertySlider onOpenContact={handleOpenContact} />}
         
-        <ProcessTimeline onOpenContact={handleOpenContact} />
         <Leadership onOpenContact={handleOpenContact} />
         <WhyChooseUs onOpenContact={handleOpenContact} />
         

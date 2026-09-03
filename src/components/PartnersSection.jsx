@@ -83,9 +83,9 @@ export default function PartnersSection() {
           >
             {sliderPartners.map((partner, idx) => (
               <SwiperSlide key={idx} className="h-auto">
-                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-6 rounded-2xl flex flex-col items-center justify-between text-center space-y-4 group hover:-translate-y-2 transition-all duration-300 shadow-lg min-h-[220px] h-full cursor-grab active:cursor-grabbing">
-                  {/* Logo container with dark high-contrast backdrop */}
-                  <div className="w-20 h-20 rounded-2xl bg-slate-950 p-2.5 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300 shadow-md">
+                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-6 sm:p-7 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:-translate-y-2 transition-all duration-300 shadow-lg min-h-[220px] h-full cursor-grab active:cursor-grabbing">
+                  {/* Large Logo container with dark high-contrast backdrop */}
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-slate-950 p-3 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md shrink-0">
                     {partner.logo ? (
                       <img 
                         src={partner.logo} 
@@ -93,22 +93,18 @@ export default function PartnersSection() {
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <Building className="w-8 h-8 text-gold-400" />
+                      <Building className="w-12 h-12 text-gold-400" />
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <h4 className="font-serif font-bold text-white text-base group-hover:text-amber-300 transition-colors leading-tight">
+                    <h4 className="font-serif font-bold text-white text-base sm:text-lg group-hover:text-amber-300 transition-colors leading-tight">
                       {partner.name}
                     </h4>
                     <p className="text-xs text-amber-200/80 font-medium leading-relaxed">
                       {partner.category}
                     </p>
                   </div>
-
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 group-hover:text-gold-400 transition-colors">
-                    Verified Partner
-                  </span>
                 </div>
               </SwiperSlide>
             ))}

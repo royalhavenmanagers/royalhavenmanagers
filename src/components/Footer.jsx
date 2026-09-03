@@ -31,9 +31,6 @@ export default function Footer({ onOpenContact }) {
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   Our Operational <span className="text-gold-gradient">Hub</span>
                 </h3>
-                <p className="text-slate-200 text-sm sm:text-base mt-2 leading-relaxed font-normal">
-                  Providing professional property management, active facility oversight, and tenant vetting across premier districts in Lagos and Ogun State.
-                </p>
               </div>
 
               {/* Office Details List */}

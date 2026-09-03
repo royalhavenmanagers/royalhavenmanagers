@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Clock, ArrowRight, X, BookOpen } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
@@ -12,7 +13,7 @@ export default function BlogSection({ onOpenContact }) {
   useEffect(() => {
     setPosts(blogStore.getPublishedPosts());
     blogStore.fetchPostsAsync().then((allPosts) => {
-      if (allPosts) {
+      if (allPosts && allPosts.length > 0) {
         setPosts(allPosts.filter(p => p.status === 'published'));
       }
     });
@@ -266,105 +267,135 @@ export default function BlogSection({ onOpenContact }) {
           </div>
         )}
 
-        {/* Article Full View Modal */}
-        {activePost && (
-          <div 
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setActivePost(null);
-              }
-            }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-fadeIn"
-          >
-            <div className="relative w-full max-w-3xl bg-white rounded-3xl border border-amber-200 shadow-2xl p-5 sm:p-10 my-6 overflow-hidden max-h-[90vh] flex flex-col">
-              
-              {/* Prominent High-Contrast Close Button */}
-              <button
-                onClick={() => setActivePost(null)}
-                aria-label="Close article modal"
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 p-2.5 text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-300 shadow-sm cursor-pointer flex items-center space-x-1"
-              >
-                <X className="w-5 h-5" />
-                <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Close</span>
-              </button>
+      </div>
 
-              {/* Scrollable Article Body */}
-              <div className="space-y-6 overflow-y-auto pr-2 overscroll-contain">
-                {/* Meta Badge */}
-                <div className="flex flex-wrap items-center gap-3 pt-2 sm:pt-0 pr-14">
-                  <span className="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+      {/* Full View Modal Rendered via Portal at Root document.body */}
+      {activePost && typeof document !== 'undefined' && createPortal(
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setActivePost(null);
+            }
+          }}
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 md:p-8 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fadeIn"
+          style={{ isolation: 'isolate' }}
+        >
+          {/* Horizontal Rectangle Modal on Desktop */}
+          <div className="relative w-full max-w-5xl bg-white rounded-3xl border border-amber-200 shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col lg:flex-row">
+            
+            {/* Prominent High-Contrast Close Button */}
+            <button
+              onClick={() => setActivePost(null)}
+              aria-label="Close article modal"
+              className="absolute top-4 right-4 z-50 p-2.5 text-slate-700 hover:text-slate-950 bg-white/95 hover:bg-white rounded-full transition-all border border-slate-300 shadow-md cursor-pointer flex items-center space-x-1"
+            >
+              <X className="w-5 h-5" />
+              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Close</span>
+            </button>
+
+            {/* LEFT COLUMN: Cover Image, Meta & Author (Desktop: 40% width, Mobile: Top Banner) */}
+            <div className="lg:w-5/12 bg-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between shrink-0 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+              <div className="space-y-6 relative z-10">
+                {/* Cover Image */}
+                <div className="h-48 sm:h-60 lg:h-64 rounded-2xl overflow-hidden border border-white/10 shadow-lg relative bg-slate-950">
+                  <img 
+                    src={activePost.coverImage} 
+                    alt={activePost.title} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-md text-amber-300 border border-gold-500/50 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
                     {activePost.category}
-                  </span>
-                  <span className="text-xs text-slate-800 font-bold flex items-center">
-                    <Calendar className="w-3.5 h-3.5 text-gold-600 mr-1" />
-                    {activePost.date}
-                  </span>
-                  <span className="text-xs text-slate-800 font-bold flex items-center">
-                    <Clock className="w-3.5 h-3.5 text-gold-600 mr-1" />
-                    {activePost.readTime}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-950 leading-tight">
-                  {activePost.title}
-                </h2>
-
-                {/* Author Info */}
-                <div className="flex items-center space-x-3 pb-4 border-b border-slate-200">
-                  <div className="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-slate-950 font-bold text-sm">
-                    RH
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-950">{activePost.author}</p>
-                    <p className="text-[11px] text-slate-800 font-semibold">Royal Haven Realty & Property Managers Ltd.</p>
                   </div>
                 </div>
 
-                {/* Featured Image */}
-                <div className="h-56 sm:h-80 rounded-2xl overflow-hidden border border-slate-200">
-                  <img src={activePost.coverImage} alt={activePost.title} className="w-full h-full object-cover" />
-                </div>
-
-                {/* Formatted Article Body Content */}
-                <div className="prose prose-slate max-w-none text-slate-900 leading-relaxed font-normal">
-                  {renderFormattedContent(activePost.content)}
-                </div>
-
-                {/* Bottom Action Banner */}
-                <div className="mt-8 bg-amber-50 p-5 sm:p-6 rounded-2xl border border-amber-300 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-left w-full sm:w-auto">
-                    <h4 className="font-serif text-base sm:text-lg font-bold text-slate-950">Have Questions About Your Property?</h4>
-                    <p className="text-xs text-slate-800 font-medium">Speak directly with our property managers and advisory team.</p>
+                {/* Meta & Author */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-4 text-xs text-amber-200/90 font-medium">
+                    <span className="flex items-center">
+                      <Calendar className="w-3.5 h-3.5 text-gold-400 mr-1.5" />
+                      {activePost.date}
+                    </span>
+                    <span className="flex items-center">
+                      <Clock className="w-3.5 h-3.5 text-gold-400 mr-1.5" />
+                      {activePost.readTime}
+                    </span>
                   </div>
 
-                  <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setActivePost(null)}
-                      className="px-5 py-3 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-800 bg-white hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer"
-                    >
-                      Close
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActivePost(null);
-                        onOpenContact();
-                      }}
-                      className="px-6 py-3 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all shrink-0 cursor-pointer"
-                    >
-                      Consultation
-                    </button>
+                  <div className="flex items-center space-x-3 pt-3 border-t border-white/10">
+                    <div className="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-slate-950 font-bold text-sm shrink-0">
+                      RH
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">{activePost.author}</p>
+                      <p className="text-[11px] text-amber-200/80 font-medium">Royal Haven Realty & Property Managers</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              {/* Quick Consultation CTA on Left Side (Desktop) */}
+              <div className="pt-6 mt-6 border-t border-white/10 hidden lg:block relative z-10">
+                <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+                  Need professional management or guidance regarding this topic?
+                </p>
+                <button
+                  onClick={() => {
+                    setActivePost(null);
+                    onOpenContact();
+                  }}
+                  className="w-full py-3 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
+                >
+                  Request Consultation
+                </button>
+              </div>
             </div>
-          </div>
-        )}
 
-      </div>
+            {/* RIGHT COLUMN: Scrollable Article Body (Desktop: 60% width) */}
+            <div className="lg:w-7/12 p-6 sm:p-10 flex flex-col justify-between overflow-y-auto max-h-[85vh] overscroll-contain">
+              <div className="space-y-6">
+                {/* Article Title */}
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-950 leading-snug pt-2 lg:pt-0 pr-12 lg:pr-14">
+                  {activePost.title}
+                </h2>
+
+                {/* Formatted Content */}
+                <div className="prose prose-slate max-w-none text-slate-900 leading-relaxed font-normal">
+                  {renderFormattedContent(activePost.content)}
+                </div>
+              </div>
+
+              {/* Bottom Action Bar */}
+              <div className="pt-8 mt-8 border-t border-slate-200 flex items-center justify-between gap-4">
+                <div className="text-left">
+                  <span className="text-xs text-slate-700 font-semibold block">Official Publication</span>
+                  <span className="text-[11px] text-slate-600">Royal Haven Realty & Property Managers Ltd.</span>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setActivePost(null)}
+                    className="px-5 py-2.5 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActivePost(null);
+                      onOpenContact();
+                    }}
+                    className="lg:hidden px-5 py-2.5 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
+                  >
+                    Consultation
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>,
+        document.body
+      )}
     </section>
   );
 }

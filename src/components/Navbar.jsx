@@ -23,7 +23,6 @@ export default function Navbar({ onOpenContact }) {
     { name: 'About Us', href: '#about' },
     { name: 'Services', href: '#services' },
     ...(companyData.showPortfolio ? [{ name: 'Portfolio', href: '#portfolio' }] : []),
-    { name: 'Process', href: '#process' },
     { name: 'Leadership', href: '#leadership' },
     { name: 'Blog', href: '#blog' },
     { name: 'Contact', href: '#contact' },
