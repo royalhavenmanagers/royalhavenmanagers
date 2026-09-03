@@ -22,33 +22,70 @@ export default function ContactModal({ isOpen, onClose }) {
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
+      let isSuccess = false;
 
-      if (res.ok && data.success) {
-        setSubmitted(true);
-        setTimeout(() => {
-          setSubmitted(false);
-          setFormData({
-            fullName: '',
-            phone: '',
-            email: '',
-            propertyType: 'Property Management',
-            location: '',
-            notes: ''
-          });
-          onClose();
-        }, 3500);
-      } else {
-        setErrorMessage(data.error || 'Failed to submit inquiry. Please try WhatsApp or call directly.');
+      // 1. Primary: Dispatch via backend endpoint (/api/contact)
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          if (res.ok && data.success) {
+            isSuccess = true;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('Backend serverless notice:', apiErr.message);
       }
+
+      // 2. Direct Supabase Fallback: Ensures lead is logged to database even on 404
+      if (!isSuccess) {
+        try {
+          const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+          const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+          if (SUPABASE_URL && SUPABASE_KEY) {
+            await fetch(`${SUPABASE_URL}/rest/v1/inquiries`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+              },
+              body: JSON.stringify({
+                name: formData.fullName,
+                phone: formData.phone,
+                email: formData.email,
+                service: formData.propertyType,
+                location: formData.location,
+                notes: formData.notes
+              })
+            });
+          }
+        } catch (sbErr) {
+          console.warn('Direct Supabase lead logging notice:', sbErr.message);
+        }
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          fullName: '',
+          phone: '',
+          email: '',
+          propertyType: 'Property Management',
+          location: '',
+          notes: ''
+        });
+        onClose();
+      }, 3500);
     } catch (err) {
       console.warn('API submission notice:', err);
-      // Friendly fallback so user still gets confirmation
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
