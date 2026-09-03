@@ -83,17 +83,17 @@ export default function PartnersSection() {
           >
             {sliderPartners.map((partner, idx) => (
               <SwiperSlide key={idx} className="h-auto">
-                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-6 sm:p-7 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:-translate-y-2 transition-all duration-300 shadow-lg min-h-[220px] h-full cursor-grab active:cursor-grabbing">
-                  {/* Large Logo container with dark high-contrast backdrop */}
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-slate-950 p-3 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md shrink-0">
+                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-5 sm:p-7 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:-translate-y-2 transition-all duration-300 shadow-lg min-h-[260px] h-full cursor-grab active:cursor-grabbing">
+                  {/* Extra Large Logo container filling the square with minimal border spacing */}
+                  <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl bg-slate-950 p-1 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md shrink-0">
                     {partner.logo ? (
                       <img 
                         src={partner.logo} 
                         alt={partner.name} 
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover rounded-xl"
                       />
                     ) : (
-                      <Building className="w-12 h-12 text-gold-400" />
+                      <Building className="w-16 h-16 text-gold-400" />
                     )}
                   </div>
 
