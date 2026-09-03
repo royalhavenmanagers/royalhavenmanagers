@@ -121,15 +121,6 @@ export default function Footer({ onOpenContact }) {
               </div>
             </a>
 
-            <p className="text-slate-200 leading-relaxed max-w-md text-sm sm:text-base font-normal">
-              A premier property management and asset protection company committed to delivering reliable, transparent, and value-driven solutions for property owners across Nigeria.
-            </p>
-
-            <div className="flex items-center space-x-3 text-amber-300 font-bold text-sm">
-              <ShieldCheck className="w-5 h-5 text-gold-400 shrink-0" />
-              <span>Building Trust. Managing Excellence. Creating Value.</span>
-            </div>
-
             {/* Official Social Media Channels */}
             <div className="pt-2 space-y-2">
               <span className="text-xs uppercase tracking-wider text-amber-200/80 font-bold block">Connect With Us</span>

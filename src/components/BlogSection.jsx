@@ -34,10 +34,6 @@ export default function BlogSection({ onOpenContact }) {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-amber-300/60 bg-amber-50 text-amber-800 text-xs uppercase tracking-widest font-bold shadow-sm">
-            <BookOpen className="w-4 h-4 mr-1 text-gold-600 shrink-0" />
-            <span>REAL ESTATE INSIGHTS & ARTICLES</span>
-          </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
             Royal Haven <span className="text-gold-gradient-light">Blog & Insights</span>
           </h2>

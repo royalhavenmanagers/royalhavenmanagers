@@ -62,6 +62,11 @@ export const companyData = {
   ],
   partners: [
     {
+      name: "Blaque Swann",
+      category: "Legal & Law Firm Partner",
+      logo: "/images/partners/swan-luxury.jpg"
+    },
+    {
       name: "Habibi's Fitz",
       category: "Fashion & Lifestyle Partner",
       logo: "/images/partners/habibis-fitz.jpg"
@@ -70,11 +75,6 @@ export const companyData = {
       name: "Olamide Skin Beauty",
       category: "Beauty & Wellness Partner",
       logo: "/images/partners/olamide-skin-beauty.jpg"
-    },
-    {
-      name: "Swan Luxury",
-      category: "Lifestyle & Brand Partner",
-      logo: "/images/partners/swan-luxury.jpg"
     },
     {
       name: "Marvel Develops",

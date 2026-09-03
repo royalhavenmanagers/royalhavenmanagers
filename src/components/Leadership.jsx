@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, Quote, ShieldCheck, ChevronRight, Sparkles } from 'lucide-react';
+import { Quote, ChevronRight, Sparkles } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Leadership({ onOpenContact }) {
@@ -16,10 +16,6 @@ export default function Leadership({ onOpenContact }) {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-bold">
-            <Award className="w-4 h-4 mr-1.5" />
-            <span>EXECUTIVE LEADERSHIP</span>
-          </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Executive <span className="text-gold-gradient">Leadership</span>
           </h2>
