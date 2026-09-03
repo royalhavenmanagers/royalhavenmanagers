@@ -184,25 +184,16 @@ export const companyData = {
   ],
   testimonials: [
     {
-      name: "Mrs. B. Adebayo",
+      name: "Mr. Kehinde Olurotimi",
       role: "Property Owner",
-      location: "Lekki, Lagos",
-      comment: "Royal Haven has been exceptional in managing my properties. Their team is professional, transparent, and always responsive.",
-      rating: 5
+      location: "Ifako-Ijaiye, Lagos State",
+      comment: "Royal Haven has completely taken away the stress of managing my residential properties. Their tenant vetting is meticulous and rent remittances are always made promptly."
     },
     {
-      name: "Mr. T. Okonkwo",
+      name: "Mrs. Odeniyi Olanike",
       role: "Property Owner",
-      location: "Victoria Island, Lagos",
-      comment: "Since partnering with Royal Haven, my rental income has improved and I no longer worry about day-to-day management.",
-      rating: 5
-    },
-    {
-      name: "Engr. K. Salami",
-      role: "Property Owner",
-      location: "Ikeja, Lagos",
-      comment: "Their attention to detail, regular reporting, and tenant management service is second to none.",
-      rating: 5
+      location: "Ilorin, Kwara State",
+      comment: "Managing properties from another state used to be a constant headache. Since handing over to Royal Haven, their transparent updates and proactive maintenance have given me total peace of mind."
     }
   ]
 };

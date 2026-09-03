@@ -1,7 +1,6 @@
 import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
-import { Star, Quote, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Quote, MapPin } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Testimonials() {
@@ -18,57 +17,45 @@ export default function Testimonials() {
             Trusted By <span className="text-gold-gradient">Property Owners</span>
           </h2>
           <p className="text-slate-200 text-base sm:text-lg leading-relaxed">
-            See what property owners and real estate investors say about our management service and responsiveness.
+            See what property owners say about our management service and responsiveness.
           </p>
         </div>
 
-        {/* Swiper Carousel */}
-        <div className="pb-12">
-          <Swiper
-            modules={[Pagination, Autoplay]}
-            spaceBetween={24}
-            slidesPerView={1}
-            breakpoints={{
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
-          >
-            {companyData.testimonials.map((test, idx) => (
-              <SwiperSlide key={idx}>
-                <div className="glass-card p-8 h-full flex flex-col justify-between border-gold-glow relative">
-                  <div className="space-y-4">
-                    {/* Stars & Quote Icon */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-1 text-gold-400">
-                        {[...Array(test.rating)].map((_, sIdx) => (
-                          <Star key={sIdx} className="w-5 h-5 fill-gold-400" />
-                        ))}
-                      </div>
-                      <Quote className="w-7 h-7 text-gold-500/30" />
-                    </div>
-
-                    <p className="text-base sm:text-lg text-slate-200 italic leading-relaxed">
-                      "{test.comment}"
-                    </p>
-                  </div>
-
-                  <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-serif font-bold text-white text-lg">{test.name}</h4>
-                      <p className="text-xs text-gold-400 font-semibold">{test.role}</p>
-                    </div>
-
-                    <div className="flex items-center text-xs text-slate-300 bg-obsidian-900 px-3 py-1 rounded-full border border-white/10">
-                      <MapPin className="w-3.5 h-3.5 text-gold-500 mr-1.5" />
-                      <span>{test.location}</span>
-                    </div>
-                  </div>
+        {/* 2-Card Responsive Grid */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {companyData.testimonials.map((test, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="glass-card p-8 sm:p-10 flex flex-col justify-between border-gold-glow relative group hover:-translate-y-1.5 transition-all duration-300"
+            >
+              <div className="space-y-4">
+                {/* Quote Icon */}
+                <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 group-hover:scale-105 transition-transform">
+                  <Quote className="w-6 h-6" />
                 </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+
+                <p className="text-base sm:text-lg text-slate-200 italic leading-relaxed pt-2">
+                  "{test.comment}"
+                </p>
+              </div>
+
+              <div className="pt-6 mt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="font-serif font-bold text-white text-lg">{test.name}</h4>
+                  <p className="text-xs text-gold-400 font-semibold">{test.role}</p>
+                </div>
+
+                <div className="flex items-center text-xs text-slate-200 font-semibold bg-obsidian-900 px-3.5 py-1.5 rounded-full border border-white/10 self-start sm:self-auto">
+                  <MapPin className="w-3.5 h-3.5 text-gold-500 mr-1.5 shrink-0" />
+                  <span>{test.location}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
       </div>
