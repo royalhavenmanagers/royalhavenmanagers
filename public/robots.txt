@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /#admin
 
-Sitemap: https://royalhaven.com.ng/sitemap.xml
+Sitemap: https://www.royalhaven.com.ng/sitemap.xml
