@@ -13,9 +13,10 @@ export const companyData = {
     { city: "Ogun", state: "Ogun State", country: "Nigeria", region: "Ogun State & Surrounding Environs" }
   ],
   socials: {
-    facebook: "https://facebook.com/royalhavenrealty",
-    instagram: "https://instagram.com/royalhavenrealty",
-    linkedin: "https://linkedin.com/company/royalhavenrealty"
+    tiktok: "https://www.tiktok.com/@royalhavenng",
+    instagram: "https://www.instagram.com/royalhaven_realty",
+    twitter: "https://x.com/royalhavenng",
+    linkedin: "" // Pending user providing link
   },
   showPortfolio: false,
 
