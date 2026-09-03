@@ -83,10 +83,63 @@ export async function handleContactSubmission(body, env = process.env) {
 
       if (!resendRes.ok) {
         const errText = await resendRes.text();
-        console.error('Resend API Error:', resendRes.status, errText);
+        console.error('Resend API Error (Admin Notification):', resendRes.status, errText);
         emailError = `Resend returned ${resendRes.status}: ${errText}`;
       } else {
         emailSent = true;
+
+        // 2. Dispatch Automatic Confirmation Email to the Client (Property Owner)
+        if (email && email.includes('@')) {
+          try {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: emailSender,
+                to: [email],
+                reply_to: 'royalhavenrealtyproperty@gmail.com',
+                subject: `Inquiry Received - Royal Haven Realty & Property Managers Ltd.`,
+                html: `
+                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                    <div style="background: #08080A; padding: 26px; text-align: center; border-bottom: 3px solid #D4AF37;">
+                      <h1 style="color: #D4AF37; margin: 0; font-size: 20px; letter-spacing: 1px; font-family: serif;">ROYAL HAVEN REALTY & PROPERTY MANAGERS</h1>
+                      <p style="color: #cbd5e1; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">Building Trust. Managing Excellence. Creating Value.</p>
+                    </div>
+                    <div style="padding: 30px; color: #1e293b;">
+                      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0;">Inquiry Received</h2>
+                      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Dear <strong>${fullName}</strong>,</p>
+                      <p style="color: #334155; font-size: 15px; line-height: 1.6;">
+                        Thank you for contacting <strong>Royal Haven Realty & Property Managers Ltd.</strong> We have received your inquiry regarding <strong>${propertyType || 'Professional Property Management'}</strong>.
+                      </p>
+                      <div style="margin: 22px 0; padding: 18px; background: #fafaf9; border-radius: 8px; border-left: 4px solid #D4AF37;">
+                        <h4 style="margin: 0 0 8px 0; color: #0f172a; font-size: 14px; text-transform: uppercase;">Next Steps</h4>
+                        <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6;">
+                          A senior property manager is reviewing your requirements. We will reach out to you within 24 business hours to discuss personalized management solutions and asset protection strategies.
+                        </p>
+                      </div>
+                      <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                        For urgent inquiries, feel free to call or WhatsApp our management desk directly at <a href="tel:+2348153785297" style="color: #B89025; font-weight: bold; text-decoration: none;">+234 815 378 5297</a>.
+                      </p>
+                      <p style="color: #64748b; font-size: 13px; margin-top: 24px;">
+                        Warm regards,<br>
+                        <strong style="color: #0f172a;">Client Relations Team</strong><br>
+                        Royal Haven Realty & Property Managers Ltd.
+                      </p>
+                    </div>
+                    <div style="background: #08080A; padding: 16px; text-align: center; font-size: 11px; color: #94a3b8;">
+                      Lagos &amp; Ogun State Environs, Nigeria &bull; <a href="https://www.royalhaven.com.ng" style="color: #D4AF37; text-decoration: none;">www.royalhaven.com.ng</a>
+                    </div>
+                  </div>
+                `
+              })
+            });
+          } catch (clientErr) {
+            console.warn('Note: Client auto-confirmation requires verified custom domain on Resend:', clientErr.message);
+          }
+        }
       }
     } catch (err) {
       console.error('Resend network error:', err);
