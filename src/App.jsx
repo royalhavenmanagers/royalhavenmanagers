@@ -74,13 +74,14 @@ export default function App() {
         <Leadership onOpenContact={handleOpenContact} />
         <WhyChooseUs onOpenContact={handleOpenContact} />
         
+        {/* Client Reviews / Social Proof */}
+        <Testimonials />
+        
         {/* Partners & Corporate Clients Section */}
         <PartnersSection />
 
         {/* Public Blog & Insights Section */}
         <BlogSection onOpenContact={handleOpenContact} />
-        
-        <Testimonials />
       </main>
 
       {/* Footer */}
