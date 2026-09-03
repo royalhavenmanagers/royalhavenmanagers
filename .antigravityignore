@@ -1,0 +1,74 @@
+# Antigravity Indexing Ignore File
+# Prevents heavy dependencies, build artifacts, logs, and massive files from being indexed
+
+# Dependencies & Package Managers
+node_modules/
+vendor/
+.pnp
+.pnp.js
+
+# Build Artifacts & Output
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.output/
+
+# Version Control
+.git/
+.svn/
+.hg/
+
+# Cache Directories
+.cache/
+.vite/
+.turbo/
+.parcel-cache/
+.eslintcache/
+.stylelintcache/
+*.tsbuildinfo
+
+# Logs & Debug Data
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+.system_generated/
+
+# Environment & Sensitive Files
+.env
+.env.*
+!.env.example
+
+# Large Media, Video, and Archive Formats
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.iso
+*.dmg
+
+# Database & Heavy Binary Data
+*.sqlite
+*.sqlite3
+*.db
+*.bin
+*.dat
+
+# OS & Temporary Files
+.DS_Store
+Thumbs.db
+tmp/
+temp/
+.temp/
