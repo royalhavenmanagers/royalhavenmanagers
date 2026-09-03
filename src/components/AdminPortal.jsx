@@ -178,8 +178,8 @@ export default function AdminPortal({ onReturnHome }) {
             <div className="w-14 h-14 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-center mx-auto text-gold-600">
               <Lock className="w-7 h-7" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-slate-900">Admin Portal Login</h2>
-            <p className="text-xs text-slate-500">Royal Haven Realty & Property Managers Ltd.</p>
+            <h2 className="font-serif text-2xl font-bold text-slate-950">Admin Portal Login</h2>
+            <p className="text-xs text-slate-700 font-semibold">Royal Haven Realty & Property Managers Ltd.</p>
           </div>
 
           {authError && (
@@ -191,7 +191,7 @@ export default function AdminPortal({ onReturnHome }) {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
                 Admin Password
               </label>
               <input
@@ -201,7 +201,7 @@ export default function AdminPortal({ onReturnHome }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter admin password"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default function AdminPortal({ onReturnHome }) {
           <div className="text-center pt-2">
             <button
               onClick={onReturnHome}
-              className="text-xs text-slate-500 hover:text-gold-700 font-semibold flex items-center justify-center mx-auto"
+              className="text-xs text-slate-700 hover:text-gold-700 font-bold flex items-center justify-center mx-auto"
             >
               <ArrowLeft className="w-3.5 h-3.5 mr-1" />
               Return to Website
@@ -306,7 +306,7 @@ export default function AdminPortal({ onReturnHome }) {
               className={`flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 ${
                 activeTab === 'security'
                   ? 'bg-slate-900 text-gold-400 shadow-sm'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
               }`}
             >
               <KeyRound className="w-4 h-4 mr-1" />
@@ -314,7 +314,7 @@ export default function AdminPortal({ onReturnHome }) {
             </button>
           </div>
 
-          <span className="text-xs text-slate-500 flex items-center space-x-1.5 font-medium">
+          <span className="text-xs text-slate-800 flex items-center space-x-1.5 font-bold">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Master Admin Authenticated</span>
           </span>
@@ -324,7 +324,7 @@ export default function AdminPortal({ onReturnHome }) {
         {activeTab === 'list' && (
           <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-serif text-lg font-bold text-slate-900">Published & Draft Articles</h3>
+              <h3 className="font-serif text-lg font-bold text-slate-950">Published & Draft Articles</h3>
               <button
                 onClick={handleStartCreate}
                 className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase rounded-xl shadow-sm hover:brightness-105"
@@ -334,15 +334,15 @@ export default function AdminPortal({ onReturnHome }) {
             </div>
 
             {posts.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 space-y-2">
-                <FileText className="w-10 h-10 mx-auto text-slate-300" />
-                <p className="text-sm font-semibold">No articles yet.</p>
-                <p className="text-xs">Click "Create New Article" to write your first blog post.</p>
+              <div className="p-12 text-center text-slate-600 space-y-2">
+                <FileText className="w-10 h-10 mx-auto text-slate-400" />
+                <p className="text-sm font-bold text-slate-900">No articles yet.</p>
+                <p className="text-xs text-slate-700 font-medium">Click "Create New Article" to write your first blog post.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-700 uppercase tracking-wider font-bold border-b border-slate-200">
+                  <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
                     <tr>
                       <th className="p-4">Article</th>
                       <th className="p-4">Category</th>
@@ -358,17 +358,17 @@ export default function AdminPortal({ onReturnHome }) {
                           <div className="flex items-center space-x-3">
                             <img src={post.coverImage} alt="Thumbnail" className="w-12 h-12 object-cover rounded-lg border border-slate-200 shrink-0" />
                             <div>
-                              <p className="font-bold text-slate-900 text-sm line-clamp-1">{post.title}</p>
-                              <p className="text-[11px] text-slate-500">{post.author}</p>
+                              <p className="font-bold text-slate-950 text-sm line-clamp-1">{post.title}</p>
+                              <p className="text-[11px] text-slate-800 font-semibold">{post.author}</p>
                             </div>
                           </div>
                         </td>
                         <td className="p-4">
-                          <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md font-semibold text-[11px]">
+                          <span className="bg-slate-100 text-slate-900 px-2.5 py-1 rounded-md font-bold text-[11px]">
                             {post.category}
                           </span>
                         </td>
-                        <td className="p-4 text-slate-600 font-mono">{post.date}</td>
+                        <td className="p-4 text-slate-950 font-mono font-bold">{post.date}</td>
                         <td className="p-4">
                           <button
                             onClick={() => handleToggleStatus(post.id)}
@@ -588,8 +588,8 @@ export default function AdminPortal({ onReturnHome }) {
                 <KeyRound className="w-3.5 h-3.5 mr-1" />
                 <span>Security Settings</span>
               </div>
-              <h2 className="font-serif text-2xl font-bold text-slate-900">Change Admin Password</h2>
-              <p className="text-xs text-slate-500">
+              <h2 className="font-serif text-2xl font-bold text-slate-950">Change Admin Password</h2>
+              <p className="text-xs text-slate-700 font-medium">
                 Update the master access password used to log into this admin portal.
               </p>
             </div>
@@ -610,7 +610,7 @@ export default function AdminPortal({ onReturnHome }) {
 
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
                   Current Password *
                 </label>
                 <input
@@ -619,12 +619,12 @@ export default function AdminPortal({ onReturnHome }) {
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
                   placeholder="Enter current password"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
                   New Password *
                 </label>
                 <input
@@ -633,12 +633,12 @@ export default function AdminPortal({ onReturnHome }) {
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
                   Confirm New Password *
                 </label>
                 <input
@@ -647,7 +647,7 @@ export default function AdminPortal({ onReturnHome }) {
                   value={confirmPwd}
                   onChange={(e) => setConfirmPwd(e.target.value)}
                   placeholder="Repeat new password"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                 />
               </div>
 
@@ -655,7 +655,7 @@ export default function AdminPortal({ onReturnHome }) {
                 <button
                   type="button"
                   onClick={() => setActiveTab('list')}
-                  className="px-5 py-3 text-xs uppercase tracking-wider font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl"
+                  className="px-5 py-3 text-xs uppercase tracking-wider font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl"
                 >
                   Cancel
                 </button>

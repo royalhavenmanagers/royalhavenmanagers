@@ -45,15 +45,15 @@ export default function Hero({ onOpenContact }) {
 
             {/* Feature Pills */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-3.5 pt-2">
-              <div className="flex items-center text-sm font-semibold text-slate-800 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
+              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
                 <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
                 <span>Professional Property Management</span>
               </div>
-              <div className="flex items-center text-sm font-semibold text-slate-800 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
+              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
                 <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
                 <span>Thorough Tenant Screening</span>
               </div>
-              <div className="flex items-center text-sm font-semibold text-slate-800 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
+              <div className="flex items-center text-sm font-bold text-slate-950 bg-white px-4 py-2.5 rounded-xl border border-amber-200 shadow-sm">
                 <CheckCircle2 className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
                 <span>Transparent Reporting & Remittance</span>
               </div>
@@ -71,7 +71,7 @@ export default function Hero({ onOpenContact }) {
 
               <a
                 href="#services"
-                className="w-full sm:w-auto px-8 py-4 text-sm uppercase tracking-widest font-semibold rounded-xl text-slate-800 bg-white border border-amber-300/80 hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center shadow-sm"
+                className="w-full sm:w-auto px-8 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-white border border-amber-300/80 hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center shadow-sm"
               >
                 <span>Our Services</span>
               </a>
@@ -114,8 +114,8 @@ export default function Hero({ onOpenContact }) {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-5 border-t border-slate-100 text-center">
                   {companyData.pillars.map((pil, idx) => (
                     <div key={idx} className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/60">
-                      <p className="font-serif text-sm font-bold text-gold-gradient">{pil.label}</p>
-                      <p className="text-[11px] text-slate-700 font-semibold mt-0.5">{pil.value}</p>
+                      <p className="font-serif text-sm font-black text-gold-gradient-light">{pil.label}</p>
+                      <p className="text-[11px] text-slate-950 font-bold mt-0.5">{pil.value}</p>
                     </div>
                   ))}
                 </div>
@@ -128,7 +128,7 @@ export default function Hero({ onOpenContact }) {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 uppercase tracking-wider">Your Property. Our Priority.</p>
-                  <p className="text-xs text-slate-600 font-medium">Transparent & Reliable Care</p>
+                  <p className="text-xs text-slate-800 font-bold">Transparent & Reliable Care</p>
                 </div>
               </div>
             </div>

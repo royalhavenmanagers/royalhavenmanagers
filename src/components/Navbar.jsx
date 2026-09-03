@@ -76,10 +76,10 @@ export default function Navbar({ onOpenContact }) {
               className="h-12 sm:h-14 w-auto object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col">
-              <span className="font-serif text-xl sm:text-2xl font-bold tracking-wider text-gold-gradient leading-tight">
-                ROYAL HAVEN
+              <span className="font-serif text-xl sm:text-2xl font-black tracking-wider text-slate-950 leading-tight">
+                ROYAL <span className="text-gold-gradient-light">HAVEN</span>
               </span>
-              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-600 font-sans font-semibold">
+              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-900 font-sans font-extrabold">
                 Realty & Property Managers Ltd.
               </span>
             </div>
@@ -127,7 +127,9 @@ export default function Navbar({ onOpenContact }) {
             <div className="flex items-center justify-between pb-6 border-b border-slate-200">
               <div className="flex items-center space-x-3">
                 <img src="/images/logo-emblem.jpg" alt="Logo" className="h-12 w-auto object-contain rounded-lg" />
-                <span className="font-serif text-xl font-bold text-gold-gradient">ROYAL HAVEN</span>
+                <span className="font-serif text-xl font-black text-slate-950">
+                  ROYAL <span className="text-gold-gradient-light">HAVEN</span>
+                </span>
               </div>
               <button 
                 onClick={() => setMobileMenuOpen(false)}
