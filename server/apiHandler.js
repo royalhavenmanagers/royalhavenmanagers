@@ -11,7 +11,7 @@ export async function handleContactSubmission(body, env = process.env) {
   }
 
   const brevoApiKey = env.BREVO_API_KEY;
-  const brevoSender = env.BREVO_SENDER_EMAIL || 'info@royalhaven.com.ng';
+  const brevoSender = env.BREVO_SENDER_EMAIL || 'royalhavenrealtyproperty@gmail.com';
   const brevoReceiver = env.BREVO_RECEIVER_EMAIL || 'royalhavenrealtyproperty@gmail.com';
 
   const supabaseUrl = env.VITE_SUPABASE_URL;

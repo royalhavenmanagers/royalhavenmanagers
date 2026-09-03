@@ -42,7 +42,7 @@ This allows consultation requests submitted on the website to land in your inbox
 3. Open your project's `.env` file (or host environment variables) and paste:
    ```env
    BREVO_API_KEY=xkeysib-your_real_brevo_api_key_here
-   BREVO_SENDER_EMAIL=info@royalhaven.com.ng
+   BREVO_SENDER_EMAIL=royalhavenrealtyproperty@gmail.com
    BREVO_RECEIVER_EMAIL=royalhavenrealtyproperty@gmail.com
    ```
 4. *(Optional)* Verify your sender domain in Brevo's **Senders & IP** settings for improved inbox deliverability.

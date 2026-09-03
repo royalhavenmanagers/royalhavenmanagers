@@ -7,7 +7,7 @@ export const companyData = {
   phones: ["08153785297", "08120850733"],
   formattedPhones: ["+234 815 378 5297", "+234 812 085 0733"],
   whatsapp: "2348153785297",
-  email: "info@royalhaven.com.ng",
+  email: "royalhavenrealtyproperty@gmail.com",
   locations: [
     { city: "Lagos", state: "Lagos State", country: "Nigeria", region: "Lagos State & Surrounding Environs" },
     { city: "Ogun", state: "Ogun State", country: "Nigeria", region: "Ogun State & Surrounding Environs" }
