@@ -83,25 +83,25 @@ export default function PartnersSection() {
           >
             {sliderPartners.map((partner, idx) => (
               <SwiperSlide key={idx} className="h-auto">
-                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-5 sm:p-7 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:-translate-y-2 transition-all duration-300 shadow-lg min-h-[260px] h-full cursor-grab active:cursor-grabbing">
-                  {/* Extra Large Logo container filling the square with minimal border spacing */}
-                  <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl bg-slate-950 p-1 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md shrink-0">
+                <div className="bg-slate-800/90 border border-slate-700/90 hover:border-gold-500/70 p-4 sm:p-5 rounded-2xl flex flex-col items-center justify-center text-center space-y-3 group hover:-translate-y-1.5 transition-all duration-300 shadow-md h-full cursor-grab active:cursor-grabbing">
+                  {/* Compact Logo container filling square edge-to-edge */}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-950 p-0.5 border border-slate-700/80 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-sm shrink-0">
                     {partner.logo ? (
                       <img 
                         src={partner.logo} 
                         alt={partner.name} 
-                        className="w-full h-full object-cover rounded-xl"
+                        className="w-full h-full object-cover rounded-lg"
                       />
                     ) : (
-                      <Building className="w-16 h-16 text-gold-400" />
+                      <Building className="w-10 h-10 text-gold-400" />
                     )}
                   </div>
 
-                  <div className="space-y-1">
-                    <h4 className="font-serif font-bold text-white text-base sm:text-lg group-hover:text-amber-300 transition-colors leading-tight">
+                  <div className="space-y-0.5">
+                    <h4 className="font-serif font-bold text-white text-sm sm:text-base group-hover:text-amber-300 transition-colors leading-tight">
                       {partner.name}
                     </h4>
-                    <p className="text-xs text-amber-200/80 font-medium leading-relaxed">
+                    <p className="text-[11px] text-amber-200/80 font-medium leading-tight">
                       {partner.category}
                     </p>
                   </div>
