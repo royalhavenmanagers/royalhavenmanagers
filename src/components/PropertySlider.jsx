@@ -250,23 +250,34 @@ export default function PropertySlider({ onOpenContact }) {
                   </span>
                 </div>
 
-                {/* Specs Box */}
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-white/5">
-                    <span className="text-[11px] text-slate-400 block">Bedrooms</span>
-                    <span className="text-sm font-bold text-white flex items-center mt-0.5">
-                      <BedDouble className="w-4 h-4 text-gold-400 mr-1.5" />
-                      {selectedProperty.bedrooms || 'N/A'}
-                    </span>
+                {/* Specs Box (Only displayed if bedrooms or bathrooms provided) */}
+                {(selectedProperty.bedrooms > 0 || selectedProperty.bathrooms > 0) && (
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
+                    {selectedProperty.bedrooms > 0 ? (
+                      <div className="bg-slate-800/80 p-3 rounded-xl border border-white/5">
+                        <span className="text-[11px] text-slate-400 block">Bedrooms</span>
+                        <span className="text-sm font-bold text-white flex items-center mt-0.5">
+                          <BedDouble className="w-4 h-4 text-gold-400 mr-1.5" />
+                          {selectedProperty.bedrooms} {selectedProperty.bedrooms === 1 ? 'Bed' : 'Beds'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-800/80 p-3 rounded-xl border border-white/5 text-slate-400 text-xs flex items-center">
+                        <span>Commercial / Open</span>
+                      </div>
+                    )}
+
+                    {selectedProperty.bathrooms > 0 && (
+                      <div className="bg-slate-800/80 p-3 rounded-xl border border-white/5">
+                        <span className="text-[11px] text-slate-400 block">Bathrooms</span>
+                        <span className="text-sm font-bold text-white flex items-center mt-0.5">
+                          <Bath className="w-4 h-4 text-gold-400 mr-1.5" />
+                          {selectedProperty.bathrooms} {selectedProperty.bathrooms === 1 ? 'Bath' : 'Baths'}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-white/5">
-                    <span className="text-[11px] text-slate-400 block">Bathrooms</span>
-                    <span className="text-sm font-bold text-white flex items-center mt-0.5">
-                      <Bath className="w-4 h-4 text-gold-400 mr-1.5" />
-                      {selectedProperty.bathrooms || 'N/A'}
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 {/* Location Box */}
                 <div className="bg-slate-800/80 p-3.5 rounded-xl border border-white/5 flex items-start space-x-2.5 text-xs text-slate-300">

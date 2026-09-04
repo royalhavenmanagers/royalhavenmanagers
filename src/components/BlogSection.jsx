@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
-import { Search, Calendar, Clock, ArrowRight, X, BookOpen } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { Search, Calendar, Clock, ArrowRight, X, BookOpen, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 
 export default function BlogSection({ onOpenContact }) {
@@ -9,6 +10,9 @@ export default function BlogSection({ onOpenContact }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activePost, setActivePost] = useState(null);
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     setPosts(blogStore.getPublishedPosts());
@@ -18,6 +22,13 @@ export default function BlogSection({ onOpenContact }) {
       }
     });
   }, []);
+
+  // Reset slider position to beginning when filters change
+  useEffect(() => {
+    if (swiperRef.current && !swiperRef.current.destroyed) {
+      swiperRef.current.slideTo(0);
+    }
+  }, [selectedCategory, searchQuery]);
 
   // Listen for Escape key to close modal and lock body scroll
   useEffect(() => {
@@ -155,9 +166,12 @@ export default function BlogSection({ onOpenContact }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full border border-gold-500/40 bg-gold-500/10 text-gold-800 text-xs uppercase tracking-widest font-bold">
+            <span>ROYAL HAVEN INSIGHTS &amp; ADVISORY</span>
+          </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
-            Royal Haven <span className="text-gold-gradient-light">Blog & Insights</span>
+            Royal Haven <span className="text-gold-gradient-light">Blog &amp; Insights</span>
           </h2>
           <p className="text-slate-800 text-base sm:text-lg font-medium leading-relaxed">
             Expert articles, market trends, and practical guidance on property management, tenant vetting, and asset protection across Nigeria.
@@ -165,14 +179,14 @@ export default function BlogSection({ onOpenContact }) {
         </div>
 
         {/* Search & Category Filter Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-12 bg-white p-4 rounded-2xl border border-amber-200/80 shadow-sm">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-amber-200/80 shadow-sm">
           {/* Categories */}
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 text-xs uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
+                className={`px-3.5 py-2 text-xs uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
                   selectedCategory === cat
                     ? 'bg-gold-gradient text-slate-950 shadow-sm'
                     : 'bg-slate-50 text-slate-900 font-bold border border-slate-300 hover:border-gold-500 hover:bg-amber-50/50'
@@ -183,20 +197,48 @@ export default function BlogSection({ onOpenContact }) {
             ))}
           </div>
 
-          {/* Search Box */}
-          <div className="relative w-full md:w-72">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search articles..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
-            />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          {/* Search Box & Navigation Arrows */}
+          <div className="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-end">
+            <div className="relative flex-1 md:w-64">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search articles..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-950 font-medium placeholder-slate-500 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
+              />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+            </div>
+
+            {/* Slider Navigation Buttons */}
+            <div className="flex items-center space-x-2 shrink-0">
+              <button
+                ref={prevRef}
+                aria-label="Previous articles"
+                className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 hover:border-gold-500 text-slate-800 hover:bg-gold-gradient hover:text-slate-950 transition-all duration-300 shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                ref={nextRef}
+                aria-label="Next articles"
+                className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 hover:border-gold-500 text-slate-800 hover:bg-gold-gradient hover:text-slate-950 transition-all duration-300 shadow-sm cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Article Cards Grid */}
+        {/* Mobile Swipe Hint */}
+        <div className="flex items-center justify-end mb-3 md:hidden">
+          <span className="text-xs text-amber-900 font-medium inline-flex items-center">
+            <Sparkles className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
+            Swipe sideways to view articles
+          </span>
+        </div>
+
+        {/* Articles Slider Container */}
         {filteredPosts.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-amber-200/80 p-8 space-y-3">
             <BookOpen className="w-12 h-12 text-slate-400 mx-auto" />
@@ -206,64 +248,105 @@ export default function BlogSection({ onOpenContact }) {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post, idx) => (
-              <motion.article
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
-                className="bg-white rounded-2xl border border-amber-200/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between group hover:-translate-y-1.5"
-              >
-                <div>
-                  {/* Image Header */}
-                  <div className="relative h-52 overflow-hidden bg-slate-100">
-                    <img 
-                      src={post.coverImage} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-4 left-4 bg-slate-950/90 backdrop-blur-md text-amber-300 border border-gold-500/50 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
-                      {post.category}
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center space-x-4 text-xs text-slate-900 font-bold">
-                      <span className="flex items-center">
-                        <Calendar className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
-                        {post.date}
-                      </span>
-                      <span className="flex items-center">
-                        <Clock className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
-                        {post.readTime}
-                      </span>
-                    </div>
-
-                    <h3 className="font-serif text-xl font-bold text-slate-950 group-hover:text-gold-700 transition-colors leading-snug">
-                      {post.title}
-                    </h3>
-
-                    <p className="text-sm text-slate-800 font-medium leading-relaxed line-clamp-3">
-                      {post.summary}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Footer Action */}
-                <div className="p-6 pt-0">
-                  <button
+          <div className="relative pb-6">
+            <Swiper
+              modules={[Navigation, Pagination, Autoplay]}
+              spaceBetween={16}
+              slidesPerView={1.15}
+              breakpoints={{
+                540: { slidesPerView: 1.5, spaceBetween: 20 },
+                768: { slidesPerView: 2.2, spaceBetween: 24 },
+                1024: { slidesPerView: 3, spaceBetween: 28 },
+              }}
+              navigation={{
+                prevEl: prevRef.current,
+                nextEl: nextRef.current,
+              }}
+              onBeforeInit={(swiper) => {
+                swiper.params.navigation.prevEl = prevRef.current;
+                swiper.params.navigation.nextEl = nextRef.current;
+              }}
+              onSwiper={(swiper) => {
+                swiperRef.current = swiper;
+                setTimeout(() => {
+                  if (swiper && !swiper.destroyed && swiper.params?.navigation) {
+                    swiper.params.navigation.prevEl = prevRef.current;
+                    swiper.params.navigation.nextEl = nextRef.current;
+                    swiper.navigation.destroy();
+                    swiper.navigation.init();
+                    swiper.navigation.update();
+                  }
+                }, 50);
+              }}
+              pagination={{ clickable: true, dynamicBullets: true }}
+              autoplay={filteredPosts.length > 3 ? {
+                delay: 5000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              } : false}
+              className="rounded-2xl !pb-14"
+            >
+              {filteredPosts.map((post) => (
+                <SwiperSlide key={post.id} className="h-auto">
+                  <article
                     onClick={() => setActivePost(post)}
-                    className="w-full py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
+                    className="bg-white rounded-2xl border border-amber-200/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between group hover:-translate-y-1.5 h-full cursor-pointer select-none"
                   >
-                    <span>Read Full Article</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.article>
-            ))}
+                    <div>
+                      {/* Image Header */}
+                      <div className="relative h-48 sm:h-52 overflow-hidden bg-slate-100">
+                        <img 
+                          src={post.coverImage} 
+                          alt={post.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-3.5 left-3.5 bg-slate-950/90 backdrop-blur-md text-amber-300 border border-gold-500/50 px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                          {post.category}
+                        </div>
+                      </div>
+
+                      {/* Body Content */}
+                      <div className="p-5 sm:p-6 space-y-3">
+                        <div className="flex items-center space-x-4 text-xs text-slate-900 font-bold">
+                          <span className="flex items-center">
+                            <Calendar className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
+                            {post.date}
+                          </span>
+                          <span className="flex items-center">
+                            <Clock className="w-3.5 h-3.5 text-gold-600 mr-1.5" />
+                            {post.readTime}
+                          </span>
+                        </div>
+
+                        <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-950 group-hover:text-gold-700 transition-colors leading-snug line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        <p className="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed line-clamp-3">
+                          {post.summary}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Footer Action */}
+                    <div className="p-5 sm:p-6 pt-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePost(post);
+                        }}
+                        className="w-full py-2.5 sm:py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
+                      >
+                        <span>Read Full Article</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </article>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         )}
 

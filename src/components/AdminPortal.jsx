@@ -40,8 +40,8 @@ export default function AdminPortal({ onReturnHome }) {
     price: '',
     propertyType: 'Residential Duplex',
     listingType: 'For Rent',
-    bedrooms: 4,
-    bathrooms: 4,
+    bedrooms: '',
+    bathrooms: '',
     coverImage: '',
     status: 'Available',
     description: ''
@@ -214,8 +214,8 @@ export default function AdminPortal({ onReturnHome }) {
       price: '',
       propertyType: 'Residential Duplex',
       listingType: 'For Rent',
-      bedrooms: 4,
-      bathrooms: 4,
+      bedrooms: '',
+      bathrooms: '',
       coverImage: '',
       status: 'Available',
       description: ''
@@ -231,8 +231,8 @@ export default function AdminPortal({ onReturnHome }) {
       price: prop.price,
       propertyType: prop.propertyType,
       listingType: prop.listingType || 'For Rent',
-      bedrooms: prop.bedrooms || 0,
-      bathrooms: prop.bathrooms || 0,
+      bedrooms: prop.bedrooms ? String(prop.bedrooms) : '',
+      bathrooms: prop.bathrooms ? String(prop.bathrooms) : '',
       coverImage: prop.coverImage || '',
       status: prop.status || 'Available',
       description: prop.description || ''
@@ -257,6 +257,8 @@ export default function AdminPortal({ onReturnHome }) {
 
     const payload = {
       ...propertyFormData,
+      bedrooms: propertyFormData.bedrooms ? parseInt(propertyFormData.bedrooms, 10) : 0,
+      bathrooms: propertyFormData.bathrooms ? parseInt(propertyFormData.bathrooms, 10) : 0,
       ...(editingPropertyId ? { id: editingPropertyId } : {})
     };
 
@@ -929,27 +931,29 @@ export default function AdminPortal({ onReturnHome }) {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
-                        Bedrooms
+                        Bedrooms (Optional)
                       </label>
                       <input
                         type="number"
                         min="0"
+                        placeholder="e.g. 4 (Leave blank if not applicable)"
                         value={propertyFormData.bedrooms}
-                        onChange={(e) => setPropertyFormData({ ...propertyFormData, bedrooms: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-gold-500"
+                        onChange={(e) => setPropertyFormData({ ...propertyFormData, bedrooms: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-400 focus:outline-none focus:border-gold-500"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
-                        Bathrooms
+                        Bathrooms (Optional)
                       </label>
                       <input
                         type="number"
                         min="0"
+                        placeholder="e.g. 3 (Leave blank if not applicable)"
                         value={propertyFormData.bathrooms}
-                        onChange={(e) => setPropertyFormData({ ...propertyFormData, bathrooms: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-gold-500"
+                        onChange={(e) => setPropertyFormData({ ...propertyFormData, bathrooms: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-400 focus:outline-none focus:border-gold-500"
                       />
                     </div>
                   </div>
