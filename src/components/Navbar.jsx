@@ -51,9 +51,12 @@ export default function Navbar({ onOpenContact }) {
               <Mail className="w-4 h-4 text-gold-400 mr-1.5" />
               <span>{companyData.email}</span>
             </a>
-            <a href="/admin" className="flex items-center text-amber-300 hover:text-white transition-colors font-medium border-l border-slate-800 pl-4">
+            <a href="#portal" className="flex items-center text-amber-300 hover:text-white transition-colors font-bold border-l border-slate-800 pl-4">
               <Lock className="w-3.5 h-3.5 mr-1 text-gold-400" />
-              <span>Admin Portal</span>
+              <span>Owner Portal</span>
+            </a>
+            <a href="/admin" className="flex items-center text-slate-400 hover:text-slate-200 transition-colors font-medium border-l border-slate-800 pl-4 text-xs">
+              <span>Admin</span>
             </a>
           </div>
         </div>
@@ -98,10 +101,18 @@ export default function Navbar({ onOpenContact }) {
           </nav>
 
           {/* Right Call To Action Button */}
-          <div className="hidden sm:flex items-center space-x-4">
+          <div className="hidden sm:flex items-center space-x-3">
+            <a
+              href="#portal"
+              className="px-4 py-2.5 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-900 bg-amber-50 hover:bg-gold-500 hover:text-slate-950 border border-gold-500/40 transition-all duration-300 shadow-sm flex items-center space-x-1.5"
+            >
+              <Lock className="w-3.5 h-3.5 text-gold-600" />
+              <span>Owner Portal</span>
+            </a>
+
             <button
               onClick={onOpenContact}
-              className="relative inline-flex items-center justify-center px-6 py-3 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 transition-all duration-300 shadow-sm hover:shadow-md group"
+              className="relative inline-flex items-center justify-center px-5 py-2.5 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 transition-all duration-300 shadow-sm hover:shadow-md group"
             >
               <span>Contact Us</span>
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -152,12 +163,28 @@ export default function Navbar({ onOpenContact }) {
               ))}
               
               <a
+                href="#portal"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-lg font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-2 pt-2 border-b border-slate-100 pb-3"
+              >
+                <Lock className="w-5 h-5 text-gold-600" />
+                <span>Owner Portal Access</span>
+              </a>
+
+              <a
+                href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"}
+                download
+                className="text-sm font-semibold text-slate-700 hover:text-gold-600 flex items-center space-x-2 py-1"
+              >
+                <span>Download Company Profile (PDF)</span>
+              </a>
+
+              <a
                 href="/admin"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-2 pt-2"
+                className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-2"
               >
-                <Lock className="w-4 h-4 text-gold-600" />
-                <span>Admin Portal Login</span>
+                <span>Admin Login</span>
               </a>
             </div>
           </div>

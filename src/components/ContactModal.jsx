@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Send, CheckCircle } from 'lucide-react';
+import { portalStore } from '../data/portalStore';
 
 export default function ContactModal({ isOpen, onClose }) {
   const [submitted, setSubmitted] = useState(false);
@@ -20,6 +21,20 @@ export default function ContactModal({ isOpen, onClose }) {
     e.preventDefault();
     setSubmitting(true);
     setErrorMessage('');
+
+    // Save lead to local portal store immediately so it appears in Admin Portal Leads Inbox
+    try {
+      portalStore.saveInquiry({
+        name: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        service: formData.propertyType,
+        location: formData.location,
+        notes: formData.notes
+      });
+    } catch {
+      // no-op
+    }
 
     try {
       let isSuccess = false;

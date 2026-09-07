@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/((?!api/|images/|royal-haven-company-profile.pdf|robots.txt|sitemap.xml|manifest.json|sw.js|assets/|favicon.ico).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
-  ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles
+  ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
+  Inbox, Phone, Mail, Calendar, Send
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
+import { portalStore } from '../data/portalStore';
 import { compressImageFile } from '../utils/imageCompressor';
 
 export default function AdminPortal({ onReturnHome }) {
@@ -57,6 +59,23 @@ export default function AdminPortal({ onReturnHome }) {
   const [pwdError, setPwdError] = useState('');
   const [pwdSuccess, setPwdSuccess] = useState('');
 
+  // Leads / Inquiries State
+  const [inquiries, setInquiries] = useState([]);
+
+  // Owner Remittances State
+  const [remittances, setRemittances] = useState([]);
+  const [showAddRemittanceModal, setShowAddRemittanceModal] = useState(false);
+  const [remittanceFormData, setRemittanceFormData] = useState({
+    propertyName: 'Royal Crest Heights',
+    propertyId: 'prop-ikeja-01',
+    grossRent: '',
+    managementFee: '',
+    maintenanceCost: '',
+    beneficiaryBank: 'Zenith Bank PLC',
+    beneficiaryAccount: '1014829301',
+    description: ''
+  });
+
   const [notification, setNotification] = useState('');
 
   useEffect(() => {
@@ -79,6 +98,54 @@ export default function AdminPortal({ onReturnHome }) {
     propertyStore.fetchPropertiesAsync().then((cloudProps) => {
       if (cloudProps && Array.isArray(cloudProps)) setProperties(cloudProps);
     });
+
+    // Load inquiries & remittances
+    setInquiries(portalStore.getInquiries());
+    setRemittances(portalStore.getTransactions().filter(t => t.type === 'owner_remittance'));
+  };
+
+  const handleToggleInquiryStatus = (id, currentStatus) => {
+    const nextStatus = currentStatus === 'pending' ? 'contacted' : 'pending';
+    const updated = portalStore.updateInquiryStatus(id, nextStatus);
+    setInquiries(updated);
+    showNotification(`Lead marked as ${nextStatus}!`);
+  };
+
+  const handleDeleteInquiry = (id) => {
+    if (window.confirm("Are you sure you want to remove this consultation lead?")) {
+      const updated = portalStore.deleteInquiry(id);
+      setInquiries(updated);
+      showNotification("Lead deleted.");
+    }
+  };
+
+  const handleCreateRemittance = (e) => {
+    e.preventDefault();
+    const gross = Number(remittanceFormData.grossRent) || 0;
+    const fee = Number(remittanceFormData.managementFee) || Math.round(gross * 0.1);
+    const maint = Number(remittanceFormData.maintenanceCost) || 0;
+    const net = gross - fee - maint;
+
+    const newTx = portalStore.addTransaction({
+      propertyId: remittanceFormData.propertyId,
+      propertyName: remittanceFormData.propertyName,
+      type: 'owner_remittance',
+      amount: net,
+      referenceCode: `RH-REM-${Date.now().toString().slice(-6)}`,
+      description: remittanceFormData.description || `Owner rent remittance (Less 10% management fee)`,
+      deductions: {
+        grossRent: gross,
+        managementFee: fee,
+        maintenanceCost: maint,
+        netRemitted: net
+      },
+      beneficiaryBank: remittanceFormData.beneficiaryBank,
+      beneficiaryAccount: remittanceFormData.beneficiaryAccount
+    });
+
+    setRemittances(portalStore.getTransactions().filter(t => t.type === 'owner_remittance'));
+    setShowAddRemittanceModal(false);
+    showNotification("Remittance successfully logged and posted to Owner Portal!");
   };
 
   const showNotification = (msg) => {
@@ -427,6 +494,32 @@ export default function AdminPortal({ onReturnHome }) {
               <span>Property Listings ({properties.length})</span>
             </button>
 
+            {/* Inquiries / Leads Module */}
+            <button
+              onClick={() => setActiveModule('inquiries')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'inquiries'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <Inbox className="w-4 h-4" />
+              <span>Leads Inbox ({inquiries.length})</span>
+            </button>
+
+            {/* Remittances Module */}
+            <button
+              onClick={() => setActiveModule('remittances')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'remittances'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>Owner Remittances ({remittances.length})</span>
+            </button>
+
             {/* Security Module */}
             <button
               onClick={() => setActiveModule('security')}
@@ -437,7 +530,7 @@ export default function AdminPortal({ onReturnHome }) {
               }`}
             >
               <KeyRound className="w-4 h-4" />
-              <span>Security &amp; Password</span>
+              <span>Security</span>
             </button>
           </div>
 
@@ -1116,6 +1209,272 @@ export default function AdminPortal({ onReturnHome }) {
                 Update Password
               </button>
             </form>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE 4: CLIENT LEADS & INQUIRIES INBOX                   */}
+        {/* ========================================================= */}
+        {activeModule === 'inquiries' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <Inbox className="w-5 h-5 text-gold-600" />
+                  <span>Consultation &amp; Landlord Leads Inbox</span>
+                </h3>
+                <p className="text-xs text-slate-600">Messages and management inquiries submitted via royalhaven.com.ng</p>
+              </div>
+              <span className="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold rounded-lg self-start sm:self-auto">
+                {inquiries.filter(i => i.status === 'pending').length} Pending Follow-up
+              </span>
+            </div>
+
+            {inquiries.length === 0 ? (
+              <div className="p-12 text-center text-slate-500 space-y-2">
+                <Inbox className="w-10 h-10 mx-auto text-slate-300" />
+                <p className="text-sm font-bold text-slate-900">No inquiries yet.</p>
+                <p className="text-xs text-slate-500">Website consultation requests will automatically populate here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 px-6 pb-6 space-y-4">
+                {inquiries.map((lead) => (
+                  <div key={lead.id} className="pt-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 hover:border-gold-500/50 transition-colors bg-slate-50/50">
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex items-center space-x-3">
+                        <span className="font-serif font-bold text-base text-slate-950">{lead.name}</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          lead.status === 'contacted' 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                            : 'bg-amber-100 text-amber-900 border border-amber-300'
+                        }`}>
+                          {lead.status === 'contacted' ? 'Contacted' : 'Pending'}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-mono">{lead.date}</span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                        <span className="font-semibold text-gold-700">Service: {lead.service}</span>
+                        <span>Location: <strong>{lead.location || 'Not specified'}</strong></span>
+                        <a href={`tel:${lead.phone}`} className="text-amber-800 hover:underline font-bold">
+                          Phone: {lead.phone}
+                        </a>
+                        <a href={`mailto:${lead.email}`} className="text-slate-700 hover:underline">
+                          Email: {lead.email}
+                        </a>
+                      </div>
+
+                      <p className="text-xs text-slate-700 bg-white p-3 rounded-lg border border-slate-200 italic mt-2">
+                        "{lead.notes || 'No message notes.'}"
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        onClick={() => handleToggleInquiryStatus(lead.id, lead.status)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                          lead.status === 'contacted'
+                            ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        }`}
+                      >
+                        {lead.status === 'contacted' ? 'Mark Pending' : 'Mark Contacted'}
+                      </button>
+
+                      <a
+                        href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(lead.name)},%20this%20is%20Royal%20Haven%20Realty%20following%20up%20on%20your%20property%20management%20inquiry.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-xs font-bold"
+                      >
+                        WhatsApp
+                      </a>
+
+                      <button
+                        onClick={() => handleDeleteInquiry(lead.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg"
+                        title="Delete Lead"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE 5: OWNER REMITTANCES RECORDER                       */}
+        {/* ========================================================= */}
+        {activeModule === 'remittances' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <DollarSign className="w-5 h-5 text-gold-600" />
+                  <span>Owner Remittances &amp; Financial Statements</span>
+                </h3>
+                <p className="text-xs text-slate-600">Dispatched rent remittances synced live to the Property Owner Portal</p>
+              </div>
+
+              <button
+                onClick={() => setShowAddRemittanceModal(true)}
+                className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase rounded-xl shadow-sm hover:brightness-105 flex items-center space-x-1"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Record New Remittance</span>
+              </button>
+            </div>
+
+            <div className="p-6 pt-0 overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
+                  <tr>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Property</th>
+                    <th className="p-3">Reference Code</th>
+                    <th className="p-3 text-right">Gross Rent</th>
+                    <th className="p-3 text-right">Management Fee</th>
+                    <th className="p-3 text-right">Net Remitted</th>
+                    <th className="p-3 text-center">Beneficiary Bank</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {remittances.map((rem) => (
+                    <tr key={rem.id} className="hover:bg-slate-50">
+                      <td className="p-3 text-slate-600">{rem.date}</td>
+                      <td className="p-3 font-bold text-slate-900">{rem.propertyName}</td>
+                      <td className="p-3 font-mono text-slate-500">{rem.referenceCode}</td>
+                      <td className="p-3 text-right font-mono text-slate-800">
+                        ₦{(rem.deductions?.grossRent || rem.amount).toLocaleString()}
+                      </td>
+                      <td className="p-3 text-right font-mono text-red-600">
+                        - ₦{(rem.deductions?.managementFee || 0).toLocaleString()}
+                      </td>
+                      <td className="p-3 text-right font-bold text-emerald-700 font-mono text-sm">
+                        ₦{(rem.deductions?.netRemitted || rem.amount).toLocaleString()}
+                      </td>
+                      <td className="p-3 text-center text-slate-600 font-medium">
+                        {rem.beneficiaryBank}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Modal to Log Remittance */}
+            {showAddRemittanceModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 className="font-serif text-lg font-bold text-slate-950">Record Owner Remittance</h4>
+                    <button onClick={() => setShowAddRemittanceModal(false)} className="text-slate-400 hover:text-slate-700">✕</button>
+                  </div>
+
+                  <form onSubmit={handleCreateRemittance} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Select Property</label>
+                      <select
+                        value={remittanceFormData.propertyName}
+                        onChange={(e) => setRemittanceFormData(prev => ({ ...prev, propertyName: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                      >
+                        <option value="Royal Crest Heights">Royal Crest Heights (Ikeja GRA)</option>
+                        <option value="Haven Terraces">Haven Terraces (Magodo GRA Phase 2)</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Gross Rent Collected (₦)</label>
+                        <input
+                          type="number"
+                          required
+                          placeholder="e.g. 5000000"
+                          value={remittanceFormData.grossRent}
+                          onChange={(e) => setRemittanceFormData(prev => ({ ...prev, grossRent: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Management Fee (10%) (₦)</label>
+                        <input
+                          type="number"
+                          placeholder="Auto 10% if left blank"
+                          value={remittanceFormData.managementFee}
+                          onChange={(e) => setRemittanceFormData(prev => ({ ...prev, managementFee: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Maintenance Deductions (₦)</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 150000 (leave 0 if none)"
+                        value={remittanceFormData.maintenanceCost}
+                        onChange={(e) => setRemittanceFormData(prev => ({ ...prev, maintenanceCost: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Beneficiary Bank</label>
+                        <input
+                          type="text"
+                          value={remittanceFormData.beneficiaryBank}
+                          onChange={(e) => setRemittanceFormData(prev => ({ ...prev, beneficiaryBank: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Account Number</label>
+                        <input
+                          type="text"
+                          value={remittanceFormData.beneficiaryAccount}
+                          onChange={(e) => setRemittanceFormData(prev => ({ ...prev, beneficiaryAccount: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Statement Description / Note</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Q3 2026 rent remittance for Flat 1A and 1B"
+                        value={remittanceFormData.description}
+                        onChange={(e) => setRemittanceFormData(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddRemittanceModal(false)}
+                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105"
+                      >
+                        Post Remittance
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

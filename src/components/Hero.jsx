@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, ArrowRight, Award, CheckCircle2 } from 'lucide-react';
+import { Shield, ArrowRight, Award, CheckCircle2, Download } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Hero({ onOpenContact }) {
@@ -52,6 +52,15 @@ export default function Hero({ onOpenContact }) {
                 <span>Request Consultation</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
+
+              <a
+                href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"}
+                download
+                className="w-full sm:w-auto px-6 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-900 bg-white border border-amber-300/90 hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center space-x-2 shadow-sm"
+              >
+                <Download className="w-4 h-4 text-gold-600" />
+                <span>Profile</span>
+              </a>
 
               <a
                 href="#services"

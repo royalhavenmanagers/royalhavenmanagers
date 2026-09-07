@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Globe, ShieldCheck, ArrowUp, Clock, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin, Globe, ShieldCheck, ArrowUp, Clock, ExternalLink, Lock, Download } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function Footer({ onOpenContact }) {
@@ -188,6 +188,22 @@ export default function Footer({ onOpenContact }) {
               <li><a href="#process" className="text-slate-200 hover:text-gold-400 transition-colors">Management Process</a></li>
               <li><a href="#leadership" className="text-slate-200 hover:text-gold-400 transition-colors">Executive Leadership</a></li>
               <li><a href="#blog" className="text-slate-200 hover:text-gold-400 transition-colors">Insights & Articles</a></li>
+              <li>
+                <a href="#portal" className="text-amber-300 hover:text-white transition-colors font-bold flex items-center space-x-1.5 pt-1">
+                  <Lock className="w-3.5 h-3.5 text-gold-400" />
+                  <span>Property Owner Portal</span>
+                </a>
+              </li>
+              <li>
+                <a 
+                  href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"} 
+                  download 
+                  className="text-slate-300 hover:text-gold-400 transition-colors flex items-center space-x-1.5 text-xs"
+                >
+                  <Download className="w-3.5 h-3.5 text-gold-400" />
+                  <span>Download Company Profile (PDF)</span>
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -99,6 +99,43 @@ export default function Leadership({ onOpenContact }) {
           </motion.div>
         </div>
 
+        {/* Associate Leadership / Operations Leadership */}
+        {companyData.leadership.length > 1 && (
+          <div className="max-w-4xl mx-auto mt-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="glass-card p-6 sm:p-8 border-gold-glow relative overflow-hidden shadow-gold-sm"
+            >
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div className="w-28 h-36 rounded-xl overflow-hidden border-2 border-gold-500/40 shadow-gold-sm shrink-0">
+                  <img
+                    src={companyData.leadership[1].images[0]}
+                    alt={companyData.leadership[1].name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 space-y-2 text-center sm:text-left">
+                  <div className="inline-block px-3 py-0.5 rounded bg-gold-500/10 border border-gold-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider">
+                    {companyData.leadership[1].title}
+                  </div>
+                  <h3 className="font-serif text-2xl font-bold text-white">
+                    {companyData.leadership[1].name}
+                  </h3>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    {companyData.leadership[1].bio}
+                  </p>
+                  <p className="text-xs text-amber-200/90 italic font-serif pt-1">
+                    "{companyData.leadership[1].quote}"
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </div>
     </section>
   );

@@ -13,9 +13,33 @@ import AdminPortal from './components/AdminPortal';
 import ContactModal from './components/ContactModal';
 import WhatsAppWidget from './components/WhatsAppWidget';
 import Footer from './components/Footer';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import OwnerPortal from './components/portal/OwnerPortal';
+import OwnerLogin from './components/portal/OwnerLogin';
 import { companyData } from './data/companyData';
 
-export default function App() {
+function OwnerPortalShell({ onReturnHome }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center text-amber-300 font-serif space-y-3">
+        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs uppercase tracking-widest font-sans font-bold text-slate-300">
+          Accessing Royal Haven Secure Vault...
+        </p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <OwnerLogin onReturnHome={onReturnHome} />;
+  }
+
+  return <OwnerPortal onReturnHome={onReturnHome} />;
+}
+
+function MainApp() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [currentRoute, setCurrentRoute] = useState('home');
 
@@ -27,6 +51,14 @@ export default function App() {
       
       if (path === '/admin' || hash === 'admin' || searchParams.get('route') === 'admin') {
         setCurrentRoute('admin');
+      } else if (
+        path === '/portal' || 
+        path.startsWith('/portal') || 
+        hash === 'portal' || 
+        hash.startsWith('portal') || 
+        searchParams.get('route') === 'portal'
+      ) {
+        setCurrentRoute('portal');
       } else {
         setCurrentRoute('home');
       }
@@ -45,7 +77,7 @@ export default function App() {
   const handleCloseContact = () => setIsContactOpen(false);
 
   const handleReturnHome = () => {
-    if (window.location.pathname === '/admin') {
+    if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/portal')) {
       window.history.pushState(null, '', '/');
     }
     window.location.hash = '';
@@ -55,6 +87,11 @@ export default function App() {
   // If viewing admin route, render AdminPortal
   if (currentRoute === 'admin') {
     return <AdminPortal onReturnHome={handleReturnHome} />;
+  }
+
+  // If viewing owner portal route, render OwnerPortalShell
+  if (currentRoute === 'portal') {
+    return <OwnerPortalShell onReturnHome={handleReturnHome} />;
   }
 
   return (
@@ -68,7 +105,7 @@ export default function App() {
         <About />
         <Services onOpenContact={handleOpenContact} />
         
-        {/* Dynamic Managed Properties Slider (Renders automatically when properties exist) */}
+        {/* Dynamic Managed Properties Slider */}
         <PropertySlider onOpenContact={handleOpenContact} />
         
         <Leadership onOpenContact={handleOpenContact} />
@@ -91,5 +128,13 @@ export default function App() {
       <WhatsAppWidget />
       <ContactModal isOpen={isContactOpen} onClose={handleCloseContact} />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }
