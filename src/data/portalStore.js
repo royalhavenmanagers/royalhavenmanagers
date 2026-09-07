@@ -531,5 +531,42 @@ export const portalStore = {
     const updated = inquiries.filter(item => item.id !== id);
     localStorage.setItem(STORAGE_KEY_INQUIRIES, JSON.stringify(updated));
     return updated;
+  },
+
+  getOwners: () => {
+    try {
+      const saved = localStorage.getItem("royalhaven_portal_owners");
+      if (saved) return JSON.parse(saved);
+      const initial = [
+        {
+          id: "owner-01",
+          fullName: "Chief Babatunde Alabi",
+          email: "owner@royalhaven.com.ng",
+          phone: "+234 803 444 8899",
+          bankName: "Zenith Bank PLC",
+          accountNumber: "1014829301",
+          accountName: "Babatunde Alabi & Sons Ent.",
+          assignedProperties: ["Royal Crest Heights (Ikeja GRA)", "Haven Terraces (Magodo GRA)"],
+          createdDate: "2026-08-01"
+        }
+      ];
+      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(initial));
+      return initial;
+    } catch {
+      return [];
+    }
+  },
+
+  addOwner: (owner) => {
+    const list = portalStore.getOwners();
+    const newOwner = {
+      ...owner,
+      id: owner.id || `owner-${Date.now()}`,
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+    list.unshift(newOwner);
+    localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
+    return newOwner;
   }
 };
+
