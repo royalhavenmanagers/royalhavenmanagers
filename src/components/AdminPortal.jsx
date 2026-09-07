@@ -234,26 +234,6 @@ export default function AdminPortal({ onReturnHome }) {
     setTimeout(() => setNotification(''), 4000);
   };
 
-  const handleChangePassword = (e) => {
-    e.preventDefault();
-    setPwdError('');
-    setPwdSuccess('');
-    if (newPwd !== confirmPwd) {
-      setPwdError('New passwords do not match.');
-      return;
-    }
-    const res = blogStore.changePassword(currentPwd, newPwd);
-    if (res.success) {
-      setPwdSuccess(res.message);
-      setCurrentPwd('');
-      setNewPwd('');
-      setConfirmPwd('');
-      showNotification('Admin password updated successfully!');
-    } else {
-      setPwdError(res.error || 'Failed to update password.');
-    }
-  };
-
   const handleLogin = (e) => {
     e.preventDefault();
     setAuthError('');

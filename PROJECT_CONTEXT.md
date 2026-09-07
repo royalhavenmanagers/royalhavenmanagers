@@ -110,6 +110,8 @@ Password: `royalhaven2026`
 2. **Property Listings**: Add and manage properties displayed on the public portfolio slider.
 3. **Consultation Leads Inbox**: View incoming website leads, mark as contacted, and follow up via direct WhatsApp link.
 4. **Owner Remittance Recorder**: Record new rent remittances that immediately post into the Owner Portal ledger.
+5. **Landlord Accounts Management**: View all registered property owner client accounts, their bank remittance details, create new accounts for clients directly, copy login credentials, or send login details to the client via WhatsApp.
+6. **Security Module**: Update the master admin password.
 
 ---
 
