@@ -21,6 +21,21 @@ export const supabase = isSupabaseConfigured
 
 // Auth helper functions with fallback support
 export const authApi = {
+  signUp: async (email, password, metadata = {}) => {
+    if (supabase) {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: metadata
+        }
+      });
+      if (error) throw error;
+      return data;
+    }
+    throw new Error('Supabase client is not configured.');
+  },
+
   signIn: async (email, password) => {
     if (supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({

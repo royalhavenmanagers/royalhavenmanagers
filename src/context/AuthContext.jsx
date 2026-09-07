@@ -162,6 +162,71 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signup = async ({ email, password, fullName, phone, bankName, accountNumber, accountName }) => {
+    setLoading(true);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    try {
+      if (isSupabaseConfigured && supabase) {
+        const data = await authApi.signUp(normalizedEmail, password, {
+          full_name: fullName,
+          phone,
+          role: 'property_owner',
+          bank_name: bankName,
+          account_number: accountNumber,
+          account_name: accountName
+        });
+
+        if (data?.user) {
+          // Update profile in profiles table with bank details
+          try {
+            await supabase.from('profiles').upsert({
+              id: data.user.id,
+              email: normalizedEmail,
+              full_name: fullName,
+              phone: phone || null,
+              role: 'property_owner',
+              bank_name: bankName || null,
+              account_number: accountNumber || null,
+              account_name: accountName || null
+            });
+          } catch (e) {
+            console.warn('Profile sync notice:', e.message);
+          }
+
+          if (data.session) {
+            setUser(data.user);
+            setIsDemo(false);
+            setProfile({
+              id: data.user.id,
+              email: normalizedEmail,
+              full_name: fullName,
+              phone,
+              role: 'property_owner',
+              bank_name: bankName,
+              account_number: accountNumber,
+              account_name: accountName
+            });
+            setLoading(false);
+            return { success: true, autoLogin: true };
+          } else {
+            setLoading(false);
+            return { 
+              success: true, 
+              autoLogin: false, 
+              message: 'Account registered successfully! You can now log in with your email and password.' 
+            };
+          }
+        }
+      }
+      setLoading(false);
+      return { success: false, error: 'Database connection is offline.' };
+    } catch (err) {
+      setLoading(false);
+      return { success: false, error: err.message || 'Failed to create account.' };
+    }
+  };
+
   const logout = async () => {
     try {
       if (isSupabaseConfigured && !isDemo) {
@@ -185,6 +250,7 @@ export function AuthProvider({ children }) {
       isDemo,
       loading,
       login,
+      signup,
       logout
     }}>
       {children}
