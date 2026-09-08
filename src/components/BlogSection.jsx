@@ -4,7 +4,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { 
   Search, Calendar, Clock, ArrowRight, X, BookOpen, 
-  ChevronLeft, ChevronRight, Sparkles, Share2, Copy, Check, Send, Link2 
+  ChevronLeft, ChevronRight, Sparkles, Share2, Copy, Check, Send, Link2,
+  ArrowLeft, MessageCircle, CheckCircle2
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 
@@ -452,181 +453,246 @@ export default function BlogSection({ onOpenContact }) {
 
       </div>
 
-      {/* Full View Modal Rendered via Portal at Root document.body */}
+      {/* Full Dedicated Article Reading Page */}
       {activePost && typeof document !== 'undefined' && createPortal(
         <div 
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleClosePost();
-            }
-          }}
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 md:p-8 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fadeIn"
+          className="fixed inset-0 z-[99999] bg-white text-slate-900 overflow-y-auto animate-fadeIn"
           style={{ isolation: 'isolate' }}
         >
-          {/* Horizontal Rectangle Modal on Desktop */}
-          <div className="relative w-full max-w-5xl bg-white rounded-3xl border border-amber-200 shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col lg:flex-row">
+          {/* Top Sticky Reading Bar */}
+          <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+              <button
+                onClick={handleClosePost}
+                className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-gold-gradient hover:text-slate-950 text-slate-800 font-bold text-xs transition-all cursor-pointer shadow-xs group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>All Articles</span>
+              </button>
+
+              <span className="hidden sm:inline-block text-[11px] font-extrabold uppercase tracking-widest text-amber-900 bg-amber-50 border border-amber-200/80 px-3 py-1 rounded-full truncate max-w-xs">
+                {activePost.category}
+              </span>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={(e) => handleCopyShareLink(e, activePost)}
+                  className="px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"
+                  title="Copy link"
+                >
+                  {copiedArticleId === activePost.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-3.5 h-3.5 text-gold-700" />
+                      <span className="hidden xs:inline">Share</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleClosePost}
+                  aria-label="Close article"
+                  className="p-1.5 rounded-full text-slate-500 hover:text-slate-950 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Article Content */}
+          <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-8">
             
-            {/* Prominent High-Contrast Close Button */}
-            <button
-              onClick={handleClosePost}
-              aria-label="Close article modal"
-              className="absolute top-4 right-4 z-50 p-2.5 text-slate-700 hover:text-slate-950 bg-white/95 hover:bg-white rounded-full transition-all border border-slate-300 shadow-md cursor-pointer flex items-center space-x-1"
-            >
-              <X className="w-5 h-5" />
-              <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Close</span>
-            </button>
+            {/* Category, Date & Read Time */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-900 bg-amber-100/70 border border-amber-300 px-3 py-1 rounded-full">
+                  {activePost.category}
+                </span>
+                <span className="text-xs text-slate-500 flex items-center">
+                  <Calendar className="w-3.5 h-3.5 mr-1 text-gold-600" />
+                  {activePost.date}
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-xs text-slate-500 flex items-center">
+                  <Clock className="w-3.5 h-3.5 mr-1 text-gold-600" />
+                  {activePost.readTime}
+                </span>
+              </div>
 
-            {/* LEFT COLUMN: Cover Image, Meta & Author (Desktop: 40% width, Mobile: Top Banner) */}
-            <div className="lg:w-5/12 bg-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between shrink-0 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
-              <div className="space-y-6 relative z-10">
-                {/* Cover Image */}
-                <div className="h-48 sm:h-60 lg:h-64 rounded-2xl overflow-hidden border border-white/10 shadow-lg relative bg-slate-950">
-                  <img 
-                    src={activePost.coverImage} 
-                    alt={activePost.title} 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3 bg-slate-950/90 backdrop-blur-md text-amber-300 border border-gold-500/50 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
-                    {activePost.category}
-                  </div>
+              {/* Title */}
+              <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight leading-tight sm:leading-snug">
+                {activePost.title}
+              </h1>
+            </div>
+
+            {/* Author Byline & Quick Share Strip */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-11 h-11 rounded-full bg-gold-gradient flex items-center justify-center text-slate-950 font-bold text-sm shadow-sm shrink-0">
+                  RH
                 </div>
-
-                {/* Meta & Author */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-4 text-xs text-amber-200/90 font-medium">
-                    <span className="flex items-center">
-                      <Calendar className="w-3.5 h-3.5 text-gold-400 mr-1.5" />
-                      {activePost.date}
-                    </span>
-                    <span className="flex items-center">
-                      <Clock className="w-3.5 h-3.5 text-gold-400 mr-1.5" />
-                      {activePost.readTime}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center space-x-3 pt-3 border-t border-white/10">
-                    <div className="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-slate-950 font-bold text-sm shrink-0">
-                      RH
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">{activePost.author}</p>
-                      <p className="text-[11px] text-amber-200/80 font-medium">Royal Haven Realty & Property Managers</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Share Toolbar */}
-                <div className="pt-4 border-t border-white/10 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center">
-                      <Share2 className="w-3.5 h-3.5 mr-1.5 text-gold-400" />
-                      <span>Share Article</span>
-                    </span>
-                    {copiedArticleId === activePost.id && (
-                      <span className="text-[10px] text-emerald-300 font-bold bg-emerald-950 border border-emerald-500/50 px-2 py-0.5 rounded animate-fadeIn">
-                        Link Copied!
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <button
-                      type="button"
-                      onClick={(e) => handleCopyShareLink(e, activePost)}
-                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-gold-500/40 text-amber-200 font-bold hover:bg-gold-gradient hover:text-slate-950 transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
-                    >
-                      {copiedArticleId === activePost.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>Copy Link</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleShareWhatsApp(e, activePost)}
-                      className="px-3 py-2 rounded-xl bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 font-bold hover:bg-emerald-900 transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleShareTwitter(e, activePost)}
-                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-slate-700 text-slate-300 font-bold hover:border-gold-500 hover:text-white transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
-                    >
-                      <span>Share on X</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleShareLinkedIn(e, activePost)}
-                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-slate-700 text-slate-300 font-bold hover:border-gold-500 hover:text-white transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
-                    >
-                      <span>LinkedIn</span>
-                    </button>
-                  </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-950">{activePost.author}</p>
+                  <p className="text-[11px] text-slate-600">Royal Haven Realty &amp; Property Managers Ltd.</p>
                 </div>
               </div>
 
-              {/* Quick Consultation CTA on Left Side (Desktop) */}
-              <div className="pt-4 mt-4 border-t border-white/10 hidden lg:block relative z-10">
-                <p className="text-xs text-slate-300 mb-2 leading-relaxed">
-                  Need professional management regarding this topic?
+              {/* Share buttons */}
+              <div className="flex items-center space-x-1.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200">
+                <button
+                  type="button"
+                  onClick={(e) => handleShareWhatsApp(e, activePost)}
+                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer"
+                  title="Share on WhatsApp"
+                >
+                  <Send className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-[11px]">WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleShareTwitter(e, activePost)}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition-all cursor-pointer"
+                  title="Share on X"
+                >
+                  <span className="text-[11px]">X</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleShareLinkedIn(e, activePost)}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold transition-all cursor-pointer"
+                  title="Share on LinkedIn"
+                >
+                  <span className="text-[11px]">LinkedIn</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleCopyShareLink(e, activePost)}
+                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 transition-all cursor-pointer"
+                  title="Copy link"
+                >
+                  {copiedArticleId === activePost.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Featured Image */}
+            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 shadow-md bg-slate-100">
+              <img 
+                src={activePost.coverImage} 
+                alt={activePost.title} 
+                className="w-full h-56 sm:h-80 md:h-96 object-cover"
+              />
+            </div>
+
+            {/* Summary Takeaway Box */}
+            {activePost.summary && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/80 border-l-4 border-gold-500 shadow-xs">
+                <p className="text-[11px] font-extrabold uppercase tracking-widest text-amber-900 mb-1 flex items-center space-x-1">
+                  <Sparkles className="w-3.5 h-3.5 text-gold-600" />
+                  <span>Key Takeaway</span>
                 </p>
+                <p className="text-sm sm:text-base text-slate-800 font-medium italic leading-relaxed">
+                  "{activePost.summary}"
+                </p>
+              </div>
+            )}
+
+            {/* Formatted Content */}
+            <div className="prose prose-slate max-w-none text-slate-900 leading-relaxed font-normal text-base sm:text-lg">
+              {renderFormattedContent(activePost.content)}
+            </div>
+
+            {/* Dedicated Bottom Sharing Card */}
+            <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-slate-50 border border-slate-200 text-center space-y-4 shadow-xs">
+              <div className="space-y-1">
+                <h4 className="font-serif text-lg sm:text-xl font-bold text-slate-950">Share this Article</h4>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
+                  Know a property owner, investor, or landlord who would find this valuable? Share it with them.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={(e) => handleShareWhatsApp(e, activePost)}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Share on WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleShareTwitter(e, activePost)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <span>Share on X</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleShareLinkedIn(e, activePost)}
+                  className="px-4 py-2.5 rounded-xl bg-[#0077b5] hover:brightness-105 text-white font-bold text-xs shadow-sm transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <span>Share on LinkedIn</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleCopyShareLink(e, activePost)}
+                  className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-900 font-bold text-xs shadow-sm transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  {copiedArticleId === activePost.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-gold-600" />}
+                  <span>{copiedArticleId === activePost.id ? 'Link Copied!' : 'Copy Article Link'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Author Bio & Advisory CTA */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-2 max-w-md">
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300 bg-amber-500/15 border border-gold-500/30 px-2.5 py-0.5 rounded-full">
+                    Executive Advisory
+                  </span>
+                </div>
+                <h4 className="font-serif text-xl font-bold text-gold-gradient">
+                  Need Professional Property Management?
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Royal Haven provides comprehensive tenant screening, rent collection, and facility maintenance across Lagos and Ogun State.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
                 <button
                   onClick={() => {
                     handleClosePost();
                     onOpenContact();
                   }}
-                  className="w-full py-2.5 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
+                  className="px-5 py-3 rounded-xl bg-gold-gradient text-slate-950 font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-md transition-all cursor-pointer text-center"
                 >
                   Request Consultation
+                </button>
+                <button
+                  onClick={handleClosePost}
+                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer text-center"
+                >
+                  Back to Website
                 </button>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Scrollable Article Body (Desktop: 60% width) */}
-            <div className="lg:w-7/12 p-6 sm:p-10 flex flex-col justify-between overflow-y-auto max-h-[85vh] overscroll-contain">
-              <div className="space-y-6">
-                {/* Article Title */}
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-950 leading-snug pt-2 lg:pt-0 pr-12 lg:pr-14">
-                  {activePost.title}
-                </h2>
-
-                {/* Formatted Content */}
-                <div className="prose prose-slate max-w-none text-slate-900 leading-relaxed font-normal">
-                  {renderFormattedContent(activePost.content)}
-                </div>
-              </div>
-
-              {/* Bottom Action Bar */}
-              <div className="pt-8 mt-8 border-t border-slate-200 flex items-center justify-between gap-4">
-                <div className="text-left">
-                  <span className="text-xs text-slate-700 font-semibold block">Official Publication</span>
-                  <span className="text-[11px] text-slate-600">Royal Haven Realty & Property Managers Ltd.</span>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setActivePost(null)}
-                    className="px-5 py-2.5 text-xs uppercase tracking-wider font-bold rounded-xl text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all cursor-pointer"
-                  >
-                    Close
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActivePost(null);
-                      onOpenContact();
-                    }}
-                    className="lg:hidden px-5 py-2.5 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
-                  >
-                    Consultation
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          </main>
         </div>,
         document.body
       )}
