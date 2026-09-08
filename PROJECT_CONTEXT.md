@@ -11,7 +11,6 @@
 * **Core Geographic Focus**: Lagos State (Lekki Peninsula, Victoria Island, Ikoyi, Ikeja GRA, Magodo GRA) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
 * **Executive Leadership**:
   * **CEO & Managing Director**: Ibrahim Ridwan Olasunkanmi
-  * **Associate Partner & Head of Operations**: Babatunde Ridwan
 * **Official Contact**:
   * **Phones**: `+234 815 378 5297`, `+234 812 085 0733`
   * **WhatsApp Concierge**: `+234 815 378 5297` (`2348153785297`)
@@ -84,7 +83,7 @@ Implemented in `src/context/AuthContext.jsx` and `src/components/portal/OwnerLog
 2. **Instant Interactive Demo Mode**:
    * Designed for immediate client evaluation without setting up a new Supabase user.
    * **Credentials**: `owner@royalhaven.com.ng` / `demo1234`
-   * **Profile**: Chief Babatunde Alabi (Zenith Bank PLC: `•••••••• 4812`).
+   * **Profile**: Chief Adeleke Balogun (Zenith Bank PLC: `•••••••• 4812`).
    * Seeded with realistic showcase properties in **Ikeja GRA** (Royal Crest Heights) and **Magodo GRA Phase 2** (Haven Terraces).
 
 ---

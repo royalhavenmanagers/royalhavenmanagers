@@ -474,13 +474,13 @@ export const portalStore = {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_INQUIRIES);
       if (saved) return JSON.parse(saved);
-      // Mock initial leads for staff demonstration
+      // Initial sample inquiries for leads inbox preview
       const initial = [
         {
           id: "lead-1",
-          name: "Chief Babatunde Alabi",
+          name: "Chief Adeleke Balogun",
           phone: "+234 803 444 8899",
-          email: "babatunde.alabi@gmail.com",
+          email: "adeleke.balogun@gmail.com",
           service: "Property Management",
           location: "Magodo GRA Phase 2, Lagos",
           notes: "I have a block of 4 flats newly completed and looking for reputable managers to handle tenant vetting and rent collection.",
@@ -537,21 +537,7 @@ export const portalStore = {
     try {
       const saved = localStorage.getItem("royalhaven_portal_owners");
       if (saved) return JSON.parse(saved);
-      const initial = [
-        {
-          id: "owner-01",
-          fullName: "Chief Babatunde Alabi",
-          email: "owner@royalhaven.com.ng",
-          phone: "+234 803 444 8899",
-          bankName: "Zenith Bank PLC",
-          accountNumber: "1014829301",
-          accountName: "Babatunde Alabi & Sons Ent.",
-          assignedProperties: ["Royal Crest Heights (Ikeja GRA)", "Haven Terraces (Magodo GRA)"],
-          createdDate: "2026-08-01"
-        }
-      ];
-      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(initial));
-      return initial;
+      return [];
     } catch {
       return [];
     }
@@ -562,11 +548,31 @@ export const portalStore = {
     const newOwner = {
       ...owner,
       id: owner.id || `owner-${Date.now()}`,
-      createdDate: new Date().toISOString().split('T')[0]
+      createdDate: owner.createdDate || new Date().toISOString().split('T')[0]
     };
-    list.unshift(newOwner);
+    // If owner with same email already exists, update them
+    const existingIndex = list.findIndex(o => o.email?.toLowerCase().trim() === newOwner.email?.toLowerCase().trim());
+    if (existingIndex >= 0) {
+      list[existingIndex] = { ...list[existingIndex], ...newOwner };
+    } else {
+      list.unshift(newOwner);
+    }
     localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
     return newOwner;
+  },
+
+  findOwnerByEmail: (email) => {
+    const list = portalStore.getOwners();
+    return list.find(o => o.email?.toLowerCase().trim() === email?.toLowerCase().trim());
+  },
+
+  validateOwnerCredentials: (email, password) => {
+    const list = portalStore.getOwners();
+    const found = list.find(o => o.email?.toLowerCase().trim() === email?.toLowerCase().trim());
+    if (found && (!found.password || found.password === password)) {
+      return found;
+    }
+    return null;
   }
 };
 

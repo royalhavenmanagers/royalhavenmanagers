@@ -86,16 +86,6 @@ export default function OwnerLogin({ onReturnHome }) {
     setIsSubmitting(false);
   };
 
-  const handleQuickDemo = async () => {
-    setErrorMessage('');
-    setSuccessMessage('');
-    setEmail('owner@royalhaven.com.ng');
-    setPassword('demo1234');
-    setIsSubmitting(true);
-    await login('owner@royalhaven.com.ng', 'demo1234');
-    setIsSubmitting(false);
-  };
-
   const handleSendResetLink = async (e) => {
     e.preventDefault();
     if (!resetEmail) return;
@@ -159,18 +149,6 @@ export default function OwnerLogin({ onReturnHome }) {
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
             Secure asset oversight, real-time rent tracking, lease updates &amp; transparent remittance statements.
           </p>
-
-          {/* Quick Demo Access Button */}
-          <div className="pt-1">
-            <button
-              onClick={handleQuickDemo}
-              type="button"
-              className="px-4 py-1.5 rounded-full bg-amber-500/10 border border-gold-500/40 text-amber-300 hover:bg-gold-gradient hover:text-obsidian-950 text-xs font-bold transition-all shadow-gold-sm flex items-center space-x-2 mx-auto"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Instant Demo Account (Chief Alabi)</span>
-            </button>
-          </div>
         </div>
 
         {/* Card */}
@@ -205,7 +183,7 @@ export default function OwnerLogin({ onReturnHome }) {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Register Landlord
+              Register Property Owner
             </button>
           </div>
 
@@ -239,7 +217,7 @@ export default function OwnerLogin({ onReturnHome }) {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. landlord@example.com"
+                    placeholder="e.g. owner@example.com"
                     className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-all font-sans"
                   />
                 </div>
@@ -314,7 +292,7 @@ export default function OwnerLogin({ onReturnHome }) {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="landlord@gmail.com"
+                      placeholder="owner@gmail.com"
                       className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
@@ -417,7 +395,7 @@ export default function OwnerLogin({ onReturnHome }) {
                 className="w-full py-3 rounded-xl bg-gold-gradient text-obsidian-950 font-bold text-xs uppercase tracking-wider shadow-gold-md hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>{isSubmitting ? 'Creating Account on Supabase...' : 'Register Owner Account'}</span>
+                <span>{isSubmitting ? 'Creating Account on Supabase...' : 'Register Property Owner'}</span>
               </button>
             </form>
           )}

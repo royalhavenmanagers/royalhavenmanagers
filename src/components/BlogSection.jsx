@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { Search, Calendar, Clock, ArrowRight, X, BookOpen, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { 
+  Search, Calendar, Clock, ArrowRight, X, BookOpen, 
+  ChevronLeft, ChevronRight, Sparkles, Share2, Copy, Check, Send, Link2 
+} from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 
 export default function BlogSection({ onOpenContact }) {
@@ -10,18 +13,86 @@ export default function BlogSection({ onOpenContact }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activePost, setActivePost] = useState(null);
+  const [copiedArticleId, setCopiedArticleId] = useState(null);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const swiperRef = useRef(null);
 
   useEffect(() => {
-    setPosts(blogStore.getPublishedPosts());
+    const published = blogStore.getPublishedPosts();
+    setPosts(published);
+
+    // Check URL parameters for direct article linking (e.g. ?article=slug)
+    const checkDirectLink = (postList) => {
+      const params = new URLSearchParams(window.location.search);
+      const articleParam = params.get('article');
+      if (articleParam && postList.length > 0) {
+        const found = postList.find(p => p.slug === articleParam || p.id === articleParam);
+        if (found) {
+          setActivePost(found);
+        }
+      }
+    };
+
+    checkDirectLink(published);
+
     blogStore.fetchPostsAsync().then((allPosts) => {
       if (allPosts && allPosts.length > 0) {
-        setPosts(allPosts.filter(p => p.status === 'published'));
+        const activeOnly = allPosts.filter(p => p.status === 'published');
+        setPosts(activeOnly);
+        checkDirectLink(activeOnly);
       }
     });
   }, []);
+
+  const getArticleShareUrl = (post) => {
+    const origin = window.location.origin;
+    const target = post.slug || post.id;
+    return `${origin}/?article=${target}#blog`;
+  };
+
+  const handleOpenPost = (post) => {
+    setActivePost(post);
+    try {
+      const target = post.slug || post.id;
+      window.history.replaceState(null, '', `?article=${target}#blog`);
+    } catch {}
+  };
+
+  const handleClosePost = () => {
+    setActivePost(null);
+    try {
+      window.history.replaceState(null, '', window.location.pathname + '#blog');
+    } catch {}
+  };
+
+  const handleCopyShareLink = (e, post) => {
+    if (e) e.stopPropagation();
+    const url = getArticleShareUrl(post);
+    navigator.clipboard.writeText(url);
+    setCopiedArticleId(post.id);
+    setTimeout(() => setCopiedArticleId(null), 3000);
+  };
+
+  const handleShareWhatsApp = (e, post) => {
+    if (e) e.stopPropagation();
+    const url = getArticleShareUrl(post);
+    const msg = `Read this insightful article from Royal Haven: "${post.title}"\n\nLink: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleShareTwitter = (e, post) => {
+    if (e) e.stopPropagation();
+    const url = getArticleShareUrl(post);
+    const text = `Insightful read on real estate: "${post.title}" by Royal Haven`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  const handleShareLinkedIn = (e, post) => {
+    if (e) e.stopPropagation();
+    const url = getArticleShareUrl(post);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+  };
 
   // Reset slider position to beginning when filters change
   useEffect(() => {
@@ -34,7 +105,7 @@ export default function BlogSection({ onOpenContact }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setActivePost(null);
+        handleClosePost();
       }
     };
 
@@ -330,17 +401,26 @@ export default function BlogSection({ onOpenContact }) {
                     </div>
 
                     {/* Footer Action */}
-                    <div className="p-5 sm:p-6 pt-0">
+                    <div className="p-5 sm:p-6 pt-0 flex items-center space-x-2">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActivePost(post);
+                          handleOpenPost(post);
                         }}
-                        className="w-full py-2.5 sm:py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
+                        className="flex-1 py-2.5 sm:py-3 rounded-xl border border-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
                       >
-                        <span>Read Full Article</span>
+                        <span>Read Article</span>
                         <ArrowRight className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopyShareLink(e, post)}
+                        title="Copy article link"
+                        className="p-2.5 sm:p-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-gold-gradient hover:text-slate-950 text-slate-900 transition-all cursor-pointer shrink-0"
+                      >
+                        {copiedArticleId === post.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-gold-700" />}
                       </button>
                     </div>
                   </article>
@@ -357,7 +437,7 @@ export default function BlogSection({ onOpenContact }) {
         <div 
           onClick={(e) => {
             if (e.target === e.currentTarget) {
-              setActivePost(null);
+              handleClosePost();
             }
           }}
           className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 md:p-8 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-fadeIn"
@@ -368,7 +448,7 @@ export default function BlogSection({ onOpenContact }) {
             
             {/* Prominent High-Contrast Close Button */}
             <button
-              onClick={() => setActivePost(null)}
+              onClick={handleClosePost}
               aria-label="Close article modal"
               className="absolute top-4 right-4 z-50 p-2.5 text-slate-700 hover:text-slate-950 bg-white/95 hover:bg-white rounded-full transition-all border border-slate-300 shadow-md cursor-pointer flex items-center space-x-1"
             >
@@ -414,19 +494,70 @@ export default function BlogSection({ onOpenContact }) {
                     </div>
                   </div>
                 </div>
+
+                {/* Share Toolbar */}
+                <div className="pt-4 border-t border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center">
+                      <Share2 className="w-3.5 h-3.5 mr-1.5 text-gold-400" />
+                      <span>Share Article</span>
+                    </span>
+                    {copiedArticleId === activePost.id && (
+                      <span className="text-[10px] text-emerald-300 font-bold bg-emerald-950 border border-emerald-500/50 px-2 py-0.5 rounded animate-fadeIn">
+                        Link Copied!
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyShareLink(e, activePost)}
+                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-gold-500/40 text-amber-200 font-bold hover:bg-gold-gradient hover:text-slate-950 transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                    >
+                      {copiedArticleId === activePost.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>Copy Link</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleShareWhatsApp(e, activePost)}
+                      className="px-3 py-2 rounded-xl bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 font-bold hover:bg-emerald-900 transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleShareTwitter(e, activePost)}
+                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-slate-700 text-slate-300 font-bold hover:border-gold-500 hover:text-white transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                    >
+                      <span>Share on X</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleShareLinkedIn(e, activePost)}
+                      className="px-3 py-2 rounded-xl bg-obsidian-950 border border-slate-700 text-slate-300 font-bold hover:border-gold-500 hover:text-white transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-sm"
+                    >
+                      <span>LinkedIn</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Quick Consultation CTA on Left Side (Desktop) */}
-              <div className="pt-6 mt-6 border-t border-white/10 hidden lg:block relative z-10">
-                <p className="text-xs text-slate-300 mb-3 leading-relaxed">
-                  Need professional management or guidance regarding this topic?
+              <div className="pt-4 mt-4 border-t border-white/10 hidden lg:block relative z-10">
+                <p className="text-xs text-slate-300 mb-2 leading-relaxed">
+                  Need professional management regarding this topic?
                 </p>
                 <button
                   onClick={() => {
-                    setActivePost(null);
+                    handleClosePost();
                     onOpenContact();
                   }}
-                  className="w-full py-3 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
+                  className="w-full py-2.5 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-sm transition-all cursor-pointer"
                 >
                   Request Consultation
                 </button>

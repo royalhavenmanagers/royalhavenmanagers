@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import OwnerPortal from './components/portal/OwnerPortal';
 import OwnerLogin from './components/portal/OwnerLogin';
 import { companyData } from './data/companyData';
+import { analyticsStore } from './data/analyticsStore';
 
 function OwnerPortalShell({ onReturnHome }) {
   const { isAuthenticated, loading } = useAuth();
@@ -44,6 +45,9 @@ function MainApp() {
   const [currentRoute, setCurrentRoute] = useState('home');
 
   useEffect(() => {
+    // Record pageview for analytics
+    analyticsStore.recordView();
+
     const handleRouteChange = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/+$/, '');
       const hash = window.location.hash.replace('#', '').toLowerCase();

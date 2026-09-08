@@ -149,14 +149,6 @@ export const companyData = {
       images: ["/images/team/ceo-navy-suit.jpg", "/images/team/ceo-taupe-suit.jpg"],
       bio: "Leading Royal Haven Realty & Property Managers Ltd. with dedication to excellence, transparency, and royalty-grade property management across Lagos State, Ogun State, and surrounding environs.",
       quote: "Every property under our care is managed with the same level of commitment as if it were our own."
-    },
-    {
-      name: "Babatunde Ridwan",
-      title: "Associate Partner & Head of Operations",
-      role: "Portfolio Operations & Client Relations",
-      images: ["/images/team/associate-partner.jpg"],
-      bio: "Overseeing day-to-day property management operations, artisan supervision, and ensuring prompt rent remittance and transparent owner reporting.",
-      quote: "Protecting landlord assets and upholding tenant trust is the cornerstone of our daily work."
     }
   ],
   process: [

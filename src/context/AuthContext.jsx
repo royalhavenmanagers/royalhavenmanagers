@@ -1,19 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured, authApi } from '../lib/supabaseClient';
+import { portalStore } from '../data/portalStore';
 
 const AuthContext = createContext({});
-
-const DEMO_OWNER_PROFILE = {
-  id: 'demo-owner-uuid',
-  email: 'owner@royalhaven.com.ng',
-  full_name: 'Chief Babatunde Alabi',
-  phone: '+234 803 444 8899',
-  role: 'property_owner',
-  bank_name: 'Zenith Bank PLC',
-  account_number: '1014829301',
-  account_name: 'Babatunde Alabi & Sons Ent.',
-  avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80'
-};
 
 const STORAGE_AUTH_USER = 'royalhaven_portal_current_user';
 
@@ -21,20 +10,33 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
     async function initAuth() {
-      // 1. Check if Supabase session is active
+      // 1. Check local saved session first
+      try {
+        const saved = localStorage.getItem(STORAGE_AUTH_USER);
+        if (saved && mounted) {
+          const parsed = JSON.parse(saved);
+          if (parsed.user && parsed.profile) {
+            setUser(parsed.user);
+            setProfile(parsed.profile);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // no-op
+      }
+
+      // 2. Check if Supabase session is active
       if (isSupabaseConfigured && supabase) {
         try {
           const session = await authApi.getCurrentSession();
           if (session?.user && mounted) {
             setUser(session.user);
-            setIsDemo(false);
-            // Fetch profile
             const { data: prof } = await supabase
               .from('profiles')
               .select('*')
@@ -59,19 +61,6 @@ export function AuthProvider({ children }) {
         }
       }
 
-      // 2. Check local saved session (demo or offline)
-      try {
-        const saved = localStorage.getItem(STORAGE_AUTH_USER);
-        if (saved && mounted) {
-          const parsed = JSON.parse(saved);
-          setUser(parsed.user);
-          setProfile(parsed.profile);
-          setIsDemo(Boolean(parsed.isDemo));
-        }
-      } catch {
-        // no-op
-      }
-
       if (mounted) setLoading(false);
     }
 
@@ -84,7 +73,6 @@ export function AuthProvider({ children }) {
         if (!mounted) return;
         if (session?.user) {
           setUser(session.user);
-          setIsDemo(false);
           const { data: prof } = await supabase
             .from('profiles')
             .select('*')
@@ -95,7 +83,6 @@ export function AuthProvider({ children }) {
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
-          setIsDemo(false);
           localStorage.removeItem(STORAGE_AUTH_USER);
         }
       });
@@ -112,124 +99,153 @@ export function AuthProvider({ children }) {
     setLoading(true);
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 1. If user entered demo credentials or offline test
-    if (
-      normalizedEmail === 'owner@royalhaven.com.ng' || 
-      password === 'demo1234' ||
-      !isSupabaseConfigured
-    ) {
-      const mockUser = {
-        id: DEMO_OWNER_PROFILE.id,
-        email: normalizedEmail || DEMO_OWNER_PROFILE.email
+    // 1. Verify against real registered property owners
+    const registeredOwner = portalStore.validateOwnerCredentials(normalizedEmail, password);
+    if (registeredOwner) {
+      const activeUser = {
+        id: registeredOwner.id,
+        email: registeredOwner.email
       };
-      setUser(mockUser);
-      setProfile(DEMO_OWNER_PROFILE);
-      setIsDemo(true);
+      const activeProfile = {
+        id: registeredOwner.id,
+        email: registeredOwner.email,
+        full_name: registeredOwner.fullName,
+        phone: registeredOwner.phone || '',
+        role: 'property_owner',
+        bank_name: registeredOwner.bankName || 'Zenith Bank PLC',
+        account_number: registeredOwner.accountNumber || '',
+        account_name: registeredOwner.accountName || registeredOwner.fullName,
+        assignedProperties: registeredOwner.assignedProperties || ['Royal Crest Heights (Ikeja GRA)']
+      };
+
+      setUser(activeUser);
+      setProfile(activeProfile);
       localStorage.setItem(
-        STORAGE_AUTH_USER, 
-        JSON.stringify({ user: mockUser, profile: DEMO_OWNER_PROFILE, isDemo: true })
+        STORAGE_AUTH_USER,
+        JSON.stringify({ user: activeUser, profile: activeProfile })
       );
       setLoading(false);
-      return { success: true, isDemo: true };
+      return { success: true };
     }
 
-    // 2. Try Supabase cloud authentication
+    // 2. Also try Supabase cloud authentication
     try {
-      const data = await authApi.signIn(normalizedEmail, password);
-      if (data?.user) {
-        setUser(data.user);
-        setIsDemo(false);
-        // Fetch profile
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+      if (isSupabaseConfigured && supabase) {
+        const data = await authApi.signIn(normalizedEmail, password);
+        if (data?.user) {
+          setUser(data.user);
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
 
-        const activeProfile = prof || {
-          id: data.user.id,
-          email: data.user.email,
-          full_name: data.user.user_metadata?.full_name || 'Valued Property Owner',
-          role: data.user.user_metadata?.role || 'property_owner'
-        };
-        setProfile(activeProfile);
-        setLoading(false);
-        return { success: true, isDemo: false };
+          const activeProfile = prof || {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || 'Valued Property Owner',
+            role: data.user.user_metadata?.role || 'property_owner',
+            bank_name: data.user.user_metadata?.bank_name || 'Zenith Bank PLC',
+            account_number: data.user.user_metadata?.account_number || '',
+            account_name: data.user.user_metadata?.account_name || ''
+          };
+          setProfile(activeProfile);
+          localStorage.setItem(
+            STORAGE_AUTH_USER,
+            JSON.stringify({ user: data.user, profile: activeProfile })
+          );
+          setLoading(false);
+          return { success: true };
+        }
       }
     } catch (err) {
-      setLoading(false);
-      return { success: false, error: err.message || 'Invalid credentials' };
+      console.warn('Supabase auth sign in notice:', err.message);
     }
+
+    setLoading(false);
+    return { 
+      success: false, 
+      error: 'Invalid email or password. Please verify your credentials or register a new property owner account.' 
+    };
   };
 
   const signup = async ({ email, password, fullName, phone, bankName, accountNumber, accountName }) => {
     setLoading(true);
     const normalizedEmail = email.trim().toLowerCase();
 
-    try {
-      if (isSupabaseConfigured && supabase) {
-        const data = await authApi.signUp(normalizedEmail, password, {
-          full_name: fullName,
-          phone,
-          role: 'property_owner',
-          bank_name: bankName,
-          account_number: accountNumber,
-          account_name: accountName
-        });
-
-        if (data?.user) {
-          // Update profile in profiles table with bank details
-          try {
-            await supabase.from('profiles').upsert({
-              id: data.user.id,
-              email: normalizedEmail,
-              full_name: fullName,
-              phone: phone || null,
-              role: 'property_owner',
-              bank_name: bankName || null,
-              account_number: accountNumber || null,
-              account_name: accountName || null
-            });
-          } catch (e) {
-            console.warn('Profile sync notice:', e.message);
-          }
-
-          if (data.session) {
-            setUser(data.user);
-            setIsDemo(false);
-            setProfile({
-              id: data.user.id,
-              email: normalizedEmail,
-              full_name: fullName,
-              phone,
-              role: 'property_owner',
-              bank_name: bankName,
-              account_number: accountNumber,
-              account_name: accountName
-            });
-            setLoading(false);
-            return { success: true, autoLogin: true };
-          } else {
-            setLoading(false);
-            return { 
-              success: true, 
-              autoLogin: false, 
-              message: 'Account registered successfully! You can now log in with your email and password.' 
-            };
-          }
-        }
-      }
+    // Check if account already exists
+    const existing = portalStore.findOwnerByEmail(normalizedEmail);
+    if (existing) {
       setLoading(false);
-      return { success: false, error: 'Database connection is offline.' };
-    } catch (err) {
-      setLoading(false);
-      return { success: false, error: err.message || 'Failed to create account.' };
+      return { 
+        success: false, 
+        error: 'An account with this email address already exists. Please sign in.' 
+      };
     }
+
+    const newOwnerId = `owner-${Date.now()}`;
+    const newOwnerData = {
+      id: newOwnerId,
+      fullName: fullName.trim(),
+      email: normalizedEmail,
+      password: password,
+      phone: phone || '',
+      bankName: bankName || 'Zenith Bank PLC',
+      accountNumber: accountNumber || '',
+      accountName: accountName || fullName.trim(),
+      assignedProperties: ['Royal Crest Heights (Ikeja GRA)'],
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+
+    // Save directly to real verified owner database
+    portalStore.addOwner(newOwnerData);
+
+    const activeUser = {
+      id: newOwnerId,
+      email: normalizedEmail
+    };
+
+    const activeProfile = {
+      id: newOwnerId,
+      email: normalizedEmail,
+      full_name: fullName.trim(),
+      phone: phone || '',
+      role: 'property_owner',
+      bank_name: bankName || 'Zenith Bank PLC',
+      account_number: accountNumber || '',
+      account_name: accountName || fullName.trim(),
+      assignedProperties: ['Royal Crest Heights (Ikeja GRA)']
+    };
+
+    // Auto-login user immediately
+    setUser(activeUser);
+    setProfile(activeProfile);
+    localStorage.setItem(
+      STORAGE_AUTH_USER,
+      JSON.stringify({ user: activeUser, profile: activeProfile })
+    );
+
+    // Sync to Supabase in the background if reachable
+    if (isSupabaseConfigured && supabase) {
+      authApi.signUp(normalizedEmail, password, {
+        full_name: fullName.trim(),
+        phone,
+        role: 'property_owner',
+        bank_name: bankName,
+        account_number: accountNumber,
+        account_name: accountName
+      }).catch(err => {
+        console.warn('Supabase cloud background sync notice:', err.message);
+      });
+    }
+
+    setLoading(false);
+    return { success: true, autoLogin: true };
   };
 
   const logout = async () => {
     try {
-      if (isSupabaseConfigured && !isDemo) {
+      if (isSupabaseConfigured && supabase) {
         await authApi.signOut();
       }
     } catch {
@@ -237,7 +253,6 @@ export function AuthProvider({ children }) {
     }
     setUser(null);
     setProfile(null);
-    setIsDemo(false);
     localStorage.removeItem(STORAGE_AUTH_USER);
   };
 
@@ -247,7 +262,6 @@ export function AuthProvider({ children }) {
       profile,
       role: profile?.role || 'property_owner',
       isAuthenticated: Boolean(user),
-      isDemo,
       loading,
       login,
       signup,

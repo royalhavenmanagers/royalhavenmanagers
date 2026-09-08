@@ -10,7 +10,6 @@
 * **Motto**: *"Building Trust. Managing Excellence. Creating Value."*
 * **Core Operating Zones**: Lagos State (Lekki, Ikoyi, Victoria Island, Ikeja GRA, Magodo) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
 * **Managing Director & CEO**: Ibrahim Ridwan Olasunkanmi
-* **Associate Partner**: Babatunde Ridwan
 
 ---
 

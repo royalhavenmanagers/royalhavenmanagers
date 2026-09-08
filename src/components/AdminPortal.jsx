@@ -3,11 +3,12 @@ import {
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
-  Inbox, Phone, Mail, Calendar, Send, Users, Copy
+  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
 import { portalStore } from '../data/portalStore';
+import { analyticsStore } from '../data/analyticsStore';
 import { compressImageFile } from '../utils/imageCompressor';
 import { supabase, authApi } from '../lib/supabaseClient';
 
@@ -93,6 +94,7 @@ export default function AdminPortal({ onReturnHome }) {
   const [createdOwnerCreds, setCreatedOwnerCreds] = useState(null);
 
   const [notification, setNotification] = useState('');
+  const [trafficStats, setTrafficStats] = useState(null);
 
   useEffect(() => {
     const authStatus = blogStore.isAuthenticated();
@@ -103,6 +105,9 @@ export default function AdminPortal({ onReturnHome }) {
   }, []);
 
   const loadData = () => {
+    // Load traffic stats
+    setTrafficStats(analyticsStore.getStats());
+
     // Load posts
     setPosts(blogStore.getPosts());
     blogStore.fetchPostsAsync().then((cloudPosts) => {
@@ -126,7 +131,7 @@ export default function AdminPortal({ onReturnHome }) {
         if (data && data.length > 0) {
           const fromCloud = data.map(p => ({
             id: p.id,
-            fullName: p.full_name || 'Valued Landlord',
+            fullName: p.full_name || 'Valued Property Owner',
             email: p.email,
             phone: p.phone || '—',
             bankName: p.bank_name || 'Zenith Bank PLC',
@@ -166,6 +171,7 @@ export default function AdminPortal({ onReturnHome }) {
     const newOwner = portalStore.addOwner({
       fullName: ownerFormData.fullName,
       email: ownerFormData.email,
+      password: ownerFormData.password,
       phone: ownerFormData.phone,
       bankName: ownerFormData.bankName,
       accountNumber: ownerFormData.accountNumber,
@@ -270,6 +276,17 @@ export default function AdminPortal({ onReturnHome }) {
     } else {
       setPwdError(res.error || "Failed to update password.");
     }
+  };
+
+  const handleRefreshTraffic = () => {
+    setTrafficStats(analyticsStore.getStats());
+    showNotification("Website traffic stats updated.");
+  };
+
+  const handleSimulateVisitor = () => {
+    analyticsStore.recordView();
+    setTrafficStats(analyticsStore.getStats());
+    showNotification("Simulated test visitor recorded (+1 view)!");
   };
 
   // -------------------------------------------------------------
@@ -614,6 +631,19 @@ export default function AdminPortal({ onReturnHome }) {
               <span>Owner Accounts ({owners.length})</span>
             </button>
 
+            {/* Website Traffic Module */}
+            <button
+              onClick={() => setActiveModule('traffic')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'traffic'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Website Traffic ({trafficStats?.today ?? 0} Today)</span>
+            </button>
+
             {/* Security Module */}
             <button
               onClick={() => setActiveModule('security')}
@@ -632,6 +662,55 @@ export default function AdminPortal({ onReturnHome }) {
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Master Admin Active</span>
           </span>
+        </div>
+
+        {/* Quick Website Traffic Ribbon */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <button
+            onClick={() => setActiveModule('traffic')}
+            className="text-left flex items-center space-x-3 p-3 rounded-xl bg-amber-50 border border-amber-200/80 hover:bg-amber-100/70 transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gold-gradient flex items-center justify-center text-slate-950 font-bold shadow-sm shrink-0">
+              <Eye className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Today's Views</p>
+              <p className="text-xl font-extrabold text-slate-950 flex items-center space-x-1.5">
+                <span>{trafficStats?.today ?? 0}</span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Live</span>
+              </p>
+            </div>
+          </button>
+
+          <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Yesterday</p>
+              <p className="text-xl font-extrabold text-slate-950">{trafficStats?.yesterday ?? 0}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-700 shrink-0">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Past 7 Days</p>
+              <p className="text-xl font-extrabold text-slate-950">{trafficStats?.last7Days ?? 0}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-700 shrink-0">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">All-Time Views</p>
+              <p className="text-xl font-extrabold text-slate-950">{trafficStats?.total ?? 0}</p>
+            </div>
+          </div>
         </div>
 
         {/* ========================================================= */}
@@ -1315,7 +1394,7 @@ export default function AdminPortal({ onReturnHome }) {
               <div>
                 <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
                   <Inbox className="w-5 h-5 text-gold-600" />
-                  <span>Consultation &amp; Landlord Leads Inbox</span>
+                  <span>Consultation &amp; Property Owner Leads Inbox</span>
                 </h3>
                 <p className="text-xs text-slate-600">Messages and management inquiries submitted via royalhaven.com.ng</p>
               </div>
@@ -1573,7 +1652,7 @@ export default function AdminPortal({ onReturnHome }) {
         )}
 
         {/* ========================================================= */}
-        {/* MODULE 6: LANDLORD & OWNER CLIENT ACCOUNTS                 */}
+        {/* MODULE 6: PROPERTY OWNER CLIENT ACCOUNTS                 */}
         {/* ========================================================= */}
         {activeModule === 'owners' && (
           <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
@@ -1581,10 +1660,10 @@ export default function AdminPortal({ onReturnHome }) {
               <div>
                 <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
                   <Users className="w-5 h-5 text-gold-600" />
-                  <span>Landlord &amp; Client Accounts</span>
+                  <span>Property Owner Accounts</span>
                 </h3>
                 <p className="text-xs text-slate-600">
-                  Manage registered property owners, view their remittance bank details, or onboard new landlords directly.
+                  Manage registered property owners, view their remittance bank details, or onboard new property owners directly.
                 </p>
               </div>
 
@@ -1593,7 +1672,7 @@ export default function AdminPortal({ onReturnHome }) {
                 className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase rounded-xl shadow-sm hover:brightness-105 flex items-center space-x-1"
               >
                 <Plus className="w-4 h-4" />
-                <span>Create Landlord Account</span>
+                <span>Register Property Owner</span>
               </button>
             </div>
 
@@ -1650,7 +1729,7 @@ export default function AdminPortal({ onReturnHome }) {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
                   <tr>
-                    <th className="p-3">Client / Landlord</th>
+                    <th className="p-3">Client / Property Owner</th>
                     <th className="p-3">Contact Email &amp; Phone</th>
                     <th className="p-3">Remittance Bank &amp; Account</th>
                     <th className="p-3">Assigned Property</th>
@@ -1709,7 +1788,7 @@ export default function AdminPortal({ onReturnHome }) {
                 <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
-                      <h4 className="font-serif text-lg font-bold text-slate-950">Create Landlord Account</h4>
+                      <h4 className="font-serif text-lg font-bold text-slate-950">Register Property Owner</h4>
                       <p className="text-[11px] text-slate-500">Registers client directly on Supabase and creates portal access.</p>
                     </div>
                     <button onClick={() => setShowAddOwnerModal(false)} className="text-slate-400 hover:text-slate-700">✕</button>
@@ -1717,7 +1796,7 @@ export default function AdminPortal({ onReturnHome }) {
 
                   <form onSubmit={handleCreateOwner} className="space-y-3.5 text-xs">
                     <div>
-                      <label className="block font-bold text-slate-900 mb-1">Landlord Full Name</label>
+                      <label className="block font-bold text-slate-900 mb-1">Property Owner Full Name</label>
                       <input
                         type="text"
                         required
@@ -1834,7 +1913,7 @@ export default function AdminPortal({ onReturnHome }) {
                         type="submit"
                         className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105"
                       >
-                        Create Client Account
+                        Register Property Owner
                       </button>
                     </div>
                   </form>
@@ -1913,6 +1992,237 @@ export default function AdminPortal({ onReturnHome }) {
                 Update Admin Password
               </button>
             </form>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE 6: WEBSITE TRAFFIC & DAILY VIEWS                    */}
+        {/* ========================================================= */}
+        {activeModule === 'traffic' && (
+          <div className="space-y-6">
+            
+            {/* Header & Actions */}
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <BarChart3 className="w-5 h-5 text-gold-600" />
+                  <span>Website Traffic &amp; Daily Views Analytics</span>
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Live tracking of daily pageviews, visitor sessions, and article reader engagement.
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2.5">
+                <button
+                  onClick={handleRefreshTraffic}
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-colors flex items-center space-x-1.5"
+                  title="Refresh counts"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Refresh</span>
+                </button>
+
+                <button
+                  onClick={handleSimulateVisitor}
+                  className="px-3.5 py-2 bg-gold-gradient hover:brightness-105 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-all flex items-center space-x-1.5"
+                  title="Record a test pageview to verify the counter immediately"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Test Visitor View (+1)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 14-Day Visual Pageview Bar Chart */}
+            <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                <div>
+                  <h4 className="font-bold text-sm text-slate-950 flex items-center space-x-2">
+                    <Activity className="w-4 h-4 text-gold-600" />
+                    <span>Daily Pageviews (Past 14 Days)</span>
+                  </h4>
+                  <p className="text-xs text-slate-600">Shows daily website views recorded per day</p>
+                </div>
+                <div className="flex items-center space-x-4 text-xs">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full bg-gold-gradient inline-block shadow-sm"></span>
+                    <span className="text-slate-800 font-bold">Today</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full bg-slate-800 inline-block"></span>
+                    <span className="text-slate-700 font-medium">Previous Days</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Graphical Bars */}
+              {(() => {
+                const history = trafficStats?.history || [];
+                const maxViews = Math.max(...history.map(h => h.views), 10);
+
+                return (
+                  <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 sm:gap-3 items-end pt-4 pb-2 overflow-x-auto">
+                    {history.map((day, idx) => {
+                      const heightPercent = Math.max(Math.round((day.views / maxViews) * 100), 8);
+                      return (
+                        <div key={idx} className="flex flex-col items-center space-y-2 group min-w-[38px]">
+                          {/* Exact View Number Tooltip / Label */}
+                          <span className={`text-[11px] font-extrabold transition-all ${
+                            day.isToday ? 'text-amber-700 font-black scale-110' : 'text-slate-800 group-hover:text-slate-950'
+                          }`}>
+                            {day.views}
+                          </span>
+
+                          {/* Bar Container */}
+                          <div className="w-full h-44 bg-slate-100 rounded-xl p-1 flex items-end justify-center border border-slate-200/70 group-hover:border-gold-500/50 transition-colors">
+                            <div
+                              style={{ height: `${heightPercent}%` }}
+                              className={`w-full rounded-lg transition-all duration-500 flex items-center justify-center ${
+                                day.isToday
+                                  ? 'bg-gold-gradient shadow-md border border-amber-300'
+                                  : 'bg-slate-800 group-hover:bg-slate-700'
+                              }`}
+                            ></div>
+                          </div>
+
+                          {/* Day & Date Labels */}
+                          <div className="text-center">
+                            <p className={`text-[11px] font-bold ${day.isToday ? 'text-amber-800 font-extrabold' : 'text-slate-800'}`}>
+                              {day.dayName}
+                            </p>
+                            <p className="text-[10px] text-slate-600">
+                              {day.shortDate.split(' ')[0]}
+                            </p>
+                            {day.isToday && (
+                              <span className="inline-block mt-0.5 text-[8px] font-extrabold uppercase px-1 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                                Today
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Daily History Table & Traffic Insights Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Daily Log Table (2 Cols) */}
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                  <h4 className="font-bold text-sm text-slate-950">Daily Pageview Log</h4>
+                  <span className="text-xs text-slate-600 font-medium">Past 14 Days</span>
+                </div>
+
+                <div className="overflow-x-auto max-h-96">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200 sticky top-0">
+                      <tr>
+                        <th className="p-3">Date</th>
+                        <th className="p-3">Day</th>
+                        <th className="p-3 text-right">Pageviews</th>
+                        <th className="p-3 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(trafficStats?.history || []).slice().reverse().map((day, idx) => (
+                        <tr key={idx} className={`hover:bg-slate-50 ${day.isToday ? 'bg-amber-50/60 font-semibold' : ''}`}>
+                          <td className="p-3 font-medium text-slate-950">
+                            {day.date}
+                          </td>
+                          <td className="p-3 text-slate-800">
+                            {day.dayName} ({day.shortDate})
+                          </td>
+                          <td className="p-3 text-right">
+                            <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-extrabold ${
+                              day.isToday 
+                                ? 'bg-gold-gradient text-slate-950 shadow-sm' 
+                                : 'bg-slate-100 text-slate-900'
+                            }`}>
+                              {day.views} views
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">
+                            {day.isToday ? (
+                              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                Active Today
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-600 font-medium">
+                                Recorded
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Traffic Sources & Article Share Attribution */}
+              <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-5 space-y-5">
+                <div>
+                  <h4 className="font-bold text-sm text-slate-950 flex items-center space-x-1.5">
+                    <Sparkles className="w-4 h-4 text-gold-600" />
+                    <span>Article Sharing &amp; Reach</span>
+                  </h4>
+                  <p className="text-xs text-slate-600 mt-1">
+                    How article sharing expands website traffic.
+                  </p>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 space-y-1.5">
+                    <p className="font-bold text-slate-950 flex items-center space-x-1">
+                      <Send className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Direct Article Sharing</span>
+                    </p>
+                    <p className="text-[11px] text-slate-700 leading-relaxed">
+                      Every published article now features one-click sharing for <strong>WhatsApp</strong>, <strong>Twitter/X</strong>, <strong>LinkedIn</strong>, and direct link copying.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <p className="font-bold text-slate-950 flex items-center space-x-1">
+                      <Eye className="w-3.5 h-3.5 text-gold-600" />
+                      <span>Direct URL Inbound Readers</span>
+                    </p>
+                    <p className="text-[11px] text-slate-700 leading-relaxed">
+                      Shared links automatically navigate visitors directly to the article modal and increment the daily website pageview counter.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                    <p className="font-bold text-slate-950">Top Visited Website Sections</p>
+                    <div className="space-y-1.5 text-[11px] text-slate-700">
+                      <div className="flex justify-between">
+                        <span>1. Homepage &amp; Showcase</span>
+                        <strong className="text-slate-900">42%</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>2. Property Listings</span>
+                        <strong className="text-slate-900">28%</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>3. Knowledge Hub / Blog</span>
+                        <strong className="text-slate-900">18%</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>4. Property Owner Portal</span>
+                        <strong className="text-slate-900">12%</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         )}
 

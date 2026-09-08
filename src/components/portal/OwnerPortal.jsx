@@ -11,7 +11,7 @@ import { companyData } from '../../data/companyData';
 import StatementPrintView from './StatementPrintView';
 
 export default function OwnerPortal({ onReturnHome }) {
-  const { profile, logout, isDemo } = useAuth();
+  const { profile, logout } = useAuth();
 
   // Data states
   const [properties, setProperties] = useState([]);
@@ -128,7 +128,7 @@ export default function OwnerPortal({ onReturnHome }) {
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Managed Portfolio of {profile?.full_name || 'Chief Babatunde Alabi'}
+                Managed Portfolio of {profile?.full_name || 'Chief Adeleke Balogun'}
               </p>
             </div>
           </div>
@@ -179,11 +179,6 @@ export default function OwnerPortal({ onReturnHome }) {
               <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
                 Asset Protection &amp; Remittance Active
               </span>
-              {isDemo && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] font-bold border border-gold-500/30">
-                  Interactive Demo Mode
-                </span>
-              )}
             </div>
             <p className="text-sm text-slate-300">
               Direct Remittance Bank: <strong className="text-white">{profile?.bank_name || 'Zenith Bank PLC'}</strong> (Account: <strong className="text-amber-200">{profile?.account_number || '•••••••• 4812'}</strong>)
