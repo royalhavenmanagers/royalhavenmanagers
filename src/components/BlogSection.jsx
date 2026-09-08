@@ -22,12 +22,21 @@ export default function BlogSection({ onOpenContact }) {
     const published = blogStore.getPublishedPosts();
     setPosts(published);
 
-    // Check URL parameters for direct article linking (e.g. ?article=slug)
+    // Check URL parameters and hash for direct article linking (e.g. ?article=slug or #article/slug)
     const checkDirectLink = (postList) => {
       const params = new URLSearchParams(window.location.search);
-      const articleParam = params.get('article');
-      if (articleParam && postList.length > 0) {
-        const found = postList.find(p => p.slug === articleParam || p.id === articleParam);
+      let targetSlug = params.get('article');
+
+      if (!targetSlug && window.location.hash) {
+        if (window.location.hash.startsWith('#article/')) {
+          targetSlug = window.location.hash.replace('#article/', '');
+        } else if (window.location.hash.startsWith('#blog/')) {
+          targetSlug = window.location.hash.replace('#blog/', '');
+        }
+      }
+
+      if (targetSlug && postList && postList.length > 0) {
+        const found = postList.find(p => p.slug === targetSlug || p.id === targetSlug);
         if (found) {
           setActivePost(found);
         }
@@ -36,6 +45,12 @@ export default function BlogSection({ onOpenContact }) {
 
     checkDirectLink(published);
 
+    const onHashOrPop = () => {
+      checkDirectLink(published);
+    };
+    window.addEventListener('hashchange', onHashOrPop);
+    window.addEventListener('popstate', onHashOrPop);
+
     blogStore.fetchPostsAsync().then((allPosts) => {
       if (allPosts && allPosts.length > 0) {
         const activeOnly = allPosts.filter(p => p.status === 'published');
@@ -43,6 +58,11 @@ export default function BlogSection({ onOpenContact }) {
         checkDirectLink(activeOnly);
       }
     });
+
+    return () => {
+      window.removeEventListener('hashchange', onHashOrPop);
+      window.removeEventListener('popstate', onHashOrPop);
+    };
   }, []);
 
   const getArticleShareUrl = (post) => {

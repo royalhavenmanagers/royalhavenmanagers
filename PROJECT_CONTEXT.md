@@ -10,7 +10,7 @@
 * **Slogan**: *"Building Trust. Managing Excellence. Creating Value."*
 * **Core Geographic Focus**: Lagos State (Lekki Peninsula, Victoria Island, Ikoyi, Ikeja GRA, Magodo GRA) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
 * **Executive Leadership**:
-  * **CEO & Managing Director**: Ibrahim Ridwan Olasunkanmi
+  * **CEO & Managing Director**: Ibrahim Ridwan Olasunkanmi (Sole Executive MD & CEO)
 * **Official Contact**:
   * **Phones**: `+234 815 378 5297`, `+234 812 085 0733`
   * **WhatsApp Concierge**: `+234 815 378 5297` (`2348153785297`)
@@ -29,66 +29,75 @@
 1. **Public Marketing Website**: `https://www.royalhaven.com.ng/`
 2. **Property Owner Portal**: `https://www.royalhaven.com.ng/#portal` (or `/portal`)
 3. **Staff Admin Portal**: `https://www.royalhaven.com.ng/#admin` (or `/admin`)
-   * **Admin Password**: `royalhaven2026`
+   * **Admin Master Password**: `royalhaven2026`
+4. **Direct Article Deep Links**:
+   * Format A: `https://www.royalhaven.com.ng/?article=slug#blog`
+   * Format B: `https://www.royalhaven.com.ng/#article/slug`
 
 ---
 
 ## 3. Database & Backend Architecture (Supabase)
 * **Supabase Project URL**: `https://pspftbflzfkbpndvhike.supabase.co`
-* **Environment Variables**:
-  * `VITE_SUPABASE_URL`: `https://pspftbflzfkbpndvhike.supabase.co`
-  * `VITE_SUPABASE_ANON_KEY`: In `.env` (public client-side key)
+* **Environment Variables & Safe Fallbacks**:
+  * Configured in `src/lib/supabaseClient.js` with hardcoded public fallbacks to ensure Vercel production deployments never fail due to missing `.env` files.
 * **SQL Schema Files**:
-  * `supabase_schema_portal.sql`: The primary 11-table enterprise schema + RLS policies + security functions. **Executed and verified live in cloud** (all tables return HTTP 200).
+  * `supabase_schema_portal.sql`: The primary 11-table enterprise schema + RLS policies + security functions.
   * `supabase_schema.sql`: Initial public schema for blog posts and inquiries.
 
 ### Entity Hierarchy:
 $$\text{Owner} \longrightarrow \text{Property} \longrightarrow \text{Unit} \longrightarrow \text{Tenant} \longrightarrow \text{Lease} \longrightarrow \text{Transaction / Remittance} \longrightarrow \text{Maintenance} \longrightarrow \text{Inspection} \longrightarrow \text{Document}$$
 
 ### Relational Tables:
-1. `profiles`: Extends Supabase `auth.users` with roles (`super_admin`, `property_manager`, `accountant`, `maintenance_staff`, `property_owner`, `tenant`) and bank account info.
-2. `portal_properties`: Managed multi-family complexes, estates, and single-family terraces.
-3. `property_owners`: Junction table mapping owners to properties (supports multi-property owners and co-ownership).
-4. `units`: Individual flats/apartments with rent amounts, service charges, bed/bath count, and status (`occupied`, `vacant`, `maintenance`).
-5. `tenants`: Vetted tenant details, phone numbers, and status.
+1. `profiles`: Extends Supabase `auth.users` with roles (`property_owner`, `property_manager`, `super_admin`) and bank remittance accounts.
+2. `portal_properties`: Managed residential complexes, blocks of flats, and terraces.
+3. `property_owners`: Junction table mapping owners to properties.
+4. `units`: Individual apartments with rent amounts, service charges, bed/bath counts, and status (`occupied`, `vacant`).
+5. `tenants`: Vetted tenant details, phone numbers, and lease statuses.
 6. `leases`: Annual lease contracts with commencement and expiration dates.
 7. `transactions`: Detailed financial ledger with itemized deductions:
    * Gross Rent Collected
    * Royal Haven Professional Management Fee (10%)
    * Audited Maintenance Deductions
-   * Net Remitted to Landlord
+   * Net Remitted to Property Owner
    * NIP Interbank Reference Codes
-8. `maintenance_requests`: Supervised repairs with before/after photos, vetted artisan names, audited costs, and status badges.
-9. `inspections`: Routine physical condition checks, manager field notes, and site photos.
-10. `documents`: Encrypted document vault for C of O, Governor's Consent, Survey Plans, and Tenancy Agreements.
-11. `audit_logs`: Immutable security audit trail tracking administrative actions.
-12. `posts`: CMS for Royal Haven real estate insights & blog articles.
-13. `inquiries`: Lead inbox storing consultation requests submitted via the website.
-
-### Row Level Security (RLS) & Isolation:
-* Strict PostgreSQL RLS policies enforce that property owners can **only** view records linked to their assigned properties via `property_owners`:
-  ```sql
-  CREATE POLICY "Owners view assigned properties" ON portal_properties
-      FOR SELECT USING (is_owner_of_property(id) OR is_staff());
-  ```
-* Functions `is_staff()` and `is_owner_of_property(prop_id)` use `SECURITY DEFINER` to guarantee tamper-proof database-level isolation.
+8. `maintenance_requests`: Supervised repairs with before/after photos, artisan names, and audited costs.
+9. `inspections`: Routine physical condition checks and manager field notes.
+10. `documents`: Encrypted document vault for C of O, Survey Plans, and Tenancy Agreements.
+11. `posts`: CMS for Royal Haven real estate insights & educational articles.
+12. `inquiries`: Consultation leads submitted via the website.
 
 ---
 
-## 4. Dual-Mode Authentication & Demo Fallback
+## 4. Property Owner Authentication (100% Real Accounts)
 Implemented in `src/context/AuthContext.jsx` and `src/components/portal/OwnerLogin.jsx`:
-1. **Live Cloud Authentication**:
-   * Uses Supabase Auth (`supabase.auth.signInWithPassword`).
-   * Password reset requests trigger Supabase's transactional email service directly from the login modal.
-2. **Instant Interactive Demo Mode**:
-   * Designed for immediate client evaluation without setting up a new Supabase user.
-   * **Credentials**: `owner@royalhaven.com.ng` / `demo1234`
-   * **Profile**: Chief Adeleke Balogun (Zenith Bank PLC: `•••••••• 4812`).
-   * Seeded with realistic showcase properties in **Ikeja GRA** (Royal Crest Heights) and **Magodo GRA Phase 2** (Haven Terraces).
+* **Zero Demo Accounts**: No mock logins, no prefill buttons, and no fake accounts.
+* **Instant Verification**: When a property owner registers (`Full Name`, `Email`, `Phone`, `Password`, `Bank Name`, `Account Number`, `Account Name`), the account is created and verified immediately.
+* **No Email Verification Blocker**: Prevents users from being locked out by missing email confirmations or third-party SMTP limits.
+* **Automatic Cloud Sync**: Syncs with Supabase in the background while keeping full local persistence.
+* **Admin Registration**: The Master Admin can also register client accounts in `#admin` and send them their login credentials directly.
 
 ---
 
-## 5. UI/UX, Typography & Design Tokens
+## 5. Article Sharing & Deep Linking Engine
+Implemented in `src/components/BlogSection.jsx`:
+* **Share Toolbar**: Every article includes one-click sharing for:
+  * **WhatsApp**: Formatted message with article title and direct link.
+  * **Twitter / X**: Pre-composed tweet with title and link.
+  * **LinkedIn**: Direct URL sharing to professional networks.
+  * **Copy Direct Link**: Interactive button with a "Link Copied!" toast.
+* **Deep Linking**: Supports both `?article=slug#blog` and `#article/slug`. Visiting the link opens the article modal directly in full-reading view.
+
+---
+
+## 6. Website Traffic & Analytics (`analyticsStore.js`)
+* **Tracking**: Automatically records daily pageviews and visitor sessions upon website entry.
+* **Admin Dashboard Integration** (`AdminPortal.jsx`):
+  * **Top Metrics Ribbon**: Displays Today's Pageviews (Live badge), Yesterday's Views, Past 7 Days Total, and All-Time Views.
+  * **Dedicated Traffic Tab**: Displays a 14-day graphical bar chart highlighting today's traffic in gold, a daily log table with percentage breakdowns, and a "Test Visitor View (+1)" simulator button.
+
+---
+
+## 7. UI/UX, Typography & Design Tokens
 * **Typography**:
   * **Headings**: `Playfair Display` & `Cinzel` (Google Fonts) — gives a regal, established luxury impression.
   * **Body & Numbers**: `Plus Jakarta Sans` — modern, crisp, and legible across all devices.
@@ -98,38 +107,16 @@ Implemented in `src/context/AuthContext.jsx` and `src/components/portal/OwnerLog
   * **Emerald**: Completed status badges, verified remittances.
   * **Amber**: Expiration alerts, pending items.
 * **Print-to-PDF Engine (`StatementPrintView.jsx`)**:
-  * Avoids heavy external PDF libraries (e.g. `jspdf` or `html2pdf`) to keep bundles data-lean.
-  * Implements clean CSS `@media print` rules: renders an official statement with Royal Haven letterhead, CAC registration info, itemized deductions, and Managing Director Ibrahim Ridwan Olasunkanmi's executive sign-off.
+  * Clean CSS `@media print` rules render official statements with Royal Haven letterhead, CAC registration info, itemized deductions, and Managing Director Ibrahim Ridwan Olasunkanmi's executive sign-off.
 
 ---
 
-## 6. Admin Portal Capabilities (`AdminPortal.jsx`)
-Password: `royalhaven2026`
-1. **Articles / Blog CMS**: Create, edit, image-compress, and publish articles.
-2. **Property Listings**: Add and manage properties displayed on the public portfolio slider.
-3. **Consultation Leads Inbox**: View incoming website leads, mark as contacted, and follow up via direct WhatsApp link.
-4. **Owner Remittance Recorder**: Record new rent remittances that immediately post into the Owner Portal ledger.
-5. **Landlord Accounts Management**: View all registered property owner client accounts, their bank remittance details, create new accounts for clients directly, copy login credentials, or send login details to the client via WhatsApp.
-6. **Security Module**: Update the master admin password.
-
----
-
-## 7. Key Constraints & Design Rationale
-1. **₦0 / $0 Email Strategy**: Client explicitly requested no paid professional email overhead. Handled via Supabase transactional email + pre-filled WhatsApp concierge links.
-2. **Data-Lean / Fast Load**: Kept frontend bundle under 850KB. Compressed all uploaded photos before storing in state/localStorage/cloud.
-3. **No Localhost Requirement from Client**: The user tests directly on production (`https://www.royalhaven.com.ng`). Never tell the user to test on localhost unless they explicitly request it.
-4. **Unambiguous Language**: Avoid developer jargon (e.g., "UUID", "RLS", "mutation") in user-facing UI. Use natural Nigerian real estate terms ("C of O", "Remittance Ledger", "Tenancy File", "Service Charge").
-
----
-
-## 8. Antigravity & Development Quick Reference
+## 8. Development & Deployment Quick Reference
 * **Build Command**: `npm run build` (Vite build, output to `dist/`)
 * **Dev Server**: `npm run dev` (Vite port 5173)
 * **Git Remote**: `origin/main` (`https://github.com/royalhavenmanagers/royalhavenmanagers.git`)
 * **Deployment Workflow**:
-  ```bash
-  git add -A
-  git commit -m "Your descriptive commit message"
-  git push origin main
+  ```powershell
+  git add . ; git commit -m "Your descriptive message" ; git push origin main
   ```
-  Vercel automatically triggers and finishes deployment in ~40 seconds.
+  Vercel automatically triggers and deploys live to `https://www.royalhaven.com.ng`.

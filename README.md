@@ -9,16 +9,17 @@
 * **Legal Entity**: Royal Haven Realty & Property Managers Ltd.
 * **Motto**: *"Building Trust. Managing Excellence. Creating Value."*
 * **Core Operating Zones**: Lagos State (Lekki, Ikoyi, Victoria Island, Ikeja GRA, Magodo) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
-* **Managing Director & CEO**: Ibrahim Ridwan Olasunkanmi
+* **Managing Director & CEO**: Ibrahim Ridwan Olasunkanmi (Sole Executive MD & CEO)
 
 ---
 
 ## 🌐 Live Routes & Access
 | Portal | Live URL | Access Note |
 | :--- | :--- | :--- |
-| **Public Website** | [`royalhaven.com.ng`](https://www.royalhaven.com.ng/) | Portfolio, company brochure, services, leadership |
-| **Owner Portal** | [`royalhaven.com.ng/#portal`](https://www.royalhaven.com.ng/#portal) | Live Supabase login + 1-Click Instant Demo as Chief Alabi |
-| **Staff Admin** | [`royalhaven.com.ng/#admin`](https://www.royalhaven.com.ng/#admin) | Password: `royalhaven2026` (Leads inbox, Remittance recorder, CMS) |
+| **Public Website** | [`royalhaven.com.ng`](https://www.royalhaven.com.ng/) | Portfolio, company profile, services, single MD leadership, knowledge hub |
+| **Owner Portal** | [`royalhaven.com.ng/#portal`](https://www.royalhaven.com.ng/#portal) | Real property owner registration & sign in |
+| **Staff Admin** | [`royalhaven.com.ng/#admin`](https://www.royalhaven.com.ng/#admin) | Password: `royalhaven2026` (Website traffic analytics, leads inbox, remittances, CMS) |
+| **Direct Article Link** | [`royalhaven.com.ng/?article=slug#blog`](https://www.royalhaven.com.ng/?article=slug#blog) | Instant reading modal deep link |
 
 ---
 
@@ -31,18 +32,25 @@
    - Facility Maintenance Log with before/after photos and vetted contractors.
    - Routine Physical Inspection Audits.
    - Encrypted Document Vault (C of O, Tenancy Contracts, Survey Plans).
-2. **Zero-Cost Authentication (`src/context/AuthContext.jsx`)**:
-   - Live Supabase Cloud Auth + Instant Demo fallback.
-   - Free transactional email password reset workflow.
+2. **Real Property Owner Authentication (`src/context/AuthContext.jsx`)**:
+   - 100% Real Account registration & login (zero demo accounts).
+   - Instant activation upon registration without email verification blockers.
    - One-touch WhatsApp Owner Concierge link.
-3. **Database Architecture (`supabase_schema_portal.sql`)**:
+3. **Article Sharing & Knowledge Hub (`src/components/BlogSection.jsx`)**:
+   - Direct link copy with live toast confirmation.
+   - One-click sharing to WhatsApp, Twitter/X, and LinkedIn.
+   - Deep-linking (`?article=slug#blog` and `#article/slug`) for instant article opening.
+4. **Website Traffic & Daily Analytics (`src/data/analyticsStore.js`)**:
+   - Daily pageview tracking (Today, Yesterday, Past 7 Days, and All-Time).
+   - Interactive 14-day graphical bar chart and daily log table in the Admin Portal.
+5. **Database Architecture (`supabase_schema_portal.sql`)**:
    - 11 enterprise relational tables with authentic Row Level Security (RLS) policies.
-   - Verified active on Supabase (`pspftbflzfkbpndvhike.supabase.co`).
+   - Safe fallbacks for zero downtime.
 
 ---
 
 ## 📖 Detailed System Architecture & Context
-For the complete technical specifications, database schema diagrams, RLS rules, and future agent instructions, see:  
+For complete technical specifications, database schema diagrams, and developer instructions, see:  
 👉 **[`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md)**
 
 ---

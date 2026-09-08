@@ -19,9 +19,10 @@ Your canonical website is https://www.royalhaven.com.ng/
 6. Website: https://www.royalhaven.com.ng/
 7. Complete the phone or video verification
 
-
-### 3. Supabase Database Activation
+### 3. Supabase Database Activation (Optional Cloud Sync)
+*Note: The website already works seamlessly with full offline & persistent storage.*
+If you want to sync all tables to your Supabase cloud SQL dashboard:
 1. Go to https://supabase.com/dashboard/project/pspftbflzfkbpndvhike/sql/new
-2. Open supabase_schema.sql from the project
-3. Copy all lines and paste into the Supabase SQL box
-4. Click Run
+2. Open `supabase_schema_portal.sql` from the project root
+3. Copy all lines and paste into the Supabase SQL editor box
+4. Click **Run**
