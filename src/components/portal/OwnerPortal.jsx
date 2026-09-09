@@ -117,6 +117,24 @@ export default function OwnerPortal({ onReturnHome }) {
   return (
     <div className="min-h-screen bg-[#08080A] bg-obsidian-950 text-slate-100 font-sans selection:bg-gold-500 selection:text-slate-950">
       
+      {/* Administrator Live Session Banner */}
+      {profile?.isAdminImpersonating && (
+        <div className="bg-gradient-to-r from-amber-600 via-gold-500 to-amber-600 text-slate-950 font-bold px-4 sm:px-8 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-md border-b border-amber-400">
+          <div className="flex items-center space-x-2">
+            <ShieldCheck className="w-4 h-4 text-slate-950" />
+            <span>Master Admin Access: You are actively managing <strong>{profile?.full_name}</strong>'s portfolio.</span>
+          </div>
+          <button
+            onClick={() => {
+              window.location.hash = '#admin';
+            }}
+            className="px-3.5 py-1 bg-slate-950 text-gold-300 hover:text-white rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+          >
+            ← Return to Admin Portal
+          </button>
+        </div>
+      )}
+
       {/* Top Professional Executive Header */}
       <header className="sticky top-0 z-40 bg-obsidian-900/95 border-b border-gold-500/25 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

@@ -12,29 +12,13 @@ const formatDateKey = (d) => {
   return `${year}-${month}-${day}`;
 };
 
-// Realistic baseline data for the past 14 days so the admin panel has historical context on first load
+// Clean initial data starting strictly at 0 real visits
 const generateInitialData = () => {
-  const byDate = {};
-  let total = 0;
-  const now = new Date();
-
-  // Baseline view counts for past 14 days
-  const baselineWeights = [42, 38, 55, 49, 62, 58, 71, 64, 53, 67, 74, 82, 69, 45];
-
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const dateStr = formatDateKey(d);
-    const count = baselineWeights[13 - i] || 35;
-    byDate[dateStr] = count;
-    total += count;
-  }
-
-  return { total, byDate };
+  return { total: 0, byDate: {} };
 };
 
 export const analyticsStore = {
-  // Record a pageview on site entry
+  // Record a real pageview on site entry
   recordView: () => {
     try {
       const todayStr = formatDateKey(new Date());
@@ -47,7 +31,7 @@ export const analyticsStore = {
         sessionStorage.setItem(SESSION_KEY_VISIT, todayStr);
       }
 
-      // Increment today's count
+      // Increment today's count with real visit
       data.byDate[todayStr] = (data.byDate[todayStr] || 0) + 1;
       data.total = (data.total || 0) + 1;
 
@@ -63,7 +47,14 @@ export const analyticsStore = {
       const saved = localStorage.getItem(STORAGE_KEY_VIEWS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.byDate && typeof parsed.total === 'number') {
+        // Automatically purge old fake baseline weights if previously cached (e.g. baseline totaling ~830 views)
+        if (parsed && parsed.byDate && typeof parsed.total === 'number') {
+          const hasOldFakeWeights = parsed.total >= 100 || Object.values(parsed.byDate).some(v => v >= 35);
+          if (hasOldFakeWeights) {
+            const clean = { total: 1, byDate: { [formatDateKey(new Date())]: 1 } };
+            localStorage.setItem(STORAGE_KEY_VIEWS, JSON.stringify(clean));
+            return clean;
+          }
           return parsed;
         }
       }
@@ -72,6 +63,18 @@ export const analyticsStore = {
       return initial;
     } catch {
       return generateInitialData();
+    }
+  },
+
+  // Reset traffic counter to zero
+  resetData: () => {
+    try {
+      const clean = { total: 0, byDate: {} };
+      localStorage.setItem(STORAGE_KEY_VIEWS, JSON.stringify(clean));
+      sessionStorage.removeItem(SESSION_KEY_VISIT);
+      return clean;
+    } catch {
+      return { total: 0, byDate: {} };
     }
   },
 

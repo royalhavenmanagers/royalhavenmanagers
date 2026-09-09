@@ -3,7 +3,7 @@ import {
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
-  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw
+  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
@@ -11,6 +11,7 @@ import { portalStore } from '../data/portalStore';
 import { analyticsStore } from '../data/analyticsStore';
 import { compressImageFile } from '../utils/imageCompressor';
 import { supabase, authApi } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminPortal({ onReturnHome }) {
   const [isAuth, setIsAuth] = useState(false);
@@ -92,6 +93,10 @@ export default function AdminPortal({ onReturnHome }) {
     assignedProperty: ''
   });
   const [createdOwnerCreds, setCreatedOwnerCreds] = useState(null);
+  const [editingOwner, setEditingOwner] = useState(null);
+  const [showEditOwnerModal, setShowEditOwnerModal] = useState(false);
+
+  const { impersonateOwner } = useAuth();
 
   const [notification, setNotification] = useState('');
   const [trafficStats, setTrafficStats] = useState(null);
@@ -191,6 +196,72 @@ export default function AdminPortal({ onReturnHome }) {
     showNotification(`Account created for ${ownerFormData.fullName}! You can now send them login credentials.`);
   };
 
+  const handleAccessClientPortal = (owner) => {
+    if (impersonateOwner) {
+      impersonateOwner(owner);
+      window.location.hash = '#portal';
+    }
+  };
+
+  const handleOpenEditOwner = (owner) => {
+    setEditingOwner({
+      ...owner,
+      assignedPropertiesText: (owner.assignedProperties || []).join(', ')
+    });
+    setShowEditOwnerModal(true);
+  };
+
+  const handleSaveEditOwner = async (e) => {
+    e.preventDefault();
+    if (!editingOwner) return;
+
+    const assignedPropsArray = editingOwner.assignedPropertiesText
+      ? editingOwner.assignedPropertiesText.split(',').map(s => s.trim()).filter(Boolean)
+      : (editingOwner.assignedProperties || []);
+
+    const updatedPayload = {
+      ...editingOwner,
+      assignedProperties: assignedPropsArray
+    };
+
+    portalStore.updateOwner(editingOwner.id, updatedPayload);
+
+    if (supabase) {
+      try {
+        await supabase.from('profiles').update({
+          full_name: updatedPayload.fullName,
+          phone: updatedPayload.phone,
+          bank_name: updatedPayload.bankName,
+          account_number: updatedPayload.accountNumber,
+          account_name: updatedPayload.accountName,
+          assigned_properties: assignedPropsArray
+        }).eq('email', editingOwner.email);
+      } catch (err) {
+        console.warn("Supabase profile sync notice:", err.message);
+      }
+    }
+
+    setOwners(portalStore.getOwners());
+    setShowEditOwnerModal(false);
+    setEditingOwner(null);
+    showNotification("Property owner account updated successfully!");
+  };
+
+  const handleDeleteOwner = async (owner) => {
+    if (window.confirm(`Are you sure you want to remove the account for ${owner.fullName} (${owner.email})?`)) {
+      portalStore.deleteOwner(owner.id);
+      if (supabase) {
+        try {
+          await supabase.from('profiles').delete().eq('email', owner.email);
+        } catch (err) {
+          console.warn("Supabase profile delete notice:", err.message);
+        }
+      }
+      setOwners(portalStore.getOwners());
+      showNotification(`Account for ${owner.fullName} removed.`);
+    }
+  };
+
   const handleToggleInquiryStatus = (id, currentStatus) => {
     const nextStatus = currentStatus === 'pending' ? 'contacted' : 'pending';
     const updated = portalStore.updateInquiryStatus(id, nextStatus);
@@ -283,10 +354,12 @@ export default function AdminPortal({ onReturnHome }) {
     showNotification("Website traffic stats updated.");
   };
 
-  const handleSimulateVisitor = () => {
-    analyticsStore.recordView();
-    setTrafficStats(analyticsStore.getStats());
-    showNotification("Simulated test visitor recorded (+1 view)!");
+  const handleResetTraffic = () => {
+    if (window.confirm("Are you sure you want to reset the website view count to 0?")) {
+      analyticsStore.resetData();
+      setTrafficStats(analyticsStore.getStats());
+      showNotification("Website traffic counter reset to 0.");
+    }
   };
 
   // -------------------------------------------------------------
@@ -1735,7 +1808,7 @@ export default function AdminPortal({ onReturnHome }) {
                     <th className="p-3">Contact Email &amp; Phone</th>
                     <th className="p-3">Remittance Bank &amp; Account</th>
                     <th className="p-3">Assigned Property</th>
-                    <th className="p-3 text-center">Quick Action</th>
+                    <th className="p-3 text-center">Manage &amp; Direct Access</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -1756,8 +1829,8 @@ export default function AdminPortal({ onReturnHome }) {
                         </div>
                       </td>
                       <td className="p-3 space-y-0.5">
-                        <span className="font-bold text-slate-900 block">{owner.bankName}</span>
-                        <span className="font-mono text-slate-600">{owner.accountNumber}</span>
+                        <span className="font-bold text-slate-900 block">{owner.bankName || '—'}</span>
+                        <span className="font-mono text-slate-600">{owner.accountNumber || '—'}</span>
                         {owner.accountName && <span className="text-[10px] text-slate-400 block truncate">{owner.accountName}</span>}
                       </td>
                       <td className="p-3">
@@ -1766,17 +1839,47 @@ export default function AdminPortal({ onReturnHome }) {
                         </span>
                       </td>
                       <td className="p-3 text-center">
-                        <a
-                          href={`https://wa.me/${(owner.phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                            `Hello ${owner.fullName}, this is Royal Haven Property Management regarding your portfolio.`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 bg-slate-900 text-gold-400 hover:bg-gold-gradient hover:text-slate-950 rounded-lg text-xs font-bold transition-all inline-flex items-center space-x-1"
-                        >
-                          <Send className="w-3 h-3" />
-                          <span>WhatsApp</span>
-                        </a>
+                        <div className="flex items-center justify-center space-x-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleAccessClientPortal(owner)}
+                            className="px-2.5 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 shadow-xs cursor-pointer"
+                            title={`Open ${owner.fullName}'s Owner Portal`}
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Enter Portal</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditOwner(owner)}
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            title="Edit owner account details"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+
+                          <a
+                            href={`https://wa.me/${(owner.phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                              `Hello ${owner.fullName}, this is Royal Haven Property Management regarding your portfolio.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-all inline-flex items-center"
+                            title="Message on WhatsApp"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteOwner(owner)}
+                            className="p-1.5 bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            title="Delete owner account"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1924,6 +2027,217 @@ export default function AdminPortal({ onReturnHome }) {
                 </div>
               </div>
             )}
+
+            {/* Modal to Edit Client Account & Override Details */}
+            {showEditOwnerModal && editingOwner && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-serif text-lg font-bold text-slate-950">Edit Client Account</h4>
+                        <span className="px-2 py-0.5 bg-gold-100 text-gold-800 text-[10px] font-bold rounded-full border border-gold-300 uppercase">
+                          Admin Master Override
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">Update client profile, login credentials, banking details, or property assignments.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setShowEditOwnerModal(false); setEditingOwner(null); }}
+                      className="text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Direct Impersonation Quick-Jump */}
+                  <div className="bg-slate-950 text-slate-100 rounded-xl p-3 flex items-center justify-between gap-3 border border-gold-500/30">
+                    <div>
+                      <span className="text-[11px] font-bold text-gold-400 block uppercase tracking-wider">Direct Portal Access</span>
+                      <p className="text-[11px] text-slate-300">Open client dashboard as this user right now</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEditOwnerModal(false);
+                        handleAccessClientPortal(editingOwner);
+                      }}
+                      className="px-3 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 shadow-sm cursor-pointer whitespace-nowrap"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Launch Dashboard</span>
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveEditOwner} className="space-y-3.5 text-xs">
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingOwner.fullName || ''}
+                        onChange={(e) => setEditingOwner(prev => ({ ...prev, fullName: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Email Address (Login)</label>
+                        <input
+                          type="email"
+                          required
+                          value={editingOwner.email || ''}
+                          onChange={(e) => setEditingOwner(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">
+                          Reset / New Password
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Leave blank or type new"
+                          value={editingOwner.password || ''}
+                          onChange={(e) => setEditingOwner(prev => ({ ...prev, password: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={editingOwner.phone || ''}
+                        onChange={(e) => setEditingOwner(prev => ({ ...prev, phone: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 space-y-2">
+                      <span className="font-bold text-slate-900 block text-[11px] uppercase text-gold-700">
+                        Remittance Bank Account Details
+                      </span>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-0.5">Bank Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Zenith Bank"
+                            value={editingOwner.bankName || ''}
+                            onChange={(e) => setEditingOwner(prev => ({ ...prev, bankName: e.target.value }))}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-0.5">Account Number</label>
+                          <input
+                            type="text"
+                            placeholder="10-digit number"
+                            maxLength={10}
+                            value={editingOwner.accountNumber || ''}
+                            onChange={(e) => setEditingOwner(prev => ({ ...prev, accountNumber: e.target.value }))}
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Account Name</label>
+                        <input
+                          type="text"
+                          placeholder="Account Name"
+                          value={editingOwner.accountName || ''}
+                          onChange={(e) => setEditingOwner(prev => ({ ...prev, accountName: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 block text-[11px] uppercase text-gold-700">
+                          Assigned Properties (Portfolio)
+                        </span>
+                        <span className="text-[10px] text-slate-400">Click pills to add/remove</span>
+                      </div>
+
+                      {/* Quick Toggle Pills from Active Properties */}
+                      {properties && properties.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-slate-50 rounded-xl border border-slate-200">
+                          {properties.map(p => {
+                            const pTitle = p.name || p.title;
+                            const currentList = editingOwner.assignedPropertiesText
+                              ? editingOwner.assignedPropertiesText.split(',').map(s => s.trim()).filter(Boolean)
+                              : (editingOwner.assignedProperties || []);
+                            const isAssigned = currentList.some(item => item.toLowerCase() === pTitle.toLowerCase());
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  let next;
+                                  if (isAssigned) {
+                                    next = currentList.filter(item => item.toLowerCase() !== pTitle.toLowerCase());
+                                  } else {
+                                    next = [...currentList, pTitle];
+                                  }
+                                  setEditingOwner(prev => ({
+                                    ...prev,
+                                    assignedProperties: next,
+                                    assignedPropertiesText: next.join(', ')
+                                  }));
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                  isAssigned
+                                    ? 'bg-gold-500 text-slate-950 shadow-xs'
+                                    : 'bg-white text-slate-600 border border-slate-200 hover:border-gold-400'
+                                }`}
+                              >
+                                {isAssigned ? '✓ ' : '+ '}{pTitle}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Assigned Property Names (Comma-separated)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Lekki Luxury Villa, Ikoyi Penthouse"
+                          value={editingOwner.assignedPropertiesText || ''}
+                          onChange={(e) => setEditingOwner(prev => ({ ...prev, assignedPropertiesText: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none font-mono text-[11px]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => { setShowEditOwnerModal(false); setEditingOwner(null); }}
+                        className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 transition-all shadow-sm cursor-pointer"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -2028,12 +2342,12 @@ export default function AdminPortal({ onReturnHome }) {
                 </button>
 
                 <button
-                  onClick={handleSimulateVisitor}
-                  className="px-3.5 py-2 bg-gold-gradient hover:brightness-105 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-all flex items-center space-x-1.5"
-                  title="Record a test pageview to verify the counter immediately"
+                  onClick={handleResetTraffic}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-300 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer"
+                  title="Reset traffic count to 0"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Test Visitor View (+1)</span>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Counter (0)</span>
                 </button>
               </div>
             </div>

@@ -262,6 +262,32 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_AUTH_USER);
   };
 
+  // Allows Admin to directly enter and manage any owner's portal
+  const impersonateOwner = (owner) => {
+    const activeUser = {
+      id: owner.id,
+      email: owner.email
+    };
+    const activeProfile = {
+      id: owner.id,
+      email: owner.email,
+      full_name: owner.fullName,
+      phone: owner.phone || '',
+      role: 'property_owner',
+      bank_name: owner.bankName || '',
+      account_number: owner.accountNumber || '',
+      account_name: owner.accountName || owner.fullName,
+      assignedProperties: owner.assignedProperties || [],
+      isAdminImpersonating: true
+    };
+    setUser(activeUser);
+    setProfile(activeProfile);
+    localStorage.setItem(
+      STORAGE_AUTH_USER,
+      JSON.stringify({ user: activeUser, profile: activeProfile })
+    );
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -271,7 +297,8 @@ export function AuthProvider({ children }) {
       loading,
       login,
       signup,
-      logout
+      logout,
+      impersonateOwner
     }}>
       {children}
     </AuthContext.Provider>

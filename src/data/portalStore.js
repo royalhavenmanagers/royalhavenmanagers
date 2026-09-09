@@ -271,5 +271,23 @@ export const portalStore = {
       return found;
     }
     return null;
+  },
+
+  updateOwner: (id, updatedData) => {
+    const list = portalStore.getOwners();
+    const idx = list.findIndex(o => o.id === id || (updatedData.email && o.email?.toLowerCase().trim() === updatedData.email?.toLowerCase().trim()));
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...updatedData };
+      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
+      return list[idx];
+    }
+    return null;
+  },
+
+  deleteOwner: (id) => {
+    const list = portalStore.getOwners();
+    const updated = list.filter(o => o.id !== id);
+    localStorage.setItem("royalhaven_portal_owners", JSON.stringify(updated));
+    return updated;
   }
 };
