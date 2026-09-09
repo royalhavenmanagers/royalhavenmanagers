@@ -33,13 +33,23 @@ export default function OwnerPortal({ onReturnHome }) {
   const [selectedUnitDetail, setSelectedUnitDetail] = useState(null);
 
   useEffect(() => {
-    // Load data from store
-    setProperties(portalStore.getProperties());
-    setTransactions(portalStore.getTransactions());
-    setMaintenance(portalStore.getMaintenance());
-    setInspections(portalStore.getInspections());
-    setDocuments(portalStore.getDocuments());
-  }, []);
+    // Load real properties from store
+    const allProps = portalStore.getProperties();
+    const assigned = profile?.assignedProperties || [];
+    
+    // An owner sees their assigned properties; admins see all; new owners without assignments see onboarding state
+    const ownerProps = assigned.length > 0
+      ? allProps.filter(p => assigned.some(a => a && (a.toLowerCase().includes(p.name?.toLowerCase()) || p.id === a)))
+      : (profile?.role === 'super_admin' ? allProps : []);
+
+    setProperties(ownerProps);
+    const propIds = new Set(ownerProps.map(p => p.id));
+
+    setTransactions(portalStore.getTransactions().filter(t => propIds.has(t.propertyId)));
+    setMaintenance(portalStore.getMaintenance().filter(m => propIds.has(m.propertyId)));
+    setInspections(portalStore.getInspections().filter(i => propIds.has(i.propertyId)));
+    setDocuments(portalStore.getDocuments().filter(d => propIds.has(d.propertyId)));
+  }, [profile]);
 
   // Format currency helper
   const formatNaira = (amount) => {
@@ -128,7 +138,7 @@ export default function OwnerPortal({ onReturnHome }) {
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Managed Portfolio of {profile?.full_name || 'Chief Adeleke Balogun'}
+                Managed Portfolio of {profile?.full_name || 'Property Owner'}
               </p>
             </div>
           </div>
@@ -171,35 +181,97 @@ export default function OwnerPortal({ onReturnHome }) {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Banner with Remittance Account & Quick Property Selector */}
-        <div className="glass-card p-4 sm:p-6 border-gold-glow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                Asset Protection &amp; Remittance Active
-              </span>
+        {properties.length === 0 ? (
+          <div className="glass-card p-8 sm:p-12 border-gold-glow text-center space-y-6 max-w-2xl mx-auto my-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-gold-500 to-amber-600 p-0.5 shadow-gold-md mx-auto">
+              <div className="w-full h-full bg-obsidian-950 rounded-[14px] flex items-center justify-center">
+                <Building2 className="w-8 h-8 text-amber-300" />
+              </div>
             </div>
-            <p className="text-sm text-slate-300">
-              Direct Remittance Bank: <strong className="text-white">{profile?.bank_name || 'Zenith Bank PLC'}</strong> (Account: <strong className="text-amber-200">{profile?.account_number || '•••••••• 4812'}</strong>)
-            </p>
-          </div>
 
-          {/* Property Selector Dropdown */}
-          <div className="flex items-center space-x-2 w-full md:w-auto">
-            <Filter className="w-4 h-4 text-amber-400 shrink-0" />
-            <select
-              value={selectedPropertyId}
-              onChange={(e) => setSelectedPropertyId(e.target.value)}
-              className="w-full md:w-64 bg-obsidian-900 border border-gold-500/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500 font-semibold"
-            >
-              <option value="all">All Managed Properties ({properties.length})</option>
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>{p.name} ({p.city})</option>
-              ))}
-            </select>
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gold-500/20 text-amber-300 border border-gold-500/40 inline-block">
+                Account Active &amp; Verified
+              </span>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white">
+                Welcome, {profile?.full_name || 'Property Owner'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+                Your property portfolio is currently being onboarded by the Royal Haven management desk. As soon as your property management agreement is finalized, your active properties, units, tenant lease schedules, verified remittances, and maintenance audits will appear here in real-time.
+              </p>
+            </div>
+
+            <div className="p-4 sm:p-5 rounded-2xl bg-obsidian-900 border border-gold-500/20 text-left space-y-2.5 max-w-md mx-auto text-xs text-slate-300">
+              <p className="font-bold text-amber-300 uppercase tracking-wider text-[11px] flex items-center">
+                <ShieldCheck className="w-4 h-4 mr-1.5 text-gold-500" />
+                Onboarding Steps:
+              </p>
+              <div className="space-y-2 text-[11px]">
+                <div className="flex items-start">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                  <span>Physical property inspection &amp; condition audit</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                  <span>Tenancy contract &amp; tenant screening verification</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                  <span>Automated rent remittance ledger connection</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={`https://wa.me/${companyData.whatsapp}?text=Hello%20Royal%20Haven,%20I%20am%20logged%20into%20my%20Owner%20Portal%20and%20would%20like%20to%20follow%20up%20on%20my%20property%20onboarding.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gold-gradient text-slate-950 font-bold text-xs uppercase tracking-wider hover:brightness-110 shadow-gold-sm transition-all flex items-center justify-center space-x-2 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 text-slate-950" />
+                <span>Chat with Management Desk</span>
+              </a>
+
+              <button
+                onClick={onReturnHome}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-obsidian-800 border border-slate-700 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+              >
+                Return to Website
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Banner with Remittance Account & Quick Property Selector */}
+            <div className="glass-card p-4 sm:p-6 border-gold-glow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Asset Protection &amp; Remittance Active
+                  </span>
+                </div>
+                <p className="text-sm text-slate-300">
+                  Direct Remittance Bank: <strong className="text-white">{profile?.bank_name || 'Not Provided'}</strong> (Account: <strong className="text-amber-200">{profile?.account_number || '—'}</strong>)
+                </p>
+              </div>
+
+              {/* Property Selector Dropdown */}
+              <div className="flex items-center space-x-2 w-full md:w-auto">
+                <Filter className="w-4 h-4 text-amber-400 shrink-0" />
+                <select
+                  value={selectedPropertyId}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
+                  className="w-full md:w-64 bg-obsidian-900 border border-gold-500/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500 font-semibold"
+                >
+                  <option value="all">All Managed Properties ({properties.length})</option>
+                  {properties.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.city})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
         {/* KPI Metrics Summary Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -730,6 +802,8 @@ export default function OwnerPortal({ onReturnHome }) {
               ))}
             </div>
           </div>
+        )}
+          </>
         )}
       </main>
 

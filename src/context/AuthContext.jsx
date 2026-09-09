@@ -21,6 +21,11 @@ export function AuthProvider({ children }) {
         if (saved && mounted) {
           const parsed = JSON.parse(saved);
           if (parsed.user && parsed.profile) {
+            if (parsed.profile.assignedProperties) {
+              parsed.profile.assignedProperties = parsed.profile.assignedProperties.filter(
+                p => !p.includes('Royal Crest') && !p.includes('Haven Terraces')
+              );
+            }
             setUser(parsed.user);
             setProfile(parsed.profile);
             setLoading(false);
@@ -112,10 +117,10 @@ export function AuthProvider({ children }) {
         full_name: registeredOwner.fullName,
         phone: registeredOwner.phone || '',
         role: 'property_owner',
-        bank_name: registeredOwner.bankName || 'Zenith Bank PLC',
+        bank_name: registeredOwner.bankName || '',
         account_number: registeredOwner.accountNumber || '',
         account_name: registeredOwner.accountName || registeredOwner.fullName,
-        assignedProperties: registeredOwner.assignedProperties || ['Royal Crest Heights (Ikeja GRA)']
+        assignedProperties: (registeredOwner.assignedProperties || []).filter(p => !p.includes('Royal Crest') && !p.includes('Haven Terraces'))
       };
 
       setUser(activeUser);
@@ -145,9 +150,10 @@ export function AuthProvider({ children }) {
             email: data.user.email,
             full_name: data.user.user_metadata?.full_name || 'Valued Property Owner',
             role: data.user.user_metadata?.role || 'property_owner',
-            bank_name: data.user.user_metadata?.bank_name || 'Zenith Bank PLC',
+            bank_name: data.user.user_metadata?.bank_name || '',
             account_number: data.user.user_metadata?.account_number || '',
-            account_name: data.user.user_metadata?.account_name || ''
+            account_name: data.user.user_metadata?.account_name || '',
+            assignedProperties: []
           };
           setProfile(activeProfile);
           localStorage.setItem(
@@ -190,10 +196,10 @@ export function AuthProvider({ children }) {
       email: normalizedEmail,
       password: password,
       phone: phone || '',
-      bankName: bankName || 'Zenith Bank PLC',
+      bankName: bankName || '',
       accountNumber: accountNumber || '',
       accountName: accountName || fullName.trim(),
-      assignedProperties: ['Royal Crest Heights (Ikeja GRA)'],
+      assignedProperties: [],
       createdDate: new Date().toISOString().split('T')[0]
     };
 
@@ -211,10 +217,10 @@ export function AuthProvider({ children }) {
       full_name: fullName.trim(),
       phone: phone || '',
       role: 'property_owner',
-      bank_name: bankName || 'Zenith Bank PLC',
+      bank_name: bankName || '',
       account_number: accountNumber || '',
       account_name: accountName || fullName.trim(),
-      assignedProperties: ['Royal Crest Heights (Ikeja GRA)']
+      assignedProperties: []
     };
 
     // Auto-login user immediately

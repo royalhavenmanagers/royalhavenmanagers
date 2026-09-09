@@ -68,13 +68,13 @@ export default function AdminPortal({ onReturnHome }) {
   const [remittances, setRemittances] = useState([]);
   const [showAddRemittanceModal, setShowAddRemittanceModal] = useState(false);
   const [remittanceFormData, setRemittanceFormData] = useState({
-    propertyName: 'Royal Crest Heights',
-    propertyId: 'prop-ikeja-01',
+    propertyName: '',
+    propertyId: '',
     grossRent: '',
     managementFee: '',
     maintenanceCost: '',
-    beneficiaryBank: 'Zenith Bank PLC',
-    beneficiaryAccount: '1014829301',
+    beneficiaryBank: '',
+    beneficiaryAccount: '',
     description: ''
   });
 
@@ -86,10 +86,10 @@ export default function AdminPortal({ onReturnHome }) {
     email: '',
     password: '',
     phone: '',
-    bankName: 'Zenith Bank PLC',
+    bankName: '',
     accountNumber: '',
     accountName: '',
-    assignedProperty: 'Royal Crest Heights'
+    assignedProperty: ''
   });
   const [createdOwnerCreds, setCreatedOwnerCreds] = useState(null);
 
@@ -134,10 +134,10 @@ export default function AdminPortal({ onReturnHome }) {
             fullName: p.full_name || 'Valued Property Owner',
             email: p.email,
             phone: p.phone || '—',
-            bankName: p.bank_name || 'Zenith Bank PLC',
+            bankName: p.bank_name || '—',
             accountNumber: p.account_number || '—',
             accountName: p.account_name || '—',
-            assignedProperties: ['Royal Crest Heights (Ikeja GRA)'],
+            assignedProperties: (p.assigned_properties || []).filter(prop => !prop.includes('Royal Crest') && !prop.includes('Haven Terraces')),
             createdDate: p.created_at ? p.created_at.split('T')[0] : '2026-08-01'
           }));
           setOwners(fromCloud);
@@ -1555,8 +1555,10 @@ export default function AdminPortal({ onReturnHome }) {
                         onChange={(e) => setRemittanceFormData(prev => ({ ...prev, propertyName: e.target.value }))}
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
                       >
-                        <option value="Royal Crest Heights">Royal Crest Heights (Ikeja GRA)</option>
-                        <option value="Haven Terraces">Haven Terraces (Magodo GRA Phase 2)</option>
+                        <option value="">— Select Managed Property —</option>
+                        {properties.map(p => (
+                          <option key={p.id} value={p.name || p.title}>{p.name || p.title} ({p.city || p.location || 'Managed'})</option>
+                        ))}
                       </select>
                     </div>
 
@@ -1760,7 +1762,7 @@ export default function AdminPortal({ onReturnHome }) {
                       </td>
                       <td className="p-3">
                         <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-semibold">
-                          {owner.assignedProperties ? owner.assignedProperties.join(", ") : "Royal Crest Heights"}
+                          {owner.assignedProperties && owner.assignedProperties.length > 0 ? owner.assignedProperties.filter(p => !p.includes('Royal Crest') && !p.includes('Haven Terraces')).join(", ") || "Pending Onboarding" : "Pending Onboarding"}
                         </span>
                       </td>
                       <td className="p-3 text-center">
@@ -1853,8 +1855,10 @@ export default function AdminPortal({ onReturnHome }) {
                           onChange={(e) => setOwnerFormData(prev => ({ ...prev, assignedProperty: e.target.value }))}
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
                         >
-                          <option value="Royal Crest Heights (Ikeja GRA)">Royal Crest Heights (Ikeja GRA)</option>
-                          <option value="Haven Terraces (Magodo GRA)">Haven Terraces (Magodo GRA)</option>
+                          <option value="">— Select Managed Property or Leave Pending —</option>
+                          {properties.map(p => (
+                            <option key={p.id} value={p.name || p.title}>{p.name || p.title} ({p.city || p.location || 'Managed'})</option>
+                          ))}
                         </select>
                       </div>
                     </div>
