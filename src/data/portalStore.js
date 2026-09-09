@@ -275,7 +275,11 @@ export const portalStore = {
 
   updateOwner: (id, updatedData) => {
     const list = portalStore.getOwners();
-    const idx = list.findIndex(o => o.id === id || (updatedData.email && o.email?.toLowerCase().trim() === updatedData.email?.toLowerCase().trim()));
+    const idx = list.findIndex(o => 
+      (id && o.id === id) || 
+      (updatedData.originalEmail && o.email?.toLowerCase().trim() === updatedData.originalEmail?.toLowerCase().trim()) ||
+      (updatedData.email && o.email?.toLowerCase().trim() === updatedData.email?.toLowerCase().trim())
+    );
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...updatedData };
       localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));

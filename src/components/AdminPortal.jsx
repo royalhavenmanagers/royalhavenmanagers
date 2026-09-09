@@ -206,9 +206,27 @@ export default function AdminPortal({ onReturnHome }) {
   const handleOpenEditOwner = (owner) => {
     setEditingOwner({
       ...owner,
+      originalEmail: owner.email,
       assignedPropertiesText: (owner.assignedProperties || []).join(', ')
     });
     setShowEditOwnerModal(true);
+  };
+
+  const handleQuickAddRemittanceForOwner = (owner) => {
+    setShowEditOwnerModal(false);
+    setActiveModule('remittances');
+    const firstAssigned = (owner.assignedProperties && owner.assignedProperties[0]) || '';
+    setRemittanceFormData({
+      propertyName: firstAssigned,
+      propertyId: '',
+      grossRent: '',
+      managementFee: '',
+      maintenanceCost: '',
+      beneficiaryBank: owner.bankName || '',
+      beneficiaryAccount: owner.accountNumber || '',
+      description: `Rent remittance for ${owner.fullName}`
+    });
+    setShowAddRemittanceModal(true);
   };
 
   const handleSaveEditOwner = async (e) => {
@@ -228,14 +246,16 @@ export default function AdminPortal({ onReturnHome }) {
 
     if (supabase) {
       try {
+        const lookupEmail = editingOwner.originalEmail || editingOwner.email;
         await supabase.from('profiles').update({
           full_name: updatedPayload.fullName,
+          email: updatedPayload.email,
           phone: updatedPayload.phone,
           bank_name: updatedPayload.bankName,
           account_number: updatedPayload.accountNumber,
           account_name: updatedPayload.accountName,
           assigned_properties: assignedPropsArray
-        }).eq('email', editingOwner.email);
+        }).eq('email', lookupEmail);
       } catch (err) {
         console.warn("Supabase profile sync notice:", err.message);
       }
@@ -244,7 +264,7 @@ export default function AdminPortal({ onReturnHome }) {
     setOwners(portalStore.getOwners());
     setShowEditOwnerModal(false);
     setEditingOwner(null);
-    showNotification("Property owner account updated successfully!");
+    showNotification(`Account details for ${updatedPayload.fullName} updated!`);
   };
 
   const handleDeleteOwner = async (owner) => {
@@ -1805,10 +1825,10 @@ export default function AdminPortal({ onReturnHome }) {
                 <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
                   <tr>
                     <th className="p-3">Client / Property Owner</th>
-                    <th className="p-3">Contact Email &amp; Phone</th>
+                    <th className="p-3">Login Email &amp; Phone</th>
                     <th className="p-3">Remittance Bank &amp; Account</th>
                     <th className="p-3">Assigned Property</th>
-                    <th className="p-3 text-center">Manage &amp; Direct Access</th>
+                    <th className="p-3 text-center">Manage Account</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -1819,14 +1839,8 @@ export default function AdminPortal({ onReturnHome }) {
                         <span className="text-[10px] text-emerald-700 font-semibold uppercase">Verified Owner</span>
                       </td>
                       <td className="p-3 space-y-0.5">
-                        <div className="flex items-center text-slate-800 font-medium">
-                          <Mail className="w-3.5 h-3.5 text-slate-400 mr-1.5 shrink-0" />
-                          <span>{owner.email}</span>
-                        </div>
-                        <div className="flex items-center text-slate-600">
-                          <Phone className="w-3.5 h-3.5 text-slate-400 mr-1.5 shrink-0" />
-                          <span>{owner.phone}</span>
-                        </div>
+                        <div className="text-slate-900 font-medium">{owner.email}</div>
+                        <div className="text-slate-500 text-[11px]">{owner.phone || '—'}</div>
                       </td>
                       <td className="p-3 space-y-0.5">
                         <span className="font-bold text-slate-900 block">{owner.bankName || '—'}</span>
@@ -1839,24 +1853,22 @@ export default function AdminPortal({ onReturnHome }) {
                         </span>
                       </td>
                       <td className="p-3 text-center">
-                        <div className="flex items-center justify-center space-x-1.5">
+                        <div className="flex items-center justify-center space-x-2">
                           <button
                             type="button"
                             onClick={() => handleAccessClientPortal(owner)}
-                            className="px-2.5 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 shadow-xs cursor-pointer"
+                            className="px-3 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
                             title={`Open ${owner.fullName}'s Owner Portal`}
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>Enter Portal</span>
+                            Enter Portal
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleOpenEditOwner(owner)}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                            title="Edit owner account details"
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all cursor-pointer"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            Edit
                           </button>
 
                           <a
@@ -1865,19 +1877,17 @@ export default function AdminPortal({ onReturnHome }) {
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-all inline-flex items-center"
-                            title="Message on WhatsApp"
+                            className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold transition-all"
                           >
-                            <Send className="w-3.5 h-3.5" />
+                            WhatsApp
                           </a>
 
                           <button
                             type="button"
                             onClick={() => handleDeleteOwner(owner)}
-                            className="p-1.5 bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                            title="Delete owner account"
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-700 rounded-lg text-xs font-medium transition-all cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
                           </button>
                         </div>
                       </td>
@@ -2034,40 +2044,46 @@ export default function AdminPortal({ onReturnHome }) {
                 <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4 max-h-[90vh] overflow-y-auto">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-serif text-lg font-bold text-slate-950">Edit Client Account</h4>
-                        <span className="px-2 py-0.5 bg-gold-100 text-gold-800 text-[10px] font-bold rounded-full border border-gold-300 uppercase">
-                          Admin Master Override
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500">Update client profile, login credentials, banking details, or property assignments.</p>
+                      <h4 className="font-serif text-lg font-bold text-slate-950">Edit Client Account</h4>
+                      <p className="text-[11px] text-slate-500">Change login credentials, profile, and property portfolio.</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => { setShowEditOwnerModal(false); setEditingOwner(null); }}
-                      className="text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                      className="text-slate-400 hover:text-slate-700 font-bold p-1 cursor-pointer text-base"
                     >
                       ✕
                     </button>
                   </div>
 
-                  {/* Direct Impersonation Quick-Jump */}
-                  <div className="bg-slate-950 text-slate-100 rounded-xl p-3 flex items-center justify-between gap-3 border border-gold-500/30">
+                  {/* Direct Impersonation & Actions Bar */}
+                  <div className="bg-slate-950 text-slate-100 rounded-xl p-3.5 flex items-center justify-between gap-3 border border-gold-500/30">
                     <div>
-                      <span className="text-[11px] font-bold text-gold-400 block uppercase tracking-wider">Direct Portal Access</span>
-                      <p className="text-[11px] text-slate-300">Open client dashboard as this user right now</p>
+                      <span className="text-xs font-bold text-amber-300 block">Direct Account Access</span>
+                      <p className="text-[11px] text-slate-400">Open and manage this client's portal in real-time</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowEditOwnerModal(false);
-                        handleAccessClientPortal(editingOwner);
-                      }}
-                      className="px-3 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 shadow-sm cursor-pointer whitespace-nowrap"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Launch Dashboard</span>
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEditOwnerModal(false);
+                          handleQuickAddRemittanceForOwner(editingOwner);
+                        }}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        Add Remittance
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEditOwnerModal(false);
+                          handleAccessClientPortal(editingOwner);
+                        }}
+                        className="px-3 py-1.5 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                      >
+                        Enter Portal
+                      </button>
+                    </div>
                   </div>
 
                   <form onSubmit={handleSaveEditOwner} className="space-y-3.5 text-xs">
@@ -2084,7 +2100,7 @@ export default function AdminPortal({ onReturnHome }) {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-bold text-slate-900 mb-1">Email Address (Login)</label>
+                        <label className="block font-bold text-slate-900 mb-1">Login Email Address</label>
                         <input
                           type="email"
                           required
@@ -2095,15 +2111,25 @@ export default function AdminPortal({ onReturnHome }) {
                       </div>
 
                       <div>
-                        <label className="block font-bold text-slate-900 mb-1">
-                          Reset / New Password
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block font-bold text-slate-900">Login Password</label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const randomPwd = 'RH-' + Math.random().toString(36).slice(-6).toUpperCase();
+                              setEditingOwner(prev => ({ ...prev, password: randomPwd }));
+                            }}
+                            className="text-[10px] text-amber-700 hover:underline font-semibold cursor-pointer"
+                          >
+                            Auto-Generate
+                          </button>
+                        </div>
                         <input
                           type="text"
-                          placeholder="Leave blank or type new"
+                          placeholder="Type new or keep current"
                           value={editingOwner.password || ''}
                           onChange={(e) => setEditingOwner(prev => ({ ...prev, password: e.target.value }))}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:border-gold-500 focus:outline-none font-mono"
                         />
                       </div>
                     </div>
@@ -2165,7 +2191,7 @@ export default function AdminPortal({ onReturnHome }) {
                         <span className="font-bold text-slate-900 block text-[11px] uppercase text-gold-700">
                           Assigned Properties (Portfolio)
                         </span>
-                        <span className="text-[10px] text-slate-400">Click pills to add/remove</span>
+                        <span className="text-[10px] text-slate-400">Click to add/remove</span>
                       </div>
 
                       {/* Quick Toggle Pills from Active Properties */}
@@ -2200,7 +2226,7 @@ export default function AdminPortal({ onReturnHome }) {
                                     : 'bg-white text-slate-600 border border-slate-200 hover:border-gold-400'
                                 }`}
                               >
-                                {isAssigned ? '✓ ' : '+ '}{pTitle}
+                                {pTitle}
                               </button>
                             );
                           })}
