@@ -55,9 +55,6 @@ export default function Navbar({ onOpenContact }) {
               <Lock className="w-3.5 h-3.5 mr-1 text-gold-400" />
               <span>Owner Portal</span>
             </a>
-            <a href="/admin" className="flex items-center text-slate-400 hover:text-slate-200 transition-colors font-medium border-l border-slate-800 pl-4 text-xs">
-              <span>Admin</span>
-            </a>
           </div>
         </div>
       </div>
@@ -177,14 +174,6 @@ export default function Navbar({ onOpenContact }) {
                 className="text-sm font-semibold text-slate-700 hover:text-gold-600 flex items-center space-x-2 py-1"
               >
                 <span>Download Company Profile (PDF)</span>
-              </a>
-
-              <a
-                href="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center space-x-2"
-              >
-                <span>Admin Login</span>
               </a>
             </div>
           </div>
