@@ -23,11 +23,15 @@ export const supabase = isSupabaseConfigured
 export const authApi = {
   signUp: async (email, password, metadata = {}) => {
     if (supabase) {
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/portal`
+        : 'https://www.royalhaven.com.ng/portal';
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
-          data: metadata
+          data: metadata,
+          emailRedirectTo: redirectUrl
         }
       });
       if (error) throw error;
