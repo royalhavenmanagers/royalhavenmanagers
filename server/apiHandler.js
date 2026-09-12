@@ -20,6 +20,8 @@ export async function handleContactSubmission(body, env = process.env) {
 
   let emailSent = false;
   let emailError = null;
+  let clientEmailSent = false;
+  let clientEmailNotice = null;
 
   const emailHtml = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
@@ -91,7 +93,41 @@ export async function handleContactSubmission(body, env = process.env) {
         // 2. Dispatch Automatic Confirmation Email to the Client (Property Owner)
         if (email && email.includes('@')) {
           try {
-            await fetch('https://api.resend.com/emails', {
+            const clientSubject = `Inquiry Received - Royal Haven Realty & Property Managers Ltd.`;
+            const clientHtml = `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <div style="background: #08080A; padding: 26px; text-align: center; border-bottom: 3px solid #D4AF37;">
+                  <h1 style="color: #D4AF37; margin: 0; font-size: 20px; letter-spacing: 1px; font-family: serif;">ROYAL HAVEN REALTY & PROPERTY MANAGERS</h1>
+                  <p style="color: #cbd5e1; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">Building Trust. Managing Excellence. Creating Value.</p>
+                </div>
+                <div style="padding: 30px; color: #1e293b;">
+                  <h2 style="color: #0f172a; font-size: 20px; margin-top: 0;">Inquiry Received</h2>
+                  <p style="color: #334155; font-size: 15px; line-height: 1.6;">Dear <strong>${fullName}</strong>,</p>
+                  <p style="color: #334155; font-size: 15px; line-height: 1.6;">
+                    Thank you for contacting <strong>Royal Haven Realty & Property Managers Ltd.</strong> We have received your inquiry regarding <strong>${propertyType || 'Professional Property Management'}</strong>.
+                  </p>
+                  <div style="margin: 22px 0; padding: 18px; background: #fafaf9; border-radius: 8px; border-left: 4px solid #D4AF37;">
+                    <h4 style="margin: 0 0 8px 0; color: #0f172a; font-size: 14px; text-transform: uppercase;">Next Steps</h4>
+                    <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6;">
+                      A senior property manager is reviewing your requirements. We will reach out to you within 24 business hours to discuss personalized management solutions and asset protection strategies.
+                    </p>
+                  </div>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                    For urgent inquiries, feel free to call or WhatsApp our management desk directly at <a href="tel:+2348153785297" style="color: #B89025; font-weight: bold; text-decoration: none;">+234 815 378 5297</a>.
+                  </p>
+                  <p style="color: #64748b; font-size: 13px; margin-top: 24px;">
+                    Warm regards,<br>
+                    <strong style="color: #0f172a;">Client Relations Team</strong><br>
+                    Royal Haven Realty & Property Managers Ltd.
+                  </p>
+                </div>
+                <div style="background: #08080A; padding: 16px; text-align: center; font-size: 11px; color: #94a3b8;">
+                  Lagos &amp; Ogun State Environs, Nigeria &bull; <a href="https://www.royalhaven.com.ng" style="color: #D4AF37; text-decoration: none;">www.royalhaven.com.ng</a>
+                </div>
+              </div>
+            `;
+
+            const clientRes = await fetch('https://api.resend.com/emails', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${resendApiKey}`,
@@ -101,43 +137,51 @@ export async function handleContactSubmission(body, env = process.env) {
                 from: emailSender,
                 to: [email],
                 reply_to: 'royalhavenrealtyproperty@gmail.com',
-                subject: `Inquiry Received - Royal Haven Realty & Property Managers Ltd.`,
-                html: `
-                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                    <div style="background: #08080A; padding: 26px; text-align: center; border-bottom: 3px solid #D4AF37;">
-                      <h1 style="color: #D4AF37; margin: 0; font-size: 20px; letter-spacing: 1px; font-family: serif;">ROYAL HAVEN REALTY & PROPERTY MANAGERS</h1>
-                      <p style="color: #cbd5e1; font-size: 11px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">Building Trust. Managing Excellence. Creating Value.</p>
-                    </div>
-                    <div style="padding: 30px; color: #1e293b;">
-                      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0;">Inquiry Received</h2>
-                      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Dear <strong>${fullName}</strong>,</p>
-                      <p style="color: #334155; font-size: 15px; line-height: 1.6;">
-                        Thank you for contacting <strong>Royal Haven Realty & Property Managers Ltd.</strong> We have received your inquiry regarding <strong>${propertyType || 'Professional Property Management'}</strong>.
-                      </p>
-                      <div style="margin: 22px 0; padding: 18px; background: #fafaf9; border-radius: 8px; border-left: 4px solid #D4AF37;">
-                        <h4 style="margin: 0 0 8px 0; color: #0f172a; font-size: 14px; text-transform: uppercase;">Next Steps</h4>
-                        <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6;">
-                          A senior property manager is reviewing your requirements. We will reach out to you within 24 business hours to discuss personalized management solutions and asset protection strategies.
-                        </p>
-                      </div>
-                      <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-                        For urgent inquiries, feel free to call or WhatsApp our management desk directly at <a href="tel:+2348153785297" style="color: #B89025; font-weight: bold; text-decoration: none;">+234 815 378 5297</a>.
-                      </p>
-                      <p style="color: #64748b; font-size: 13px; margin-top: 24px;">
-                        Warm regards,<br>
-                        <strong style="color: #0f172a;">Client Relations Team</strong><br>
-                        Royal Haven Realty & Property Managers Ltd.
-                      </p>
-                    </div>
-                    <div style="background: #08080A; padding: 16px; text-align: center; font-size: 11px; color: #94a3b8;">
-                      Lagos &amp; Ogun State Environs, Nigeria &bull; <a href="https://www.royalhaven.com.ng" style="color: #D4AF37; text-decoration: none;">www.royalhaven.com.ng</a>
-                    </div>
-                  </div>
-                `
+                subject: clientSubject,
+                html: clientHtml
               })
             });
+
+            if (clientRes.ok) {
+              clientEmailSent = true;
+            } else {
+              const clientErrText = await clientRes.text();
+              console.warn('Resend Client Auto-Confirmation Notice:', clientRes.status, clientErrText);
+              if (clientRes.status === 403 || clientErrText.includes('testing emails')) {
+                clientEmailNotice = 'Client auto-confirmation blocked by Resend: custom domain verification needed at resend.com/domains';
+              }
+
+              // Fallback to Brevo for client confirmation if available
+              if (brevoApiKey && !brevoApiKey.includes('your_')) {
+                try {
+                  const brevoClientRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                      'api-key': brevoApiKey,
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      sender: {
+                        name: 'Royal Haven Realty',
+                        email: env.BREVO_SENDER_EMAIL || 'royalhavenrealtyproperty@gmail.com'
+                      },
+                      to: [{ email: email, name: fullName }],
+                      subject: clientSubject,
+                      htmlContent: clientHtml
+                    })
+                  });
+                  if (brevoClientRes.ok) {
+                    clientEmailSent = true;
+                    clientEmailNotice = 'Sent via Brevo fallback';
+                  }
+                } catch (bErr) {
+                  console.warn('Brevo client fallback error:', bErr.message);
+                }
+              }
+            }
           } catch (clientErr) {
-            console.warn('Note: Client auto-confirmation requires verified custom domain on Resend:', clientErr.message);
+            console.warn('Note: Client auto-confirmation exception:', clientErr.message);
           }
         }
       }
@@ -231,6 +275,8 @@ export async function handleContactSubmission(body, env = process.env) {
     body: {
       success: true,
       emailSent,
+      clientEmailSent,
+      clientEmailNotice,
       dbSaved,
       emailError,
       message: 'Consultation request received successfully.'

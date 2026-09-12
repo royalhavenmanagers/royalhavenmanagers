@@ -78,14 +78,17 @@ Implemented in `src/context/AuthContext.jsx` and `src/components/portal/OwnerLog
 
 ---
 
-## 5. Article Sharing & Deep Linking Engine
-Implemented in `src/components/BlogSection.jsx`:
+## 5. Article Sharing & Dynamic Open Graph Preview Engine
+Implemented across `api/article-preview.js`, `vercel.json`, and `src/components/BlogSection.jsx`:
+* **Dynamic Social Media Previews**: When an article is shared on WhatsApp, Facebook, Twitter/X, LinkedIn, or Telegram, the clean link format `https://www.royalhaven.com.ng/article/:slug` is served by Vercel serverless function `api/article-preview.js`.
+  * Injects dynamic `<meta property="og:image">`, `og:title`, `og:description`, and `twitter:image` tags with the article's actual cover photo and excerpt (instead of the generic website logo).
+  * Automatically redirects human visitors to `/?article=:slug#blog` to open the interactive full-reading modal seamlessly.
 * **Share Toolbar**: Every article includes one-click sharing for:
-  * **WhatsApp**: Formatted message with article title and direct link.
+  * **WhatsApp**: Formatted message with article title and direct `/article/:slug` link.
   * **Twitter / X**: Pre-composed tweet with title and link.
   * **LinkedIn**: Direct URL sharing to professional networks.
   * **Copy Direct Link**: Interactive button with a "Link Copied!" toast.
-* **Deep Linking**: Supports both `?article=slug#blog` and `#article/slug`. Visiting the link opens the article modal directly in full-reading view.
+* **Deep Linking**: Supports `/article/:slug`, `?article=slug#blog`, and `#article/slug`. Visiting any format opens the article modal directly in full-reading view.
 
 ---
 

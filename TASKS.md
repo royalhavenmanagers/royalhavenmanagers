@@ -26,3 +26,18 @@ If you want to sync all tables to your Supabase cloud SQL dashboard:
 2. Open `supabase_schema_portal.sql` from the project root
 3. Copy all lines and paste into the Supabase SQL editor box
 4. Click **Run**
+
+### 4. Enable Client Auto-Confirmation Emails (Resend Domain Setup)
+To allow the consultation form to send automated confirmation emails to client inboxes:
+1. Go to https://resend.com/domains
+2. Click **Add Domain** and enter `royalhaven.com.ng`
+3. Add the 3 DNS records provided by Resend to your domain registrar (Namecheap, Whogohost, GoDaddy, etc.)
+4. Once verified, update `RESEND_SENDER_EMAIL` in your Vercel Environment Variables to `Royal Haven <inquiries@royalhaven.com.ng>`
+*(See full detailed instructions in `HUMAN_TASKS.md`)*
+
+### 5. Supabase Auth Redirect URLs (Owner Portal Reset Link)
+1. Go to https://supabase.com/dashboard/project/pspftbflzfkbpndvhike/auth/url-configuration
+2. Set **Site URL** to `https://www.royalhaven.com.ng`
+3. Add Redirect URLs: `https://www.royalhaven.com.ng/*` and `https://www.royalhaven.com.ng/portal`
+4. Click **Save**
+

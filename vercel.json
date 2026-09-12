@@ -5,7 +5,15 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/((?!api/|images/|royal-haven-company-profile.pdf|robots.txt|sitemap.xml|manifest.json|sw.js|assets/|favicon.ico).*)",
+      "source": "/article/:slug",
+      "destination": "/api/article-preview?slug=:slug"
+    },
+    {
+      "source": "/articles/:slug",
+      "destination": "/api/article-preview?slug=:slug"
+    },
+    {
+      "source": "/((?!api/|article/|articles/|images/|royal-haven-company-profile.pdf|robots.txt|sitemap.xml|manifest.json|sw.js|assets/|favicon.ico).*)",
       "destination": "/index.html"
     }
   ]

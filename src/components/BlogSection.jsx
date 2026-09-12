@@ -23,10 +23,17 @@ export default function BlogSection({ onOpenContact }) {
     const published = blogStore.getPublishedPosts();
     setPosts(published);
 
-    // Check URL parameters and hash for direct article linking (e.g. ?article=slug or #article/slug)
+    // Check URL parameters, path, and hash for direct article linking (e.g. /article/slug, ?article=slug or #article/slug)
     const checkDirectLink = (postList) => {
       const params = new URLSearchParams(window.location.search);
       let targetSlug = params.get('article');
+
+      if (!targetSlug && (window.location.pathname.startsWith('/article/') || window.location.pathname.startsWith('/articles/'))) {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          targetSlug = decodeURIComponent(parts[1]);
+        }
+      }
 
       if (!targetSlug && window.location.hash) {
         if (window.location.hash.startsWith('#article/')) {
@@ -67,9 +74,11 @@ export default function BlogSection({ onOpenContact }) {
   }, []);
 
   const getArticleShareUrl = (post) => {
-    const origin = window.location.origin;
+    const origin = typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://www.royalhaven.com.ng';
     const target = post.slug || post.id;
-    return `${origin}/?article=${target}#blog`;
+    return `${origin}/article/${target}`;
   };
 
   const handleOpenPost = (post) => {
@@ -83,7 +92,10 @@ export default function BlogSection({ onOpenContact }) {
   const handleClosePost = () => {
     setActivePost(null);
     try {
-      window.history.replaceState(null, '', window.location.pathname + '#blog');
+      const path = (window.location.pathname.startsWith('/article/') || window.location.pathname.startsWith('/articles/'))
+        ? '/'
+        : window.location.pathname;
+      window.history.replaceState(null, '', path + '#blog');
     } catch {}
   };
 
