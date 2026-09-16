@@ -47,7 +47,7 @@ export default function Hero({ onOpenContact }) {
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               <button
                 onClick={onOpenContact}
-                className="w-full sm:w-auto px-9 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 group"
+                className="w-full sm:w-auto min-h-[48px] px-9 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
               >
                 <span>Request Consultation</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -56,7 +56,7 @@ export default function Hero({ onOpenContact }) {
               <a
                 href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"}
                 download
-                className="w-full sm:w-auto px-6 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-900 bg-white border border-amber-300/90 hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center space-x-2 shadow-sm"
+                className="w-full sm:w-auto min-h-[48px] px-6 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-900 bg-white border border-amber-300/90 hover:bg-amber-50 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
               >
                 <Download className="w-4 h-4 text-gold-600" />
                 <span>Profile</span>
@@ -64,7 +64,7 @@ export default function Hero({ onOpenContact }) {
 
               <a
                 href="#services"
-                className="w-full sm:w-auto px-8 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-white border border-amber-300/80 hover:bg-amber-50 transition-colors duration-300 flex items-center justify-center shadow-sm"
+                className="w-full sm:w-auto min-h-[48px] px-8 py-4 text-sm uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-white border border-amber-300/80 hover:bg-amber-50 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
               >
                 <span>Our Services</span>
               </a>

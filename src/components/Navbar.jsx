@@ -152,7 +152,7 @@ export default function Navbar({ onOpenContact }) {
                   key={link.name}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-xl font-semibold text-slate-900 hover:text-gold-600 transition-colors flex items-center justify-between border-b border-slate-100 pb-3"
+                  className="text-lg font-semibold text-slate-900 hover:text-gold-600 transition-colors flex items-center justify-between border-b border-slate-100 py-3 min-h-[48px]"
                 >
                   <span>{link.name}</span>
                   <ChevronRight className="w-5 h-5 text-gold-500" />
@@ -162,16 +162,25 @@ export default function Navbar({ onOpenContact }) {
               <a
                 href="#portal"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-bold text-amber-800 hover:text-amber-900 flex items-center space-x-2 pt-2 border-b border-slate-100 pb-3"
+                className="text-base font-bold text-amber-900 hover:text-amber-950 flex items-center space-x-2 border-b border-slate-100 py-3 min-h-[48px]"
               >
-                <Lock className="w-5 h-5 text-gold-600" />
-                <span>Owner Portal Access</span>
+                <Lock className="w-4 h-4 text-gold-600 shrink-0" />
+                <span>Property Owner Portal</span>
+              </a>
+
+              <a
+                href="#admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 border-b border-slate-100 py-2.5 min-h-[44px]"
+              >
+                <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+                <span>Staff Admin Portal</span>
               </a>
 
               <a
                 href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"}
                 download
-                className="text-sm font-semibold text-slate-700 hover:text-gold-600 flex items-center space-x-2 py-1"
+                className="text-sm font-semibold text-slate-700 hover:text-gold-600 flex items-center space-x-2 py-2 min-h-[44px]"
               >
                 <span>Download Company Profile (PDF)</span>
               </a>
