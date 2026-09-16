@@ -26,9 +26,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     bank_name TEXT,
     account_number TEXT,
     account_name TEXT,
+    assigned_properties TEXT[] DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Safely add assigned_properties if profiles table already exists
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS assigned_properties TEXT[] DEFAULT '{}';
 
 -- -------------------------------------------------------------------
 -- 3. PROPERTIES TABLE

@@ -36,16 +36,28 @@ export default function OwnerPortal({ onReturnHome }) {
     // Load real properties from store
     const allProps = portalStore.getProperties();
     const assigned = profile?.assignedProperties || [];
+    const ownerEmail = profile?.email ? profile.email.toLowerCase().trim() : '';
+    const ownerId = profile?.id || '';
     
-    // An owner sees their assigned properties; admins see all; new owners without assignments see onboarding state
-    const ownerProps = assigned.length > 0
-      ? allProps.filter(p => assigned.some(a => a && (a.toLowerCase().includes(p.name?.toLowerCase()) || p.id === a)))
-      : (profile?.role === 'super_admin' ? allProps : []);
+    // An owner sees their assigned properties (by name/ID or by ownerEmail/ownerId)
+    const ownerProps = (profile?.role === 'super_admin' || profile?.role === 'property_manager')
+      ? allProps
+      : allProps.filter(p => {
+          const matchAssigned = assigned.length > 0 && assigned.some(a => a && (p.name?.toLowerCase().includes(a.toLowerCase()) || p.id === a));
+          const matchEmail = Boolean(ownerEmail && p.ownerEmail && p.ownerEmail.toLowerCase().trim() === ownerEmail);
+          const matchId = Boolean(ownerId && p.ownerId && p.ownerId === ownerId);
+          return matchAssigned || matchEmail || matchId;
+        });
 
     setProperties(ownerProps);
     const propIds = new Set(ownerProps.map(p => p.id));
+    const propNames = new Set(ownerProps.map(p => p.name?.toLowerCase().trim()));
 
-    setTransactions(portalStore.getTransactions().filter(t => propIds.has(t.propertyId)));
+    setTransactions(portalStore.getTransactions().filter(t => 
+      propIds.has(t.propertyId) || 
+      (t.propertyName && propNames.has(t.propertyName.toLowerCase().trim())) ||
+      (ownerEmail && t.ownerEmail && t.ownerEmail.toLowerCase().trim() === ownerEmail)
+    ));
     setMaintenance(portalStore.getMaintenance().filter(m => propIds.has(m.propertyId)));
     setInspections(portalStore.getInspections().filter(i => propIds.has(i.propertyId)));
     setDocuments(portalStore.getDocuments().filter(d => propIds.has(d.propertyId)));

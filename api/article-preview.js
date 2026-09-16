@@ -143,9 +143,11 @@ export default async function handler(req, res) {
     return res.status(200).send(fallbackHtml);
   }
 
-  // Ensure cover image is an absolute URL
-  let coverImage = article.coverImage || `${siteDomain}/images/og-image.jpg`;
-  if (coverImage.startsWith('/')) {
+  // Ensure cover image is an absolute HTTPS URL (WhatsApp / Facebook reject base64 data URLs)
+  let coverImage = article.coverImage;
+  if (!coverImage || coverImage.startsWith('data:') || typeof coverImage !== 'string') {
+    coverImage = `${siteDomain}/images/og-image.jpg`;
+  } else if (coverImage.startsWith('/')) {
     coverImage = `${siteDomain}${coverImage}`;
   }
 

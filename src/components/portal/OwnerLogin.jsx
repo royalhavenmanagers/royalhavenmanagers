@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, Sparkles, AlertCircle, CheckCircle, User, Phone, Landmark, CreditCard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, Sparkles, AlertCircle, CheckCircle, User, Phone, Landmark, CreditCard, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { authApi, isSupabaseConfigured } from '../../lib/supabaseClient';
+import { authApi, isSupabaseConfigured, supabase } from '../../lib/supabaseClient';
 import { companyData } from '../../data/companyData';
 
 export default function OwnerLogin({ onReturnHome }) {
   const { login, signup } = useAuth();
   
-  // Auth mode: 'signin' or 'signup'
+  // Auth mode: 'signin', 'signup', or 'reset-password'
   const [authMode, setAuthMode] = useState('signin');
 
   // Sign In fields
@@ -23,14 +23,46 @@ export default function OwnerLogin({ onReturnHome }) {
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
 
+  // New Password fields (for recovery from email link)
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Password reset modal state
+  // Password reset modal state (for requesting the link)
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetStatus, setResetStatus] = useState({ loading: false, success: '', error: '' });
+
+  // Detect #reset-password in URL or recovery token from Supabase
+  useEffect(() => {
+    const checkHash = () => {
+      const hash = window.location.hash || '';
+      if (hash.includes('reset-password') || hash.includes('type=recovery') || hash.includes('access_token')) {
+        setAuthMode('reset-password');
+      }
+    };
+    checkHash();
+    window.addEventListener('hashchange', checkHash);
+
+    // Also listen to Supabase auth event for PASSWORD_RECOVERY
+    let sub = null;
+    if (isSupabaseConfigured && supabase) {
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          setAuthMode('reset-password');
+        }
+      });
+      sub = data.subscription;
+    }
+
+    return () => {
+      window.removeEventListener('hashchange', checkHash);
+      if (sub) sub.unsubscribe();
+    };
+  }, []);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -115,6 +147,40 @@ export default function OwnerLogin({ onReturnHome }) {
     }
   };
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (newPassword.length < 6) {
+      setErrorMessage('New password must be at least 6 characters long.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (isSupabaseConfigured) {
+        await authApi.updatePassword(newPassword);
+        setSuccessMessage('Your password has been reset successfully! You can now sign in with your new password.');
+        setAuthMode('signin');
+        setPassword(newPassword);
+        window.location.hash = '#portal';
+      } else {
+        setSuccessMessage('Password updated successfully!');
+        setAuthMode('signin');
+      }
+    } catch (err) {
+      setErrorMessage(err.message || 'Failed to update password. Link may have expired.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#060608] bg-obsidian-950 text-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       
@@ -154,38 +220,45 @@ export default function OwnerLogin({ onReturnHome }) {
         {/* Card */}
         <div className="glass-card p-6 sm:p-8 border-gold-glow shadow-gold-lg relative backdrop-blur-xl">
           
-          {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-obsidian-900 rounded-xl border border-gold-500/20 mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('signin');
-                setErrorMessage('');
-              }}
-              className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                authMode === 'signin'
-                  ? 'bg-gold-gradient text-obsidian-950 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Sign In
-            </button>
+          {/* Mode Switcher Tabs (Hidden during Password Reset) */}
+          {authMode !== 'reset-password' ? (
+            <div className="grid grid-cols-2 gap-2 p-1 bg-obsidian-900 rounded-xl border border-gold-500/20 mb-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('signin');
+                  setErrorMessage('');
+                }}
+                className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+                  authMode === 'signin'
+                    ? 'bg-gold-gradient text-obsidian-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Sign In
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('signup');
-                setErrorMessage('');
-              }}
-              className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                authMode === 'signup'
-                  ? 'bg-gold-gradient text-obsidian-950 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Register Property Owner
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('signup');
+                  setErrorMessage('');
+                }}
+                className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+                  authMode === 'signup'
+                    ? 'bg-gold-gradient text-obsidian-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Register Property Owner
+              </button>
+            </div>
+          ) : (
+            <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded-xl mb-6 flex items-center space-x-2 text-amber-300 text-xs font-semibold">
+              <KeyRound className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Password Recovery: Set Your New Password</span>
+            </div>
+          )}
 
           {errorMessage && (
             <div className="mb-5 p-3 rounded-xl bg-red-950/70 border border-red-800 text-red-200 text-xs flex items-start space-x-2.5">
@@ -202,9 +275,78 @@ export default function OwnerLogin({ onReturnHome }) {
           )}
 
           {/* ======================================================= */}
-          {/* SIGN IN FORM                                            */}
+          {/* 1. RESET PASSWORD FORM                                  */}
           {/* ======================================================= */}
-          {authMode === 'signin' ? (
+          {authMode === 'reset-password' && (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1.5">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password (min. 6 characters)"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1.5">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3.5 text-xs font-bold uppercase tracking-wider text-obsidian-950 bg-gold-gradient rounded-xl hover:shadow-gold-md transition-all flex items-center justify-center space-x-2 font-bold disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <span>Updating Password...</span>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Save New Password &amp; Proceed</span>
+                  </>
+                )}
+              </button>
+
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('signin');
+                    window.location.hash = '#portal';
+                  }}
+                  className="text-xs text-slate-400 hover:text-amber-300 transition-colors"
+                >
+                  Return to Sign In
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ======================================================= */}
+          {/* 2. SIGN IN FORM                                         */}
+          {/* ======================================================= */}
+          {authMode === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1.5">
@@ -218,7 +360,7 @@ export default function OwnerLogin({ onReturnHome }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. owner@example.com"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-all font-sans"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
               </div>
@@ -230,21 +372,25 @@ export default function OwnerLogin({ onReturnHome }) {
                   </label>
                   <button
                     type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                    onClick={() => {
+                      setResetEmail(email);
+                      setShowForgotModal(true);
+                      setResetStatus({ loading: false, success: '', error: '' });
+                    }}
+                    className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
                   >
                     Forgot Password?
                   </button>
                 </div>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-all font-sans"
+                    placeholder="••••••••"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
               </div>
@@ -252,20 +398,28 @@ export default function OwnerLogin({ onReturnHome }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gold-gradient text-obsidian-950 font-bold text-xs uppercase tracking-wider shadow-gold-md hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+                className="w-full py-3.5 text-xs font-bold uppercase tracking-wider text-obsidian-950 bg-gold-gradient rounded-xl hover:shadow-gold-md transition-all flex items-center justify-center space-x-2 font-bold disabled:opacity-50"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>{isSubmitting ? 'Authenticating...' : 'Sign In to Portal'}</span>
+                {isSubmitting ? (
+                  <span>Authenticating...</span>
+                ) : (
+                  <>
+                    <KeyRound className="w-4 h-4" />
+                    <span>Access Owner Dashboard</span>
+                  </>
+                )}
               </button>
             </form>
-          ) : (
-            /* ======================================================= */
-            /* SIGN UP FORM (FULLSTACK SUPABASE REGISTRATION)           */
-            /* ======================================================= */
+          )}
+
+          {/* ======================================================= */}
+          {/* 3. SIGN UP FORM (Register New Property Owner)           */}
+          {/* ======================================================= */}
+          {authMode === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
-                  Full Legal Name
+                  Full Name / Entity Name *
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -274,7 +428,7 @@ export default function OwnerLogin({ onReturnHome }) {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Chief Adekunle Johnson"
+                    placeholder="e.g. Chief Adeleke Johnson"
                     className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
@@ -283,43 +437,44 @@ export default function OwnerLogin({ onReturnHome }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
-                    Email Address
+                    Email Address *
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="owner@gmail.com"
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
-                    Phone Number
+                    Phone Number *
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="tel"
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+234 803 000 0000"
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      placeholder="+234 800 000 0000"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Password Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
-                    Create Password
+                    Create Password *
                   </label>
                   <input
                     type="password"
@@ -327,75 +482,76 @@ export default function OwnerLogin({ onReturnHome }) {
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     placeholder="Min. 6 chars"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
-                    Confirm Password
+                    Confirm Password *
                   </label>
                   <input
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-type password"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    placeholder="Repeat password"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
               </div>
 
-              {/* Remittance Bank Information */}
-              <div className="pt-2 border-t border-slate-800 space-y-2">
-                <span className="text-[11px] uppercase font-bold text-amber-300 block">
-                  Rent Remittance Bank Details
+              {/* Remittance Banking Information (Optional for easy payouts) */}
+              <div className="p-3 bg-obsidian-900/80 rounded-xl border border-gold-500/20 space-y-2.5">
+                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider flex items-center space-x-1.5">
+                  <Landmark className="w-3.5 h-3.5 text-gold-400" />
+                  <span>Direct Remittance Bank Details (Optional)</span>
                 </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <input
                       type="text"
-                      required
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      placeholder="Bank Name (e.g. Zenith Bank)"
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      placeholder="Bank (e.g. Zenith)"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
-
                   <div>
                     <input
                       type="text"
-                      required
                       value={accountNumber}
                       onChange={(e) => setAccountNumber(e.target.value)}
-                      placeholder="10-Digit NUBAN Number"
-                      maxLength={10}
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      placeholder="10-Digit NUBAN"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <input
-                    type="text"
-                    required
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    placeholder="Account Name (Must match bank records)"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      value={accountName}
+                      onChange={(e) => setAccountName(e.target.value)}
+                      placeholder="Account Name"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    />
+                  </div>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gold-gradient text-obsidian-950 font-bold text-xs uppercase tracking-wider shadow-gold-md hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+                className="w-full py-3.5 text-xs font-bold uppercase tracking-wider text-obsidian-950 bg-gold-gradient rounded-xl hover:shadow-gold-md transition-all flex items-center justify-center space-x-2 font-bold disabled:opacity-50"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>{isSubmitting ? 'Creating Account on Supabase...' : 'Register Property Owner'}</span>
+                {isSubmitting ? (
+                  <span>Creating Account...</span>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>Create &amp; Enter Owner Dashboard</span>
+                  </>
+                )}
               </button>
             </form>
           )}
@@ -457,7 +613,7 @@ export default function OwnerLogin({ onReturnHome }) {
                   required
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="e.g. owner@royalhaven.com.ng"
+                  placeholder="e.g. owner@example.com"
                   className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                 />
               </div>
