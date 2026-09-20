@@ -5,6 +5,7 @@ const STORAGE_KEY_PROPERTIES = "royalhaven_portal_properties";
 const STORAGE_KEY_TRANSACTIONS = "royalhaven_portal_transactions";
 const STORAGE_KEY_MAINTENANCE = "royalhaven_portal_maintenance";
 const STORAGE_KEY_INSPECTIONS = "royalhaven_portal_inspections";
+const STORAGE_KEY_DOCUMENTS = "royalhaven_portal_documents";
 const STORAGE_KEY_INQUIRIES = "royalhaven_leads_inbox";
 const STORAGE_KEY_ONBOARDING_SUBMISSIONS = "royalhaven_portal_onboarding_submissions";
 
@@ -130,6 +131,27 @@ export const portalStore = {
     }
   },
 
+  // Add Document / Report
+  addDocument: (doc) => {
+    const list = portalStore.getDocuments();
+    const newDoc = {
+      ...doc,
+      id: doc.id || `doc-${Date.now()}`,
+      date: doc.date || new Date().toISOString().split('T')[0],
+      fileSize: doc.fileSize || 'Digital Document'
+    };
+    list.unshift(newDoc);
+    localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(list));
+    return newDoc;
+  },
+
+  deleteDocument: (id) => {
+    const list = portalStore.getDocuments();
+    const updated = list.filter(d => d.id !== id);
+    localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(updated));
+    return updated;
+  },
+
   // Add new property
   addProperty: (property) => {
     const properties = portalStore.getProperties();
@@ -141,6 +163,21 @@ export const portalStore = {
     properties.unshift(newProp);
     localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(properties));
     return newProp;
+  },
+
+  // Update existing property & its units
+  updateProperty: (id, updates) => {
+    const properties = portalStore.getProperties();
+    const updated = properties.map(p => (p.id === id ? { ...p, ...updates } : p));
+    localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+    return updated;
+  },
+
+  deleteProperty: (id) => {
+    const properties = portalStore.getProperties();
+    const updated = properties.filter(p => p.id !== id);
+    localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+    return updated;
   },
 
   // Add new remittance / transaction
@@ -164,11 +201,26 @@ export const portalStore = {
       ...item,
       id: `maint-${Date.now()}`,
       reportedDate: new Date().toISOString().split('T')[0],
-      status: 'reported'
+      status: item.status || 'reported'
     };
     list.unshift(newItem);
     localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(list));
     return newItem;
+  },
+
+  // Update maintenance ticket
+  updateMaintenance: (id, updates) => {
+    const list = portalStore.getMaintenance();
+    const updated = list.map(m => (m.id === id ? { ...m, ...updates } : m));
+    localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(updated));
+    return updated;
+  },
+
+  deleteMaintenance: (id) => {
+    const list = portalStore.getMaintenance();
+    const updated = list.filter(m => m.id !== id);
+    localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(updated));
+    return updated;
   },
 
   // Add inspection record
@@ -182,6 +234,20 @@ export const portalStore = {
     list.unshift(newItem);
     localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(list));
     return newItem;
+  },
+
+  updateInspection: (id, updates) => {
+    const list = portalStore.getInspections();
+    const updated = list.map(i => (i.id === id ? { ...i, ...updates } : i));
+    localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(updated));
+    return updated;
+  },
+
+  deleteInspection: (id) => {
+    const list = portalStore.getInspections();
+    const updated = list.filter(i => i.id !== id);
+    localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(updated));
+    return updated;
   },
 
   // Inquiries / Leads Inbox management
@@ -531,13 +597,59 @@ export const portalStore = {
         propertyId: 'rh-demo-prop-lekki',
         propertyName: demoPropName,
         unitNumber: 'Flat 102',
+        title: 'Industrial Water Purification Filter Cartridge Replacement',
         issue: 'Industrial Water Purification Filter Cartridge Replacement',
+        description: 'Routine quarterly servicing of whole-building filtration membrane and carbon cartridge.',
         priority: 'medium',
         status: 'reported',
         reportedDate: '2026-09-14',
+        actualCost: 35000,
         estimatedCost: 35000,
+        contractor: 'Engr. Tunde Waterworks Ltd.',
         assignedContractor: 'Engr. Tunde Waterworks Ltd.'
       });
+
+      const docs = portalStore.getDocuments();
+      if (!docs.some(d => d.propertyId === 'rh-demo-prop-lekki')) {
+        portalStore.addDocument({
+          id: 'rh-demo-doc-1',
+          propertyId: 'rh-demo-prop-lekki',
+          propertyName: demoPropName,
+          title: 'Certificate of Occupancy (C of O) & Building Plan',
+          documentType: 'Title Deed',
+          date: '2026-01-15',
+          fileSize: '2.4 MB (PDF)',
+          fileUrl: '#'
+        });
+        portalStore.addDocument({
+          id: 'rh-demo-doc-2',
+          propertyId: 'rh-demo-prop-lekki',
+          propertyName: demoPropName,
+          title: 'Q2 2026 Comprehensive Tenancy Audit & Remittance Statement',
+          documentType: 'Financial Statement',
+          date: '2026-06-30',
+          fileSize: '1.8 MB (PDF)',
+          fileUrl: '#'
+        });
+      }
+
+      const insps = portalStore.getInspections();
+      if (!insps.some(i => i.propertyId === 'rh-demo-prop-lekki')) {
+        portalStore.addInspection({
+          id: 'rh-demo-insp-1',
+          propertyId: 'rh-demo-prop-lekki',
+          propertyName: demoPropName,
+          inspectorName: 'Engr. Babajide Fasola (Lead Facility Manager)',
+          inspectionDate: '2026-08-20',
+          overallCondition: 'Excellent',
+          reportType: 'Quarterly Routine Audit',
+          notes: 'Full structural inspection of Grand Imperial Court completed. Roof drainage cleared prior to heavy rainfall, electrical distribution panel tested with normal thermal signatures, and water pressure across all 4 units meets optimal residential standards.',
+          photos: [
+            'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80',
+            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'
+          ]
+        });
+      }
     }
   }
 };

@@ -3,7 +3,7 @@ import {
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
-  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2
+  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2, Wrench, Paperclip
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
@@ -123,6 +123,27 @@ export default function AdminPortal({ onReturnHome }) {
     leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   });
 
+  // Managed Portal Properties (Units & Tenants)
+  const [managedProperties, setManagedProperties] = useState([]);
+  const [editingUnitsProp, setEditingUnitsProp] = useState(null);
+  const [showEditUnitsModal, setShowEditUnitsModal] = useState(false);
+
+  // Facility Maintenance & Invoices State
+  const [maintenanceList, setMaintenanceList] = useState([]);
+  const [showLogMaintenanceModal, setShowLogMaintenanceModal] = useState(false);
+  const [maintenanceFormData, setMaintenanceFormData] = useState({
+    propertyId: '',
+    propertyName: '',
+    unitNumber: '',
+    title: '',
+    description: '',
+    contractor: '',
+    actualCost: '',
+    invoiceUrl: null,
+    invoiceName: null,
+    status: 'in_progress'
+  });
+
   const { impersonateOwner } = useAuth();
 
   const [notification, setNotification] = useState('');
@@ -151,6 +172,10 @@ export default function AdminPortal({ onReturnHome }) {
     propertyStore.fetchPropertiesAsync().then((cloudProps) => {
       if (cloudProps && Array.isArray(cloudProps)) setProperties(cloudProps);
     });
+
+    // Load managed properties (with units & tenants) and maintenance
+    setManagedProperties(portalStore.getProperties());
+    setMaintenanceList(portalStore.getMaintenance());
 
     // Load inquiries, remittances & onboarding submissions
     setInquiries(portalStore.getInquiries());
@@ -506,6 +531,255 @@ export default function AdminPortal({ onReturnHome }) {
     }
   };
 
+  // -------------------------------------------------------------
+  // MANAGED PROPERTIES & UNITS / TENANTS HANDLERS
+  // -------------------------------------------------------------
+  const handleOpenEditUnits = (prop) => {
+    const rawUnits = prop.units || [];
+    const clonedUnits = rawUnits.map((u, idx) => ({
+      id: u.id || `unit-${prop.id}-${idx + 1}`,
+      unitNumber: u.unitNumber || `Flat ${idx + 1}`,
+      floorPlanType: u.floorPlanType || 'Apartment',
+      rentAmount: u.rentAmount ?? (prop.targetRent || 5000000),
+      status: u.status || 'occupied',
+      tenant: {
+        fullName: u.tenant?.fullName || '',
+        phone: u.tenant?.phone || '',
+        email: u.tenant?.email || '',
+        leaseStart: u.tenant?.leaseStart || new Date().toISOString().split('T')[0],
+        leaseEnd: u.tenant?.leaseEnd || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        paymentStatus: u.tenant?.paymentStatus || 'Paid'
+      }
+    }));
+
+    setEditingUnitsProp({
+      ...prop,
+      units: clonedUnits.length > 0 ? clonedUnits : [
+        {
+          id: `unit-${prop.id}-1`,
+          unitNumber: 'Flat 1',
+          floorPlanType: 'Apartment',
+          rentAmount: 5000000,
+          status: 'occupied',
+          tenant: {
+            fullName: 'Tenant Name',
+            phone: '+234 800 000 0000',
+            email: '',
+            leaseStart: new Date().toISOString().split('T')[0],
+            leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            paymentStatus: 'Paid'
+          }
+        }
+      ]
+    });
+    setShowEditUnitsModal(true);
+  };
+
+  const handleUnitFieldChange = (index, field, value) => {
+    if (!editingUnitsProp) return;
+    const updated = [...editingUnitsProp.units];
+    updated[index] = {
+      ...updated[index],
+      [field]: field === 'rentAmount' ? Number(value) : value
+    };
+    setEditingUnitsProp(prev => ({ ...prev, units: updated }));
+  };
+
+  const handleTenantFieldChange = (index, field, value) => {
+    if (!editingUnitsProp) return;
+    const updated = [...editingUnitsProp.units];
+    updated[index] = {
+      ...updated[index],
+      tenant: {
+        ...(updated[index].tenant || {}),
+        [field]: value
+      }
+    };
+    setEditingUnitsProp(prev => ({ ...prev, units: updated }));
+  };
+
+  const handleAddUnitToEditingProp = () => {
+    if (!editingUnitsProp) return;
+    const nextNum = editingUnitsProp.units.length + 1;
+    const newUnit = {
+      id: `unit-${editingUnitsProp.id}-${Date.now()}`,
+      unitNumber: `Flat ${nextNum}`,
+      floorPlanType: 'Residential Apartment',
+      rentAmount: editingUnitsProp.units[0]?.rentAmount || 5000000,
+      status: 'vacant',
+      tenant: {
+        fullName: '',
+        phone: '',
+        email: '',
+        leaseStart: new Date().toISOString().split('T')[0],
+        leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        paymentStatus: 'Due'
+      }
+    };
+    setEditingUnitsProp(prev => ({
+      ...prev,
+      units: [...prev.units, newUnit]
+    }));
+  };
+
+  const handleRemoveUnitFromEditingProp = (unitId) => {
+    if (!editingUnitsProp) return;
+    if (editingUnitsProp.units.length <= 1) {
+      alert("A managed building must have at least one unit.");
+      return;
+    }
+    setEditingUnitsProp(prev => ({
+      ...prev,
+      units: prev.units.filter(u => u.id !== unitId)
+    }));
+  };
+
+  const handleSaveUnitsAndTenants = (e) => {
+    e.preventDefault();
+    if (!editingUnitsProp) return;
+
+    portalStore.updateProperty(editingUnitsProp.id, {
+      name: editingUnitsProp.name,
+      address: editingUnitsProp.address,
+      city: editingUnitsProp.city,
+      unitsCount: editingUnitsProp.units.length,
+      units: editingUnitsProp.units
+    });
+
+    loadData();
+    setShowEditUnitsModal(false);
+    setEditingUnitsProp(null);
+    showNotification("Units and tenant records updated successfully!");
+  };
+
+  // -------------------------------------------------------------
+  // AUTOMATIC REMITTANCE CALCULATION HANDLER
+  // -------------------------------------------------------------
+  const handleAutoFillRemittance = (prop) => {
+    if (!prop) return;
+    const occupiedUnits = (prop.units || []).filter(u => u.status === 'occupied');
+    const totalAnnualRent = occupiedUnits.reduce((acc, u) => acc + Number(u.rentAmount || 0), 0);
+    // Automatic monthly gross (Annual / 12)
+    const monthlyGross = totalAnnualRent > 0 ? Math.round(totalAnnualRent / 12) : 2500000;
+    const fee = Math.round(monthlyGross * 0.10); // 10% Royal Haven Management Fee
+    const net = monthlyGross - fee; // 90% Net Remittance
+
+    const owner = owners.find(o => o.id === prop.ownerId || o.email === prop.ownerEmail || (o.assignedProperties || []).includes(prop.name));
+
+    setRemittanceFormData({
+      propertyId: prop.id,
+      propertyName: prop.name,
+      grossRent: monthlyGross,
+      managementFee: fee,
+      maintenanceCost: 0,
+      beneficiaryBank: owner?.bankName || 'Zenith Bank',
+      beneficiaryAccount: owner?.accountNumber || '',
+      description: `Automatic monthly rent payout for ${prop.name} (Less 10% Royal Haven Management Fee)`
+    });
+
+    setActiveModule('remittances');
+    setShowAddRemittanceModal(true);
+  };
+
+  const handleRemittancePropertySelect = (propIdentifier) => {
+    const prop = managedProperties.find(p => p.id === propIdentifier || p.name === propIdentifier);
+    if (prop) {
+      const occupiedUnits = (prop.units || []).filter(u => u.status === 'occupied');
+      const totalAnnualRent = occupiedUnits.reduce((acc, u) => acc + Number(u.rentAmount || 0), 0);
+      const monthlyGross = totalAnnualRent > 0 ? Math.round(totalAnnualRent / 12) : (Number(prop.targetRent) || 2500000);
+      const fee = Math.round(monthlyGross * 0.10);
+      const net = monthlyGross - fee;
+
+      const owner = owners.find(o => o.id === prop.ownerId || o.email === prop.ownerEmail || (o.assignedProperties || []).includes(prop.name));
+
+      setRemittanceFormData(prev => ({
+        ...prev,
+        propertyId: prop.id,
+        propertyName: prop.name,
+        grossRent: monthlyGross,
+        managementFee: fee,
+        maintenanceCost: 0,
+        beneficiaryBank: owner?.bankName || prev.beneficiaryBank || 'Zenith Bank',
+        beneficiaryAccount: owner?.accountNumber || prev.beneficiaryAccount || '',
+        description: `Automatic monthly rent payout for ${prop.name} (Less 10% Royal Haven Management Fee)`
+      }));
+    } else {
+      setRemittanceFormData(prev => ({ ...prev, propertyName: propIdentifier }));
+    }
+  };
+
+  // -------------------------------------------------------------
+  // FACILITY MAINTENANCE & INVOICE ATTACHMENT HANDLERS
+  // -------------------------------------------------------------
+  const handleLogMaintenanceSubmit = (e) => {
+    e.preventDefault();
+    if (!maintenanceFormData.propertyName || !maintenanceFormData.title) {
+      alert("Please select a property and enter the maintenance issue.");
+      return;
+    }
+
+    const cost = Number(maintenanceFormData.actualCost) || 0;
+    portalStore.addMaintenance({
+      propertyId: maintenanceFormData.propertyId,
+      propertyName: maintenanceFormData.propertyName,
+      unitNumber: maintenanceFormData.unitNumber || 'Whole Building',
+      title: maintenanceFormData.title,
+      issue: maintenanceFormData.title,
+      description: maintenanceFormData.description || 'Routine preventive maintenance.',
+      contractor: maintenanceFormData.contractor || 'Royal Haven Facility Team',
+      actualCost: cost,
+      estimatedCost: cost,
+      status: maintenanceFormData.status || 'in_progress',
+      invoiceUrl: maintenanceFormData.invoiceUrl || null,
+      invoiceName: maintenanceFormData.invoiceName || null
+    });
+
+    loadData();
+    setShowLogMaintenanceModal(false);
+    setMaintenanceFormData({
+      propertyId: '',
+      propertyName: '',
+      unitNumber: '',
+      title: '',
+      description: '',
+      contractor: '',
+      actualCost: '',
+      invoiceUrl: null,
+      invoiceName: null,
+      status: 'in_progress'
+    });
+    showNotification("Maintenance work order logged with contractor invoice!");
+  };
+
+  const handleToggleMaintenanceStatus = (item) => {
+    const nextStatus = item.status === 'completed' ? 'in_progress' : 'completed';
+    portalStore.updateMaintenance(item.id, { status: nextStatus });
+    loadData();
+    showNotification(`Maintenance ticket marked as ${nextStatus === 'completed' ? 'Resolved' : 'In Progress'}.`);
+  };
+
+  const handleInvoiceUploadForTicket = (ticketId, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      portalStore.updateMaintenance(ticketId, {
+        invoiceUrl: reader.result,
+        invoiceName: file.name
+      });
+      loadData();
+      showNotification(`Contractor invoice "${file.name}" attached successfully.`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteMaintenance = (id) => {
+    if (window.confirm("Delete this maintenance record from the audit log?")) {
+      portalStore.deleteMaintenance(id);
+      loadData();
+      showNotification("Maintenance ticket removed.");
+    }
+  };
+
   const handleCreateRemittance = (e) => {
     e.preventDefault();
     const gross = Number(remittanceFormData.grossRent) || 0;
@@ -795,14 +1069,6 @@ export default function AdminPortal({ onReturnHome }) {
             >
               Access Admin Dashboard
             </button>
-
-            <button
-              type="button"
-              onClick={() => setPassword('royalhaven2026')}
-              className="w-full py-2 text-[11px] text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl font-bold transition-colors border border-amber-200 cursor-pointer"
-            >
-              🔑 Quick Admin Auto-fill (royalhaven2026)
-            </button>
           </form>
 
           <div className="text-center pt-2">
@@ -926,6 +1192,19 @@ export default function AdminPortal({ onReturnHome }) {
             >
               <DollarSign className="w-4 h-4" />
               <span>Owner Remittances ({remittances.length})</span>
+            </button>
+
+            {/* Maintenance & Invoices Module */}
+            <button
+              onClick={() => setActiveModule('maintenance')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'maintenance'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <Wrench className="w-4 h-4" />
+              <span>Maintenance &amp; Invoices ({maintenanceList.length})</span>
             </button>
 
             {/* Owner Accounts Module */}
@@ -1859,15 +2138,19 @@ export default function AdminPortal({ onReturnHome }) {
 
                   <form onSubmit={handleCreateRemittance} className="space-y-4 text-xs">
                     <div>
-                      <label className="block font-bold text-slate-900 mb-1">Select Property</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block font-bold text-slate-900">Select Managed Property</label>
+                        <span className="text-[10px] text-amber-700 font-bold uppercase">⚡ Auto-Calculates 90/10 Split</span>
+                      </div>
                       <select
                         value={remittanceFormData.propertyName}
-                        onChange={(e) => setRemittanceFormData(prev => ({ ...prev, propertyName: e.target.value }))}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        onChange={(e) => handleRemittancePropertySelect(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-semibold"
+                        required
                       >
                         <option value="">— Select Managed Property —</option>
-                        {properties.map(p => (
-                          <option key={p.id} value={p.name || p.title}>{p.name || p.title} ({p.city || p.location || 'Managed'})</option>
+                        {managedProperties.map(p => (
+                          <option key={p.id} value={p.name}>{p.name} ({p.city || 'Lagos'})</option>
                         ))}
                       </select>
                     </div>
@@ -1958,6 +2241,154 @@ export default function AdminPortal({ onReturnHome }) {
                     </div>
                   </form>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE: FACILITY MAINTENANCE & CONTRACTOR INVOICES       */}
+        {/* ========================================================= */}
+        {activeModule === 'maintenance' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <Wrench className="w-5 h-5 text-gold-600" />
+                  <span>Facility Maintenance &amp; Contractor Invoices</span>
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Audited work orders and verified contractor receipts. In accordance with property accounting standards, repair logs cannot be overwritten.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMaintenanceFormData({
+                    propertyId: managedProperties[0]?.id || '',
+                    propertyName: managedProperties[0]?.name || '',
+                    unitNumber: '',
+                    title: '',
+                    description: '',
+                    contractor: '',
+                    actualCost: '',
+                    invoiceUrl: null,
+                    invoiceName: null,
+                    status: 'in_progress'
+                  });
+                  setShowLogMaintenanceModal(true);
+                }}
+                className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-md hover:brightness-110 flex items-center space-x-1.5 cursor-pointer transition-all shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Log Maintenance Order</span>
+              </button>
+            </div>
+
+            {maintenanceList.length === 0 ? (
+              <div className="p-16 text-center text-slate-600 space-y-3">
+                <Wrench className="w-12 h-12 mx-auto text-slate-400" />
+                <h4 className="text-base font-bold text-slate-900">No maintenance tickets logged yet</h4>
+                <p className="text-xs text-slate-600 max-w-md mx-auto">
+                  Click "Log Maintenance Order" to register a repair work order with contractor receipts.
+                </p>
+              </div>
+            ) : (
+              <div className="p-6 pt-0 overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Property &amp; Unit</th>
+                      <th className="p-3">Work Order / Issue</th>
+                      <th className="p-3">Contractor</th>
+                      <th className="p-3 text-right">Audited Cost</th>
+                      <th className="p-3">Contractor Invoice</th>
+                      <th className="p-3 text-center">Status</th>
+                      <th className="p-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {maintenanceList.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-3">
+                          <strong className="text-slate-950 font-bold block text-sm">{item.propertyName}</strong>
+                          <span className="text-[11px] text-slate-500">{item.unitNumber || 'Whole Building'}</span>
+                        </td>
+                        <td className="p-3 max-w-xs space-y-1">
+                          <p className="font-bold text-slate-900">{item.title || item.issue}</p>
+                          {item.description && (
+                            <p className="text-[11px] text-slate-600 line-clamp-2">{item.description}</p>
+                          )}
+                          <span className="text-[10px] text-slate-400 block">Reported: {item.reportedDate}</span>
+                        </td>
+                        <td className="p-3">
+                          <span className="font-semibold text-slate-900">{item.contractor || 'Vetted Contractor'}</span>
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold text-amber-900 text-sm">
+                          ₦{Number(item.actualCost || item.cost || item.estimatedCost || 0).toLocaleString()}
+                        </td>
+                        <td className="p-3">
+                          {item.invoiceUrl ? (
+                            <a
+                              href={item.invoiceUrl}
+                              download={item.invoiceName || `${item.propertyName}-Invoice.pdf`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-lg text-xs font-bold inline-flex items-center gap-1 shadow-xs transition-colors"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-amber-700" />
+                              <span className="truncate max-w-[120px]">{item.invoiceName || 'View Invoice'}</span>
+                            </a>
+                          ) : (
+                            <label className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors">
+                              <Paperclip className="w-3 h-3 text-slate-500" />
+                              <span>Attach Invoice</span>
+                              <input
+                                type="file"
+                                accept=".pdf,image/*"
+                                className="hidden"
+                                onChange={(e) => handleInvoiceUploadForTicket(item.id, e.target.files[0])}
+                              />
+                            </label>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            item.status === 'completed'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : 'bg-amber-100 text-amber-900 border border-amber-300'
+                          }`}>
+                            {item.status === 'completed' ? 'Resolved' : 'In Progress'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleMaintenanceStatus(item)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                item.status === 'completed'
+                                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              }`}
+                            >
+                              {item.status === 'completed' ? 'Reopen' : 'Mark Resolved'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMaintenance(item.id)}
+                              className="p-1.5 text-slate-400 hover:text-red-700 rounded-lg transition-colors cursor-pointer"
+                              title="Delete from Log"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -2261,6 +2692,127 @@ export default function AdminPortal({ onReturnHome }) {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Managed Buildings, Units & Tenants Section */}
+            <div className="p-6 border-t border-slate-200 space-y-4 bg-slate-50/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-serif text-base font-bold text-slate-950 flex items-center space-x-2">
+                    <Building2 className="w-4 h-4 text-gold-600" />
+                    <span>Managed Buildings, Units &amp; Tenants ({managedProperties.length})</span>
+                  </h4>
+                  <p className="text-xs text-slate-600">
+                    Edit tenancy records, rent amounts, lease expiry dates, or trigger automatic 90/10 remittances.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleOpenOnboardModal()}
+                  className="px-3 py-1.5 bg-slate-900 text-gold-400 hover:bg-slate-800 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Onboard New Building</span>
+                </button>
+              </div>
+
+              {managedProperties.length === 0 ? (
+                <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500 text-xs">
+                  No managed buildings onboarded yet. Click "Onboard Managed Property" above to link a building.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {managedProperties.map(prop => {
+                    const occupied = (prop.units || []).filter(u => u.status === 'occupied').length;
+                    const totalUnits = (prop.units || []).length || prop.unitsCount || 1;
+                    const totalRent = (prop.units || []).reduce((sum, u) => sum + Number(u.rentAmount || 0), 0);
+                    const owner = owners.find(o => o.id === prop.ownerId || o.email === prop.ownerEmail || (o.assignedProperties || []).includes(prop.name));
+
+                    return (
+                      <div key={prop.id} className="bg-white p-5 rounded-2xl border border-amber-200 shadow-xs space-y-4 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h5 className="font-serif text-base font-bold text-slate-950">{prop.name}</h5>
+                              <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-gold-600 shrink-0" />
+                                <span>{prop.address || 'Lagos, Nigeria'}</span>
+                              </p>
+                            </div>
+                            <span className="px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs font-bold shrink-0">
+                              {occupied}/{totalUnits} Occupied
+                            </span>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Assigned Landlord:</span>
+                              <strong className="text-slate-900 font-semibold">{owner?.fullName || prop.ownerEmail || 'Registered Owner'}</strong>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Annual Gross Rent:</span>
+                              <strong className="text-emerald-700 font-bold font-mono">₦{totalRent.toLocaleString()}</strong>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Auto Monthly Net (90%):</span>
+                              <strong className="text-amber-800 font-bold font-mono">₦{Math.round((totalRent / 12) * 0.9).toLocaleString()}</strong>
+                            </div>
+                          </div>
+
+                          {/* Preview of Units */}
+                          <div className="space-y-1 pt-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Flats &amp; Active Tenants</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(prop.units || []).map((u, i) => (
+                                <span
+                                  key={u.id || i}
+                                  className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                                    u.status === 'occupied'
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200'
+                                  }`}
+                                >
+                                  {u.unitNumber}: {u.status === 'occupied' ? (u.tenant?.fullName || 'Occupied') : 'Vacant'}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditUnits(prop)}
+                            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-gold-400 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            <span>Edit Units &amp; Tenants</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleAutoFillRemittance(prop)}
+                            className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                          >
+                            <DollarSign className="w-3.5 h-3.5" />
+                            <span>Auto-Remit (90/10)</span>
+                          </button>
+
+                          {owner && (
+                            <button
+                              type="button"
+                              onClick={() => handleAccessClientPortal(owner)}
+                              className="px-3 py-2 bg-gold-gradient text-slate-950 hover:brightness-110 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+                            >
+                              Enter Portal
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Modal for Onboarding Managed Property */}
@@ -3219,6 +3771,374 @@ export default function AdminPortal({ onReturnHome }) {
 
             </div>
 
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODAL: EDIT UNITS & TENANTS                               */}
+        {/* ========================================================= */}
+        {showEditUnitsModal && editingUnitsProp && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-white max-w-3xl w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-5 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-gold-500"></span>
+                    <h4 className="font-serif text-lg font-bold text-slate-950">
+                      Edit Units &amp; Tenants — {editingUnitsProp.name}
+                    </h4>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Update tenancy agreements, lease dates, and payment status. Changes sync live to the landlord's dashboard.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowEditUnitsModal(false); setEditingUnitsProp(null); }}
+                  className="text-slate-400 hover:text-slate-700 font-bold p-1 text-base cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveUnitsAndTenants} className="space-y-5 text-xs">
+                {/* Building Information */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Building Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingUnitsProp.name}
+                      onChange={(e) => setEditingUnitsProp(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Physical Address</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingUnitsProp.address}
+                      onChange={(e) => setEditingUnitsProp(prev => ({ ...prev, address: e.target.value }))}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Units List */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs uppercase tracking-wider text-gold-700">
+                      Flats &amp; Tenants ({editingUnitsProp.units.length} Total)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleAddUnitToEditingProp}
+                      className="px-3 py-1.5 bg-slate-900 text-gold-400 hover:bg-slate-800 rounded-lg font-bold text-xs inline-flex items-center gap-1 cursor-pointer transition-all shadow-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Add Flat / Unit</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+                    {editingUnitsProp.units.map((u, idx) => (
+                      <div key={u.id || idx} className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-100 gap-2">
+                          <div className="flex items-center space-x-2 flex-1">
+                            <input
+                              type="text"
+                              value={u.unitNumber}
+                              onChange={(e) => handleUnitFieldChange(idx, 'unitNumber', e.target.value)}
+                              placeholder="Flat 101"
+                              className="font-bold text-slate-900 text-sm bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 w-44"
+                            />
+                            <select
+                              value={u.status}
+                              onChange={(e) => handleUnitFieldChange(idx, 'status', e.target.value)}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold border ${
+                                u.status === 'occupied'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : 'bg-amber-50 text-amber-900 border-amber-300'
+                              }`}
+                            >
+                              <option value="occupied">Occupied</option>
+                              <option value="vacant">Vacant</option>
+                            </select>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
+                              <span className="text-slate-500 font-semibold">Rent (₦):</span>
+                              <input
+                                type="number"
+                                value={u.rentAmount}
+                                onChange={(e) => handleUnitFieldChange(idx, 'rentAmount', e.target.value)}
+                                placeholder="5000000"
+                                className="w-28 font-mono font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg px-2 py-1"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveUnitFromEditingProp(u.id)}
+                              className="text-slate-400 hover:text-red-600 p-1 font-bold cursor-pointer"
+                              title="Delete Flat"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        {u.status === 'occupied' && (
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-1">
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tenant Name</label>
+                              <input
+                                type="text"
+                                value={u.tenant?.fullName || ''}
+                                onChange={(e) => handleTenantFieldChange(idx, 'fullName', e.target.value)}
+                                placeholder="Full Name"
+                                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-semibold"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Tenant Phone</label>
+                              <input
+                                type="tel"
+                                value={u.tenant?.phone || ''}
+                                onChange={(e) => handleTenantFieldChange(idx, 'phone', e.target.value)}
+                                placeholder="+234 803 000 0000"
+                                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-medium"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Lease Expiry</label>
+                              <input
+                                type="date"
+                                value={u.tenant?.leaseEnd || ''}
+                                onChange={(e) => handleTenantFieldChange(idx, 'leaseEnd', e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-600 mb-0.5">Rent Status</label>
+                              <select
+                                value={u.tenant?.paymentStatus || 'Paid'}
+                                onChange={(e) => handleTenantFieldChange(idx, 'paymentStatus', e.target.value)}
+                                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-bold"
+                              >
+                                <option value="Paid">Paid</option>
+                                <option value="Due">Due</option>
+                                <option value="Overdue">Overdue</option>
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => { setShowEditUnitsModal(false); setEditingUnitsProp(null); }}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 transition-all shadow-sm cursor-pointer"
+                  >
+                    Save Units &amp; Tenants
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODAL: LOG MAINTENANCE WORK ORDER & ATTACH INVOICE        */}
+        {/* ========================================================= */}
+        {showLogMaintenanceModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+                    <Wrench className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-lg font-bold text-slate-950">Log Maintenance Work Order</h4>
+                    <p className="text-[11px] text-slate-500">Creates an immutable audit record and attaches contractor invoice.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowLogMaintenanceModal(false)}
+                  className="text-slate-400 hover:text-slate-700 font-bold p-1 text-base cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleLogMaintenanceSubmit} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-900 mb-1">Target Property</label>
+                  <select
+                    required
+                    value={maintenanceFormData.propertyName}
+                    onChange={(e) => {
+                      const prop = managedProperties.find(p => p.name === e.target.value);
+                      setMaintenanceFormData(prev => ({
+                        ...prev,
+                        propertyName: e.target.value,
+                        propertyId: prop?.id || ''
+                      }));
+                    }}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-medium"
+                  >
+                    <option value="">— Select Managed Property —</option>
+                    {managedProperties.map(p => (
+                      <option key={p.id} value={p.name}>{p.name} ({p.city || 'Lagos'})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Unit / Flat (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Flat 102 or Common Area"
+                      value={maintenanceFormData.unitNumber}
+                      onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Initial Status</label>
+                    <select
+                      value={maintenanceFormData.status}
+                      onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, status: e.target.value }))}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold"
+                    >
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Resolved</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-900 mb-1">Work Order / Repair Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Borehole Water Pump Overhaul"
+                    value={maintenanceFormData.title}
+                    onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-900 mb-1">Work Description &amp; Scope</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Describe parts replaced or repairs executed by the facility team..."
+                    value={maintenanceFormData.description}
+                    onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                  ></textarea>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Vetted Contractor</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Engr. Tunde Waterworks Ltd."
+                      value={maintenanceFormData.contractor}
+                      onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, contractor: e.target.value }))}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-900 mb-1">Audited Cost (₦)</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="e.g. 45000"
+                      value={maintenanceFormData.actualCost}
+                      onChange={(e) => setMaintenanceFormData(prev => ({ ...prev, actualCost: e.target.value }))}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Upload Contractor Invoice */}
+                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                      <Paperclip className="w-3.5 h-3.5 text-amber-700" />
+                      Attach Contractor Invoice / Receipt (PDF / Image)
+                    </span>
+                    {maintenanceFormData.invoiceName && (
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        ✓ Attached
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept=".pdf,image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setMaintenanceFormData(prev => ({
+                          ...prev,
+                          invoiceUrl: reader.result,
+                          invoiceName: file.name
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-gold-400 hover:file:bg-slate-800 cursor-pointer"
+                  />
+                  {maintenanceFormData.invoiceName && (
+                    <p className="text-[11px] text-slate-600 font-mono">
+                      File: {maintenanceFormData.invoiceName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowLogMaintenanceModal(false)}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 transition-all shadow-sm cursor-pointer"
+                  >
+                    Log Work Order
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 

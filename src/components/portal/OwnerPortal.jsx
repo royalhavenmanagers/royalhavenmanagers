@@ -1268,6 +1268,21 @@ export default function OwnerPortal({ onReturnHome }) {
                           </div>
                         </div>
 
+                        {item.invoiceUrl && (
+                          <div className="pt-1">
+                            <a
+                              href={item.invoiceUrl}
+                              download={item.invoiceName || `${item.propertyName}-Contractor-Invoice.pdf`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-gold-gradient hover:text-slate-950 border border-gold-500/30 text-amber-300 font-bold text-xs transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+                            >
+                              <FileText className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">View Contractor Invoice ({item.invoiceName || 'PDF'})</span>
+                            </a>
+                          </div>
+                        )}
+
                         <a
                           href={`https://wa.me/${companyData.whatsapp}?text=Hello%20Royal%20Haven,%20I%20am%20reviewing%20maintenance%20ticket%20(${item.id})%20for%20${item.propertyName}%20regarding%20"${item.title}".`}
                           target="_blank"

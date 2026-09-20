@@ -169,15 +169,6 @@ export default function Navbar({ onOpenContact }) {
               </a>
 
               <a
-                href="#admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 border-b border-slate-100 py-2.5 min-h-[44px]"
-              >
-                <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>Staff Admin Portal</span>
-              </a>
-
-              <a
                 href={companyData.brochureUrl || "/royal-haven-company-profile.pdf"}
                 download
                 className="text-sm font-semibold text-slate-700 hover:text-gold-600 flex items-center space-x-2 py-2 min-h-[44px]"
