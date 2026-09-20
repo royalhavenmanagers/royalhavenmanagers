@@ -3,7 +3,7 @@ import {
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
-  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink
+  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
@@ -96,6 +96,33 @@ export default function AdminPortal({ onReturnHome }) {
   const [editingOwner, setEditingOwner] = useState(null);
   const [showEditOwnerModal, setShowEditOwnerModal] = useState(false);
 
+  // Property Onboarding Wizard & Submissions Queue State
+  const [onboardingSubmissions, setOnboardingSubmissions] = useState([]);
+  const [showOnboardPropertyModal, setShowOnboardPropertyModal] = useState(false);
+  const [activatedPropertyData, setActivatedPropertyData] = useState(null);
+  const [onboardPropertyForm, setOnboardPropertyForm] = useState({
+    ownerMode: 'existing', // 'existing' | 'new'
+    ownerId: '',
+    newOwnerName: '',
+    newOwnerEmail: '',
+    newOwnerPhone: '',
+    newOwnerPassword: '',
+    newOwnerBank: '',
+    newOwnerAccount: '',
+    propertyName: '',
+    address: '',
+    city: 'Lagos',
+    state: 'Lagos State',
+    propertyType: 'Residential Apartment',
+    unitsCount: 1,
+    targetRent: '',
+    tenantName: '',
+    tenantPhone: '',
+    tenantEmail: '',
+    leaseStart: new Date().toISOString().split('T')[0],
+    leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  });
+
   const { impersonateOwner } = useAuth();
 
   const [notification, setNotification] = useState('');
@@ -125,9 +152,10 @@ export default function AdminPortal({ onReturnHome }) {
       if (cloudProps && Array.isArray(cloudProps)) setProperties(cloudProps);
     });
 
-    // Load inquiries & remittances
+    // Load inquiries, remittances & onboarding submissions
     setInquiries(portalStore.getInquiries());
     setRemittances(portalStore.getTransactions().filter(t => t.type === 'owner_remittance'));
+    setOnboardingSubmissions(portalStore.getOnboardingSubmissions());
 
     // Load registered owners from store & Supabase
     setOwners(portalStore.getOwners());
@@ -294,6 +322,187 @@ export default function AdminPortal({ onReturnHome }) {
       const updated = portalStore.deleteInquiry(id);
       setInquiries(updated);
       showNotification("Lead deleted.");
+    }
+  };
+
+  // Onboard Managed Property Handlers
+  const handleOpenOnboardModal = (preselectedOwner = null) => {
+    setOnboardPropertyForm({
+      ownerMode: preselectedOwner ? 'existing' : (owners.length > 0 ? 'existing' : 'new'),
+      ownerId: preselectedOwner ? preselectedOwner.id : (owners[0]?.id || ''),
+      newOwnerName: '',
+      newOwnerEmail: '',
+      newOwnerPhone: '',
+      newOwnerPassword: '',
+      newOwnerBank: 'Zenith Bank',
+      newOwnerAccount: '',
+      propertyName: '',
+      address: '',
+      city: 'Lagos',
+      state: 'Lagos State',
+      propertyType: 'Residential Apartment',
+      unitsCount: 1,
+      targetRent: '',
+      tenantName: '',
+      tenantPhone: '',
+      tenantEmail: '',
+      leaseStart: new Date().toISOString().split('T')[0],
+      leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    });
+    setShowOnboardPropertyModal(true);
+  };
+
+  const handleAdminOnboardSubmit = async (e) => {
+    e.preventDefault();
+    if (!onboardPropertyForm.propertyName.trim()) {
+      alert("Please enter a property name.");
+      return;
+    }
+
+    let targetOwnerId = onboardPropertyForm.ownerId;
+    let targetOwnerName = '';
+    let targetOwnerEmail = '';
+    let targetOwnerPhone = '';
+
+    if (onboardPropertyForm.ownerMode === 'new') {
+      if (!onboardPropertyForm.newOwnerName || !onboardPropertyForm.newOwnerEmail) {
+        alert("Please fill in Landlord Full Name and Email.");
+        return;
+      }
+      const tempPassword = onboardPropertyForm.newOwnerPassword || ('RH-' + Math.random().toString(36).slice(-6).toUpperCase());
+
+      try {
+        if (authApi) {
+          await authApi.signUp(onboardPropertyForm.newOwnerEmail, tempPassword, {
+            full_name: onboardPropertyForm.newOwnerName,
+            phone: onboardPropertyForm.newOwnerPhone,
+            role: 'property_owner',
+            bank_name: onboardPropertyForm.newOwnerBank,
+            account_number: onboardPropertyForm.newOwnerAccount
+          });
+        }
+      } catch (err) {
+        console.warn("Supabase user creation notice:", err.message);
+      }
+
+      const created = portalStore.addOwner({
+        fullName: onboardPropertyForm.newOwnerName,
+        email: onboardPropertyForm.newOwnerEmail,
+        phone: onboardPropertyForm.newOwnerPhone,
+        password: tempPassword,
+        bankName: onboardPropertyForm.newOwnerBank,
+        accountNumber: onboardPropertyForm.newOwnerAccount,
+        assignedProperties: [onboardPropertyForm.propertyName.trim()]
+      });
+
+      targetOwnerId = created.id;
+      targetOwnerName = created.fullName;
+      targetOwnerEmail = created.email;
+      targetOwnerPhone = created.phone;
+    } else {
+      const existing = owners.find(o => o.id === targetOwnerId || o.email === targetOwnerId);
+      if (!existing) {
+        alert("Please select an existing Property Owner.");
+        return;
+      }
+      targetOwnerId = existing.id;
+      targetOwnerName = existing.fullName;
+      targetOwnerEmail = existing.email;
+      targetOwnerPhone = existing.phone;
+
+      const currentProps = existing.assignedProperties || [];
+      if (!currentProps.includes(onboardPropertyForm.propertyName.trim())) {
+        const updatedProps = [...currentProps, onboardPropertyForm.propertyName.trim()];
+        portalStore.updateOwner(existing.id, { assignedProperties: updatedProps });
+        if (supabase) {
+          try {
+            await supabase.from('profiles').update({ assigned_properties: updatedProps }).eq('email', existing.email);
+          } catch {}
+        }
+      }
+    }
+
+    const unitsCount = Math.max(1, parseInt(onboardPropertyForm.unitsCount, 10) || 1);
+    const targetRent = Number(onboardPropertyForm.targetRent) || 0;
+    const propId = `prop-${Date.now()}`;
+
+    const newProp = portalStore.addProperty({
+      id: propId,
+      name: onboardPropertyForm.propertyName.trim(),
+      address: onboardPropertyForm.address?.trim() || 'Lagos, Nigeria',
+      city: onboardPropertyForm.city || 'Lagos',
+      state: onboardPropertyForm.state || 'Lagos State',
+      propertyType: onboardPropertyForm.propertyType || 'Residential Apartment',
+      status: 'active',
+      ownerId: targetOwnerId,
+      ownerEmail: targetOwnerEmail,
+      unitsCount: unitsCount,
+      units: Array.from({ length: unitsCount }, (_, i) => ({
+        id: `unit-${propId}-${i + 1}`,
+        unitNumber: `Flat ${i + 1}`,
+        floorPlanType: onboardPropertyForm.propertyType || 'Apartment',
+        rentAmount: targetRent,
+        serviceCharge: 0,
+        bedrooms: 3,
+        bathrooms: 3,
+        status: 'occupied',
+        tenant: {
+          fullName: i === 0 && onboardPropertyForm.tenantName ? onboardPropertyForm.tenantName : `Verified Tenant ${i + 1}`,
+          phone: i === 0 && onboardPropertyForm.tenantPhone ? onboardPropertyForm.tenantPhone : '+234 800 000 0000',
+          email: i === 0 && onboardPropertyForm.tenantEmail ? onboardPropertyForm.tenantEmail : 'tenant@royalhaven.com.ng',
+          leaseStart: onboardPropertyForm.leaseStart || new Date().toISOString().split('T')[0],
+          leaseEnd: onboardPropertyForm.leaseEnd || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          paymentStatus: 'Paid'
+        }
+      }))
+    });
+
+    if (targetRent > 0) {
+      const gross = targetRent;
+      const mgmtFee = Math.round(gross * 0.10);
+      const net = gross - mgmtFee;
+      portalStore.addTransaction({
+        propertyId: propId,
+        propertyName: newProp.name,
+        ownerEmail: targetOwnerEmail,
+        type: 'owner_remittance',
+        amount: net,
+        referenceCode: `RH-REM-${Date.now().toString().slice(-6)}`,
+        date: new Date().toISOString().split('T')[0],
+        status: 'completed',
+        deductions: {
+          grossRent: gross,
+          managementFee: mgmtFee,
+          maintenanceCost: 0,
+          netRemitted: net
+        }
+      });
+    }
+
+    loadData();
+    setShowOnboardPropertyModal(false);
+    setActivatedPropertyData({
+      ownerName: targetOwnerName,
+      ownerPhone: targetOwnerPhone,
+      ownerEmail: targetOwnerEmail,
+      propertyName: newProp.name
+    });
+    showNotification(`Property "${newProp.name}" successfully onboarded and activated for ${targetOwnerName}!`);
+  };
+
+  const handleApproveSubmission = (sub) => {
+    const res = portalStore.approveOnboardingSubmission(sub.id);
+    if (res) {
+      loadData();
+      showNotification(`Submission Approved! "${res.property.name}" is now live on the owner dashboard.`);
+    }
+  };
+
+  const handleDismissSubmission = (id) => {
+    if (window.confirm("Dismiss this property onboarding submission?")) {
+      portalStore.deleteOnboardingSubmission(id);
+      loadData();
+      showNotification("Submission removed.");
     }
   };
 
@@ -1762,14 +1971,135 @@ export default function AdminPortal({ onReturnHome }) {
                 </p>
               </div>
 
-              <button
-                onClick={() => setShowAddOwnerModal(true)}
-                className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase rounded-xl shadow-sm hover:brightness-105 flex items-center space-x-1"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Register Property Owner</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenOnboardModal()}
+                  className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-md hover:brightness-110 flex items-center space-x-1.5 cursor-pointer transition-all"
+                >
+                  <Building2 className="w-4 h-4" />
+                  <span>➕ Onboard Managed Property</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddOwnerModal(true)}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold uppercase rounded-xl transition-all flex items-center space-x-1 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Register Owner</span>
+                </button>
+              </div>
             </div>
+
+            {/* Activated Property Banner with 1-Click WhatsApp Welcome Link */}
+            {activatedPropertyData && (
+              <div className="mx-6 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 text-slate-800 space-y-2.5 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-emerald-900 font-bold text-xs">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    <span>🎉 "{activatedPropertyData.propertyName}" is Activated for {activatedPropertyData.ownerName}!</span>
+                  </div>
+                  <button onClick={() => setActivatedPropertyData(null)} className="text-xs text-slate-400 hover:text-slate-600">✕ Dismiss</button>
+                </div>
+                <p className="text-xs text-slate-600">
+                  The property, units, and dashboard are live. Send {activatedPropertyData.ownerName} their portal link:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const msg = `Hello ${activatedPropertyData.ownerName},\nYour property "${activatedPropertyData.propertyName}" is now live on your Royal Haven Owner Portal!\n\nLog in at https://www.royalhaven.com.ng/#portal to monitor your tenants, rent payments, and remittance statements.`;
+                      navigator.clipboard.writeText(msg);
+                      alert("Welcome message copied to clipboard!");
+                    }}
+                    className="px-3 py-1.5 bg-white border border-emerald-400 text-emerald-800 rounded-lg text-xs font-bold flex items-center space-x-1 hover:bg-emerald-100 cursor-pointer"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Welcome Message</span>
+                  </button>
+                  {activatedPropertyData.ownerPhone && (
+                    <a
+                      href={`https://wa.me/${activatedPropertyData.ownerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                        `Hello ${activatedPropertyData.ownerName}, your property "${activatedPropertyData.propertyName}" is now live on your Royal Haven Owner Portal.\n\nPortal Link: https://www.royalhaven.com.ng/#portal\n\nYou can view your live tenants, rental payments, and download remittance receipts.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold flex items-center space-x-1 hover:bg-emerald-700"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send Welcome on WhatsApp</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Incoming Property Submissions Queue */}
+            {onboardingSubmissions && onboardingSubmissions.filter(s => s.status === 'pending').length > 0 && (
+              <div className="mx-6 p-4 rounded-2xl bg-amber-50/90 border border-amber-300 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                      <Building2 className="w-4 h-4 text-amber-700" />
+                      Incoming Property Submissions ({onboardingSubmissions.filter(s => s.status === 'pending').length} Pending)
+                    </h4>
+                  </div>
+                  <span className="text-[11px] text-amber-800 font-medium">Submitted by landlords via Owner Portal</span>
+                </div>
+
+                <div className="space-y-2">
+                  {onboardingSubmissions.filter(s => s.status === 'pending').map(sub => (
+                    <div key={sub.id} className="bg-white p-3.5 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <strong className="text-slate-900 font-bold text-sm">{sub.propertyName}</strong>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 uppercase">
+                            {sub.propertyType || 'Residential'}
+                          </span>
+                          <span className="text-xs text-slate-500">• {sub.unitsCount || 1} Units</span>
+                        </div>
+                        <p className="text-xs text-slate-600">
+                          Owner: <span className="font-semibold text-slate-900">{sub.ownerName || sub.ownerEmail}</span> ({sub.ownerPhone || 'No phone'}) | Expected Rent: <span className="font-bold text-emerald-700">₦{Number(sub.targetRent || 0).toLocaleString()}</span>
+                        </p>
+                        {sub.address && <p className="text-[11px] text-slate-500 italic">Location: {sub.address}</p>}
+                        {sub.notes && <p className="text-[11px] text-slate-500">Note: "{sub.notes}"</p>}
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleApproveSubmission(sub)}
+                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1 shadow-xs cursor-pointer"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Approve &amp; Activate</span>
+                        </button>
+                        {sub.ownerPhone && (
+                          <a
+                            href={`https://wa.me/${sub.ownerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${sub.ownerName || 'Sir/Ma'}, this is Royal Haven regarding your property onboarding submission for "${sub.propertyName}".`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-xs font-bold border border-emerald-200"
+                          >
+                            WhatsApp
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDismissSubmission(sub.id)}
+                          className="px-2.5 py-2 text-slate-400 hover:text-red-600 text-xs font-semibold cursor-pointer"
+                          title="Dismiss submission"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Created Owner Success Notification with Copy Credentials */}
             {createdOwnerCreds && (
@@ -1848,9 +2178,28 @@ export default function AdminPortal({ onReturnHome }) {
                         {owner.accountName && <span className="text-[10px] text-slate-400 block truncate">{owner.accountName}</span>}
                       </td>
                       <td className="p-3">
-                        <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-semibold">
-                          {owner.assignedProperties && owner.assignedProperties.length > 0 ? owner.assignedProperties.filter(p => !p.includes('Royal Crest') && !p.includes('Haven Terraces')).join(", ") || "Pending Onboarding" : "Pending Onboarding"}
-                        </span>
+                        {(() => {
+                          const assigned = owner.assignedProperties && owner.assignedProperties.length > 0 
+                            ? owner.assignedProperties.filter(p => !p.includes('Royal Crest') && !p.includes('Haven Terraces')).join(", ")
+                            : null;
+                          if (assigned) {
+                            return (
+                              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1">
+                                🏢 {assigned}
+                              </span>
+                            );
+                          }
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditOwner(owner)}
+                              className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                              title="Click to assign a property to this owner"
+                            >
+                              ➕ Link Property Now
+                            </button>
+                          );
+                        })()}
                       </td>
                       <td className="p-3 text-center">
                         <div className="flex items-center justify-center space-x-2">
@@ -1861,6 +2210,15 @@ export default function AdminPortal({ onReturnHome }) {
                             title={`Open ${owner.fullName}'s Owner Portal`}
                           >
                             Enter Portal
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenOnboardModal(owner)}
+                            className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            title={`Onboard a new property for ${owner.fullName}`}
+                          >
+                            + Onboard
                           </button>
 
                           <button
@@ -1896,6 +2254,292 @@ export default function AdminPortal({ onReturnHome }) {
                 </tbody>
               </table>
             </div>
+
+            {/* Modal for Onboarding Managed Property */}
+            {showOnboardPropertyModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white max-w-2xl w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-5 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-lg font-bold text-slate-950">Onboard Managed Property</h4>
+                        <p className="text-[11px] text-slate-500">Attach building, units, and tenancy to a landlord's live digital dashboard.</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowOnboardPropertyModal(false)}
+                      className="text-slate-400 hover:text-slate-700 font-bold p-1 cursor-pointer text-base"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAdminOnboardSubmit} className="space-y-4 text-xs">
+                    {/* Step 1: Owner Selection */}
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 text-xs uppercase tracking-wider text-gold-700 flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5" />
+                          1. Landlord / Property Owner
+                        </span>
+                        <div className="flex rounded-lg border border-slate-200 p-0.5 bg-white text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => setOnboardPropertyForm(prev => ({ ...prev, ownerMode: 'existing' }))}
+                            className={`px-3 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                              onboardPropertyForm.ownerMode === 'existing'
+                                ? 'bg-slate-900 text-white'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            Existing Owner
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOnboardPropertyForm(prev => ({ ...prev, ownerMode: 'new' }))}
+                            className={`px-3 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                              onboardPropertyForm.ownerMode === 'new'
+                                ? 'bg-slate-900 text-white'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            + New Owner
+                          </button>
+                        </div>
+                      </div>
+
+                      {onboardPropertyForm.ownerMode === 'existing' ? (
+                        <div>
+                          <label className="block font-bold text-slate-900 mb-1">Select Registered Owner</label>
+                          <select
+                            required
+                            value={onboardPropertyForm.ownerId}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, ownerId: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-medium"
+                          >
+                            <option value="">— Select Owner from System —</option>
+                            {owners.map(o => (
+                              <option key={o.id} value={o.id}>
+                                {o.fullName} ({o.email})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">Landlord Full Name</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. Chief Babatunde Adeleke"
+                                value={onboardPropertyForm.newOwnerName}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerName: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">Login Email Address</label>
+                              <input
+                                type="email"
+                                required
+                                placeholder="client@gmail.com"
+                                value={onboardPropertyForm.newOwnerEmail}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerEmail: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">WhatsApp Phone Number</label>
+                              <input
+                                type="tel"
+                                placeholder="+234 803 000 0000"
+                                value={onboardPropertyForm.newOwnerPhone}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerPhone: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">Assign Login Password</label>
+                              <input
+                                type="text"
+                                placeholder="Leave blank to auto-generate"
+                                value={onboardPropertyForm.newOwnerPassword}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerPassword: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">Payout Bank Name</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Zenith Bank"
+                                value={onboardPropertyForm.newOwnerBank}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerBank: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                              />
+                            </div>
+                            <div>
+                              <label className="block font-bold text-slate-900 mb-1">10-Digit Account Number</label>
+                              <input
+                                type="text"
+                                maxLength={10}
+                                placeholder="0123456789"
+                                value={onboardPropertyForm.newOwnerAccount}
+                                onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, newOwnerAccount: e.target.value }))}
+                                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Step 2: Property & Units Details */}
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                      <span className="font-bold text-slate-900 text-xs uppercase tracking-wider text-gold-700 flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" />
+                        2. Managed Property &amp; Units
+                      </span>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-bold text-slate-900 mb-1">Property / Estate Name</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Royal Haven Duplex Court"
+                            value={onboardPropertyForm.propertyName}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, propertyName: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-900 mb-1">Property Type</label>
+                          <select
+                            value={onboardPropertyForm.propertyType}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, propertyType: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          >
+                            <option value="Residential Apartment">Residential Apartment</option>
+                            <option value="Semi-Detached Duplex">Semi-Detached Duplex</option>
+                            <option value="Fully Detached Luxury Villa">Fully Detached Luxury Villa</option>
+                            <option value="Block of Commercial Flats">Block of Commercial Flats</option>
+                            <option value="Serviced Terrace">Serviced Terrace</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block font-bold text-slate-900 mb-1">Address &amp; Location</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Plot 12, Admiralty Way, Lekki Phase 1"
+                            value={onboardPropertyForm.address}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, address: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block font-bold text-slate-900 mb-1">Total Units</label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={50}
+                              required
+                              value={onboardPropertyForm.unitsCount}
+                              onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, unitsCount: e.target.value }))}
+                              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-900 mb-1">Rent / Unit (₦)</label>
+                            <input
+                              type="number"
+                              placeholder="e.g. 5000000"
+                              value={onboardPropertyForm.targetRent}
+                              onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, targetRent: e.target.value }))}
+                              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 3: Optional Active Tenant Setup */}
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                      <span className="font-bold text-slate-900 text-xs uppercase tracking-wider text-gold-700 flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        3. Initial Tenant Setup (Optional - can be updated anytime)
+                      </span>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">Tenant Full Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Dr. Kelechi Nwosu"
+                            value={onboardPropertyForm.tenantName}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, tenantName: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">Tenant Phone</label>
+                          <input
+                            type="tel"
+                            placeholder="+234 802 000 0000"
+                            value={onboardPropertyForm.tenantPhone}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, tenantPhone: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">Lease Expiry Date</label>
+                          <input
+                            type="date"
+                            value={onboardPropertyForm.leaseEnd}
+                            onChange={(e) => setOnboardPropertyForm(prev => ({ ...prev, leaseEnd: e.target.value }))}
+                            className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowOnboardPropertyModal(false)}
+                        className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold cursor-pointer hover:bg-slate-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 shadow-md flex items-center space-x-2 cursor-pointer"
+                      >
+                        <Building2 className="w-4 h-4" />
+                        <span>Complete Onboarding &amp; Activate</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
 
             {/* Modal to Create Client Account */}
             {showAddOwnerModal && (

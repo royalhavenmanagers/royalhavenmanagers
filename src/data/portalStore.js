@@ -5,8 +5,8 @@ const STORAGE_KEY_PROPERTIES = "royalhaven_portal_properties";
 const STORAGE_KEY_TRANSACTIONS = "royalhaven_portal_transactions";
 const STORAGE_KEY_MAINTENANCE = "royalhaven_portal_maintenance";
 const STORAGE_KEY_INSPECTIONS = "royalhaven_portal_inspections";
-const STORAGE_KEY_DOCUMENTS = "royalhaven_portal_documents";
 const STORAGE_KEY_INQUIRIES = "royalhaven_leads_inbox";
+const STORAGE_KEY_ONBOARDING_SUBMISSIONS = "royalhaven_portal_onboarding_submissions";
 
 // Clean production store with zero demo accounts or fake sample data
 const DEFAULT_PORTAL_DATA = {
@@ -292,6 +292,112 @@ export const portalStore = {
     const list = portalStore.getOwners();
     const updated = list.filter(o => o.id !== id);
     localStorage.setItem("royalhaven_portal_owners", JSON.stringify(updated));
+    return updated;
+  },
+
+  // Onboarding Submissions Queue
+  getOnboardingSubmissions: () => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  },
+
+  addOnboardingSubmission: (sub) => {
+    const list = portalStore.getOnboardingSubmissions();
+    const newSub = {
+      ...sub,
+      id: sub.id || `sub-${Date.now()}`,
+      date: sub.date || new Date().toISOString().split('T')[0],
+      status: sub.status || 'pending'
+    };
+    list.unshift(newSub);
+    localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(list));
+    return newSub;
+  },
+
+  updateOnboardingSubmissionStatus: (id, status) => {
+    const list = portalStore.getOnboardingSubmissions();
+    const updated = list.map(item => item.id === id ? { ...item, status } : item);
+    localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
+    return updated;
+  },
+
+  approveOnboardingSubmission: (id) => {
+    const list = portalStore.getOnboardingSubmissions();
+    const sub = list.find(item => item.id === id);
+    if (!sub) return null;
+
+    const unitsCount = Math.max(1, parseInt(sub.unitsCount, 10) || 1);
+    const targetRent = Number(sub.targetRent) || 0;
+    const propId = `prop-${Date.now()}`;
+
+    const newProperty = portalStore.addProperty({
+      id: propId,
+      name: sub.propertyName.trim(),
+      address: sub.address?.trim() || '',
+      city: sub.city || 'Lagos',
+      state: sub.state || 'Lagos State',
+      propertyType: sub.propertyType || 'Residential',
+      status: 'active',
+      ownerEmail: sub.ownerEmail || '',
+      ownerId: sub.ownerId || '',
+      unitsCount: unitsCount,
+      notes: sub.notes || '',
+      units: Array.from({ length: unitsCount }, (_, i) => ({
+        id: `unit-${propId}-${i + 1}`,
+        unitNumber: `Flat ${i + 1}`,
+        floorPlanType: sub.propertyType || 'Apartment',
+        rentAmount: targetRent,
+        serviceCharge: 0,
+        bedrooms: 3,
+        bathrooms: 3,
+        status: 'occupied',
+        tenant: {
+          fullName: 'Assigned Tenant',
+          phone: '+234 800 000 0000',
+          email: 'tenant@royalhaven.com.ng',
+          leaseStart: new Date().toISOString().split('T')[0],
+          leaseEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          paymentStatus: 'Paid'
+        }
+      }))
+    });
+
+    // Link to owner
+    if (sub.ownerId || sub.ownerEmail) {
+      const owners = portalStore.getOwners();
+      const owner = owners.find(o => 
+        (sub.ownerId && o.id === sub.ownerId) || 
+        (sub.ownerEmail && o.email?.toLowerCase().trim() === sub.ownerEmail.toLowerCase().trim())
+      );
+      if (owner) {
+        const assigned = owner.assignedProperties || [];
+        if (!assigned.includes(newProperty.name)) {
+          portalStore.updateOwner(owner.id, {
+            assignedProperties: [...assigned, newProperty.name]
+          });
+        }
+      }
+    }
+
+    // Mark submission approved
+    const updated = list.map(item => item.id === id ? { ...item, status: 'approved', propertyId: propId } : item);
+    localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
+
+    return { property: newProperty, submission: sub };
+  },
+
+  deleteOnboardingSubmission: (id) => {
+    const list = portalStore.getOnboardingSubmissions();
+    const updated = list.filter(item => item.id !== id);
+    localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
     return updated;
   }
 };
