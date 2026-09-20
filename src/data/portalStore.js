@@ -399,5 +399,145 @@ export const portalStore = {
     const updated = list.filter(item => item.id !== id);
     localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
     return updated;
+  },
+
+  seedDemoData: (demoOwnerId = 'owner-demo-adeleke', demoEmail = 'demo.landlord@royalhaven.com.ng') => {
+    const demoPropName = 'Grand Imperial Court, Lekki Phase 1';
+    const props = portalStore.getProperties();
+    const existing = props.find(p => p.name === demoPropName || p.id === 'rh-demo-prop-lekki');
+    
+    if (!existing) {
+      portalStore.addProperty({
+        id: 'rh-demo-prop-lekki',
+        name: demoPropName,
+        address: 'Plot 14, Admiralty Way, Lekki Phase 1',
+        city: 'Lagos',
+        state: 'Lagos State',
+        propertyType: 'Luxury Serviced Apartments',
+        status: 'active',
+        ownerId: demoOwnerId,
+        ownerEmail: demoEmail,
+        coverImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80',
+        unitsCount: 4,
+        units: [
+          {
+            id: 'rh-unit-1',
+            unitNumber: 'Flat 101 (3-Bed Luxury)',
+            floorPlanType: '3-Bedroom Penthouse',
+            rentAmount: 8000000,
+            serviceCharge: 1200000,
+            bedrooms: 3,
+            bathrooms: 3,
+            status: 'occupied',
+            tenant: {
+              fullName: 'Engr. Femi Alabi',
+              phone: '+234 803 222 1100',
+              email: 'femi.alabi@shell.com',
+              leaseStart: '2025-12-01',
+              leaseEnd: '2026-11-30',
+              paymentStatus: 'Paid'
+            }
+          },
+          {
+            id: 'rh-unit-2',
+            unitNumber: 'Flat 102 (3-Bed Serviced)',
+            floorPlanType: '3-Bedroom Apartment',
+            rentAmount: 8000000,
+            serviceCharge: 1200000,
+            bedrooms: 3,
+            bathrooms: 3,
+            status: 'occupied',
+            tenant: {
+              fullName: 'Barrister Chioma Okonkwo',
+              phone: '+234 802 333 4455',
+              email: 'chioma@okonkwolegal.ng',
+              leaseStart: '2025-10-16',
+              leaseEnd: '2026-10-15',
+              paymentStatus: 'Paid'
+            }
+          },
+          {
+            id: 'rh-unit-3',
+            unitNumber: 'Flat 201 (3-Bed Luxury)',
+            floorPlanType: '3-Bedroom Apartment',
+            rentAmount: 8500000,
+            serviceCharge: 1200000,
+            bedrooms: 3,
+            bathrooms: 3,
+            status: 'occupied',
+            tenant: {
+              fullName: 'Mr. David Adeleke',
+              phone: '+234 814 555 7788',
+              email: 'david@fintechafrica.io',
+              leaseStart: '2026-03-01',
+              leaseEnd: '2027-02-28',
+              paymentStatus: 'Paid'
+            }
+          },
+          {
+            id: 'rh-unit-4',
+            unitNumber: 'Flat 202 (3-Bed Penthouse)',
+            floorPlanType: '3-Bedroom Penthouse',
+            rentAmount: 8500000,
+            serviceCharge: 1200000,
+            bedrooms: 3,
+            bathrooms: 3,
+            status: 'occupied',
+            tenant: {
+              fullName: 'Dr. Olumide Bakare',
+              phone: '+234 809 111 8899',
+              email: 'o.bakare@lagosmed.org',
+              leaseStart: '2026-04-15',
+              leaseEnd: '2027-04-14',
+              paymentStatus: 'Paid'
+            }
+          }
+        ]
+      });
+
+      const monthsSeed = [
+        { date: '2026-04-10', gross: 2750000, fee: 275000, maint: 0, net: 2475000 },
+        { date: '2026-05-10', gross: 2750000, fee: 275000, maint: 45000, net: 2430000 },
+        { date: '2026-06-10', gross: 2750000, fee: 275000, maint: 0, net: 2475000 },
+        { date: '2026-07-10', gross: 2750000, fee: 275000, maint: 0, net: 2475000 },
+        { date: '2026-08-10', gross: 2750000, fee: 275000, maint: 60000, net: 2415000 },
+        { date: '2026-09-10', gross: 2750000, fee: 275000, maint: 0, net: 2475000 }
+      ];
+
+      monthsSeed.forEach((m, idx) => {
+        portalStore.addTransaction({
+          id: `rh-demo-tx-${idx + 1}`,
+          propertyId: 'rh-demo-prop-lekki',
+          propertyName: demoPropName,
+          ownerEmail: demoEmail,
+          type: 'owner_remittance',
+          amount: m.net,
+          referenceCode: `RH-REM-20260${idx + 4}`,
+          date: m.date,
+          status: 'completed',
+          beneficiaryBank: 'Zenith Bank Plc',
+          beneficiaryAccount: '1014589201',
+          deductions: {
+            grossRent: m.gross,
+            managementFee: m.fee,
+            maintenanceCost: m.maint,
+            netRemitted: m.net
+          }
+        });
+      });
+
+      portalStore.addMaintenance({
+        id: 'rh-demo-maint-1',
+        propertyId: 'rh-demo-prop-lekki',
+        propertyName: demoPropName,
+        unitNumber: 'Flat 102',
+        issue: 'Industrial Water Purification Filter Cartridge Replacement',
+        priority: 'medium',
+        status: 'reported',
+        reportedDate: '2026-09-14',
+        estimatedCost: 35000,
+        assignedContractor: 'Engr. Tunde Waterworks Ltd.'
+      });
+    }
   }
 };

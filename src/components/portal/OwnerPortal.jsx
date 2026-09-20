@@ -390,6 +390,26 @@ export default function OwnerPortal({ onReturnHome }) {
         </div>
       )}
 
+      {/* Demo Account Preview Banner */}
+      {profile?.isDemoAccount && (
+        <div className="bg-gradient-to-r from-amber-950 via-obsidian-900 to-amber-950 text-amber-200 px-4 sm:px-8 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs border-b border-gold-500/40 shadow-sm">
+          <div className="flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong>Interactive Demo Session:</strong> You are previewing a luxury portfolio in Lekki Phase 1 with live charts &amp; tenant records.
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={logout}
+              className="px-3 py-1 bg-gold-gradient text-slate-950 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:brightness-110 transition-all cursor-pointer"
+            >
+              Exit Demo &amp; Sign In
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Professional Executive Header */}
       <header className="sticky top-0 z-40 bg-obsidian-900/95 border-b border-gold-500/25 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

@@ -5,7 +5,7 @@ import { authApi, isSupabaseConfigured, supabase } from '../../lib/supabaseClien
 import { companyData } from '../../data/companyData';
 
 export default function OwnerLogin({ onReturnHome }) {
-  const { login, signup } = useAuth();
+  const { login, signup, loginDemo } = useAuth();
   
   // Auth mode: 'signin', 'signup', or 'reset-password'
   const [authMode, setAuthMode] = useState('signin');
@@ -409,6 +409,28 @@ export default function OwnerLogin({ onReturnHome }) {
                   </>
                 )}
               </button>
+
+              {/* Quick 1-Click Demo Landlord Access */}
+              <div className="pt-4 border-t border-gold-500/20 text-center space-y-2.5 mt-4">
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-slate-800"></div>
+                  <span className="flex-shrink mx-3 text-[10px] uppercase tracking-widest text-slate-500 font-bold">Or Instant Preview</span>
+                  <div className="flex-grow border-t border-slate-800"></div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => loginDemo()}
+                  className="w-full py-3 text-xs font-bold uppercase tracking-wider text-amber-300 bg-obsidian-900 border border-gold-500/40 rounded-xl hover:bg-gold-500/10 hover:border-gold-500 transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-sm"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>1-Click Demo Landlord Login</span>
+                </button>
+
+                <p className="text-[11px] text-slate-400">
+                  Instantly test-drive the live portal with a luxury Lekki Phase 1 property, active tenants &amp; remittance charts.
+                </p>
+              </div>
             </form>
           )}
 

@@ -795,6 +795,14 @@ export default function AdminPortal({ onReturnHome }) {
             >
               Access Admin Dashboard
             </button>
+
+            <button
+              type="button"
+              onClick={() => setPassword('royalhaven2026')}
+              className="w-full py-2 text-[11px] text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl font-bold transition-colors border border-amber-200 cursor-pointer"
+            >
+              🔑 Quick Admin Auto-fill (royalhaven2026)
+            </button>
           </form>
 
           <div className="text-center pt-2">

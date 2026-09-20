@@ -288,6 +288,58 @@ export function AuthProvider({ children }) {
     );
   };
 
+  // Instant 1-Click Demo Landlord Login
+  const loginDemo = () => {
+    const demoOwnerId = 'owner-demo-adeleke';
+    const demoEmail = 'demo.landlord@royalhaven.com.ng';
+    const demoName = 'Dr. Babatunde Adeleke (Diaspora Investor)';
+    const demoPropName = 'Grand Imperial Court, Lekki Phase 1';
+
+    // 1. Ensure demo property & transactions exist in portalStore
+    portalStore.seedDemoData(demoOwnerId, demoEmail);
+
+    // 2. Ensure owner exists in portalStore
+    portalStore.addOwner({
+      id: demoOwnerId,
+      fullName: demoName,
+      email: demoEmail,
+      phone: '+44 7911 123456',
+      bankName: 'Zenith Bank Plc',
+      accountNumber: '1014589201',
+      accountName: 'Dr. Babatunde Adeleke',
+      assignedProperties: [demoPropName],
+      createdDate: '2026-01-15'
+    });
+
+    const activeUser = {
+      id: demoOwnerId,
+      email: demoEmail
+    };
+
+    const activeProfile = {
+      id: demoOwnerId,
+      email: demoEmail,
+      full_name: demoName,
+      phone: '+44 7911 123456',
+      role: 'property_owner',
+      bank_name: 'Zenith Bank Plc',
+      account_number: '1014589201',
+      account_name: 'Dr. Babatunde Adeleke',
+      assignedProperties: [demoPropName],
+      isDemoAccount: true
+    };
+
+    setUser(activeUser);
+    setProfile(activeProfile);
+    localStorage.setItem(
+      STORAGE_AUTH_USER,
+      JSON.stringify({ user: activeUser, profile: activeProfile })
+    );
+    setLoading(false);
+    window.location.hash = '#portal';
+    return { success: true };
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -298,7 +350,8 @@ export function AuthProvider({ children }) {
       login,
       signup,
       logout,
-      impersonateOwner
+      impersonateOwner,
+      loginDemo
     }}>
       {children}
     </AuthContext.Provider>
