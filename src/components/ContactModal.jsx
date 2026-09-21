@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Send, CheckCircle } from 'lucide-react';
 import { portalStore } from '../data/portalStore';
 
-export default function ContactModal({ isOpen, onClose }) {
+export default function ContactModal({ isOpen, onClose, initialData = null }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -10,10 +10,26 @@ export default function ContactModal({ isOpen, onClose }) {
     fullName: '',
     phone: '',
     email: '',
-    propertyType: 'Property Management',
+    propertyType: 'Full Property Management',
     location: '',
     notes: ''
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setFormData(prev => ({
+          ...prev,
+          propertyType: initialData.service || prev.propertyType || 'Full Property Management',
+          location: initialData.location || prev.location || '',
+          notes: initialData.notes || prev.notes || ''
+        }));
+      }
+    } else {
+      setSubmitted(false);
+      setErrorMessage('');
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 

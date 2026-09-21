@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
 import Services from './components/Services';
+import LandlordCalculator from './components/LandlordCalculator';
 import PropertySlider from './components/PropertySlider';
 import Leadership from './components/Leadership';
 import WhyChooseUs from './components/WhyChooseUs';
@@ -42,6 +43,7 @@ function OwnerPortalShell({ onReturnHome }) {
 
 function MainApp() {
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactInitialData, setContactInitialData] = useState(null);
   const [currentRoute, setCurrentRoute] = useState('home');
 
   useEffect(() => {
@@ -77,8 +79,14 @@ function MainApp() {
     };
   }, []);
 
-  const handleOpenContact = () => setIsContactOpen(true);
-  const handleCloseContact = () => setIsContactOpen(false);
+  const handleOpenContact = (initialData = null) => {
+    setContactInitialData(initialData);
+    setIsContactOpen(true);
+  };
+  const handleCloseContact = () => {
+    setIsContactOpen(false);
+    setContactInitialData(null);
+  };
 
   const handleReturnHome = () => {
     if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/portal')) {
@@ -109,6 +117,9 @@ function MainApp() {
         <About />
         <Services onOpenContact={handleOpenContact} />
         
+        {/* Landlord Rental Income & Remittance Calculator */}
+        <LandlordCalculator onOpenContact={handleOpenContact} />
+
         {/* Dynamic Managed Properties Slider */}
         <PropertySlider onOpenContact={handleOpenContact} />
         
@@ -130,7 +141,11 @@ function MainApp() {
 
       {/* Floating Interactive Elements */}
       <WhatsAppWidget />
-      <ContactModal isOpen={isContactOpen} onClose={handleCloseContact} />
+      <ContactModal 
+        isOpen={isContactOpen} 
+        onClose={handleCloseContact} 
+        initialData={contactInitialData} 
+      />
     </div>
   );
 }
