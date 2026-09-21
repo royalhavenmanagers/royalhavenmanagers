@@ -8,7 +8,7 @@
 ## 1. Executive Summary & Company Identity
 * **Company Legal Name**: Royal Haven Realty & Property Managers Ltd.
 * **Slogan**: *"Building Trust. Managing Excellence. Creating Value."*
-* **Core Geographic Focus**: Lagos State (Lekki Peninsula, Victoria Island, Ikoyi, Ikeja GRA, Magodo GRA) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
+* **Core Geographic Focus**: Lagos State (Lekki Peninsula, Victoria Island, Ikoyi, Ikeja GRA, Magodo GRA, Ajah) & Ogun State (Abeokuta, Sagamu, Mowe) Environs, Nigeria.
 * **Executive Leadership**:
   * **CEO & Managing Director**: Ibrahim Ridwan Olasunkanmi (Sole Executive MD & CEO)
 * **Official Contact**:
@@ -27,95 +27,77 @@
 
 ### Key Navigation Routes:
 1. **Public Marketing Website**: `https://www.royalhaven.com.ng/`
-2. **Property Owner Portal**: `https://www.royalhaven.com.ng/#portal` (or `/portal`)
-3. **Staff Admin Portal**: `https://www.royalhaven.com.ng/#admin` (or `/admin`)
+2. **Interactive Income Calculator**: `https://www.royalhaven.com.ng/#calculator`
+3. **Property Owner Portal**: `https://www.royalhaven.com.ng/#portal` (or `/portal`)
+4. **Staff Admin Portal**: `https://www.royalhaven.com.ng/#admin` (or `/admin`)
    * **Admin Master Password**: `royalhaven2026`
-4. **Direct Article Deep Links**:
+5. **Direct Article Deep Links**:
    * Format A: `https://www.royalhaven.com.ng/?article=slug#blog`
    * Format B: `https://www.royalhaven.com.ng/#article/slug`
 
 ---
 
-## 3. Database & Backend Architecture (Supabase)
+## 3. Landlord Rental Income & Remittance Calculator
+* **Component File**: `src/components/LandlordCalculator.jsx`
+* **Purpose**: Allows landlords and diaspora property owners to calculate their net rental income dynamically before signing with Royal Haven.
+* **Core Mechanics**:
+  * **Currencies**: Supports NGN (₦), USD ($), GBP (£), and CAD (C$) with tailored unit rent ranges.
+  * **Unit Sliders & Presets**: 1 to 24 units with fast preset configurations (*1 Luxury Flat*, *Duplex*, *Block of 4 Flats*, *8-Unit Building*, *12-Unit Estate*).
+  * **Calculations**:
+    $$\text{Total Gross Annual Rent} = \text{Units} \times \text{Rent Per Unit}$$
+    $$\text{Owner Net Annual Remittance (90\%)} = \text{Total Gross Annual Rent} \times 0.90$$
+    $$\text{Management Fee (10\%)} = \text{Total Gross Annual Rent} \times 0.10$$
+    $$\text{Owner Monthly Average} = \frac{\text{Owner Net Annual Remittance}}{12}$$
+  * **Plain-English Explanations**: Eliminates financial jargon ("cap rates", "amortization") in favor of clear terminology: *Total Rent Collected*, *What You Receive (Direct Bank Deposit)*, and *What the 10% Fee Covers* (tenant vetting, on-time collection, routine photo inspections, artisan oversight, and tenancy contracts).
+  * **Side-by-Side Comparison**: Contrasts the headaches of self-managing against hands-free Royal Haven management.
+  * **Direct Lead Bridge**: The "Have Royal Haven Manage My Property" button opens `ContactModal.jsx` with pre-filled estimates of units, expected rent, and estimated payout.
+
+---
+
+## 4. SEO Supercharge & Google Rich Snippets
+* **Google `FAQPage` JSON-LD Schema** (`index.html`):
+  * Features 6 plain-English questions addressing common landlord inquiries (management fees, diaspora property monitoring, tenant screening, remittance speed, coverage areas, maintenance handling).
+  * Enables Google to generate expandable accordion rich snippets directly on search engine results pages (SERPs).
+* **Enhanced Geo-Targeting & Meta Tags**:
+  * Targets prime corridors: Lekki Phase 1, Ikoyi, Victoria Island, Ikeja GRA, Magodo, Ajah, Surulere, and Abeokuta.
+  * Captures high-intent search phrases: *"Landlord Rental Income Calculator Lagos"*, *"Diaspora Landlord Nigeria"*, *"Property Management Remittance Lekki"*.
+* **XML Sitemap** (`public/sitemap.xml`):
+  * Fully indexed canonical routes with `#calculator` prioritized at `0.95`.
+
+---
+
+## 5. Portal & Data Architecture (`portalStore.js`)
+* **State Management**: Dual-engine architecture operating with instant offline `localStorage` fallback and asynchronous Supabase cloud sync.
+* **Key Modules**:
+  * **Secure Asset Document Vault**: 1-click downloading and previewing for C of O, Survey Plans, Tenancy Agreements, and Financial Statements.
+  * **Routine Inspection Sessions**: Photo-verified quarterly/annual physical property audits with manager notes.
+  * **Safe Deletion Safeguards**: Modal confirmation dialogs ("Are you sure?") prevent accidental deletion of properties, remittances, documents, or inspections.
+  * **Property Deduplication**: Idempotent property addition and `Set` deduplication on owner accounts permanently prevents property doubling upon account creation.
+
+---
+
+## 6. Database & Backend Architecture (Supabase)
 * **Supabase Project URL**: `https://pspftbflzfkbpndvhike.supabase.co`
-* **Environment Variables & Safe Fallbacks**:
-  * Configured in `src/lib/supabaseClient.js` with hardcoded public fallbacks to ensure Vercel production deployments never fail due to missing `.env` files.
+* **Environment Variables & Safe Fallbacks**: Configured in `src/lib/supabaseClient.js` with public fallbacks to ensure zero build or runtime failures.
 * **SQL Schema Files**:
-  * `supabase_schema_portal.sql`: The primary 11-table enterprise schema + RLS policies + security functions.
-  * `supabase_schema.sql`: Initial public schema for blog posts and inquiries.
+  * `supabase_schema_portal.sql`: 11-table enterprise schema + RLS policies + security functions.
+  * `supabase_schema.sql`: Public schema for blog posts and inquiries.
 
 ### Entity Hierarchy:
 $$\text{Owner} \longrightarrow \text{Property} \longrightarrow \text{Unit} \longrightarrow \text{Tenant} \longrightarrow \text{Lease} \longrightarrow \text{Transaction / Remittance} \longrightarrow \text{Maintenance} \longrightarrow \text{Inspection} \longrightarrow \text{Document}$$
 
-### Relational Tables:
-1. `profiles`: Extends Supabase `auth.users` with roles (`property_owner`, `property_manager`, `super_admin`) and bank remittance accounts.
-2. `portal_properties`: Managed residential complexes, blocks of flats, and terraces.
-3. `property_owners`: Junction table mapping owners to properties.
-4. `units`: Individual apartments with rent amounts, service charges, bed/bath counts, and status (`occupied`, `vacant`).
-5. `tenants`: Vetted tenant details, phone numbers, and lease statuses.
-6. `leases`: Annual lease contracts with commencement and expiration dates.
-7. `transactions`: Detailed financial ledger with itemized deductions:
-   * Gross Rent Collected
-   * Royal Haven Professional Management Fee (10%)
-   * Audited Maintenance Deductions
-   * Net Remitted to Property Owner
-   * NIP Interbank Reference Codes
-8. `maintenance_requests`: Supervised repairs with before/after photos, artisan names, and audited costs.
-9. `inspections`: Routine physical condition checks and manager field notes.
-10. `documents`: Encrypted document vault for C of O, Survey Plans, and Tenancy Agreements.
-11. `posts`: CMS for Royal Haven real estate insights & educational articles.
-12. `inquiries`: Consultation leads submitted via the website.
-
 ---
 
-## 4. Property Owner Authentication (100% Real Accounts)
-Implemented in `src/context/AuthContext.jsx` and `src/components/portal/OwnerLogin.jsx`:
-* **Zero Demo Accounts**: No mock logins, no prefill buttons, and no fake accounts.
-* **Instant Verification**: When a property owner registers (`Full Name`, `Email`, `Phone`, `Password`, `Bank Name`, `Account Number`, `Account Name`), the account is created and verified immediately.
-* **No Email Verification Blocker**: Prevents users from being locked out by missing email confirmations or third-party SMTP limits.
-* **Automatic Cloud Sync**: Syncs with Supabase in the background while keeping full local persistence.
-* **Admin Registration**: The Master Admin can also register client accounts in `#admin` and send them their login credentials directly.
-
----
-
-## 5. Article Sharing & Dynamic Open Graph Preview Engine
-Implemented across `api/article-preview.js`, `vercel.json`, and `src/components/BlogSection.jsx`:
-* **Dynamic Social Media Previews**: When an article is shared on WhatsApp, Facebook, Twitter/X, LinkedIn, or Telegram, the clean link format `https://www.royalhaven.com.ng/article/:slug` is served by Vercel serverless function `api/article-preview.js`.
-  * Injects dynamic `<meta property="og:image">`, `og:title`, `og:description`, and `twitter:image` tags with the article's actual cover photo and excerpt (instead of the generic website logo).
-  * Automatically redirects human visitors to `/?article=:slug#blog` to open the interactive full-reading modal seamlessly.
-* **Share Toolbar**: Every article includes one-click sharing for:
-  * **WhatsApp**: Formatted message with article title and direct `/article/:slug` link.
-  * **Twitter / X**: Pre-composed tweet with title and link.
-  * **LinkedIn**: Direct URL sharing to professional networks.
-  * **Copy Direct Link**: Interactive button with a "Link Copied!" toast.
-* **Deep Linking**: Supports `/article/:slug`, `?article=slug#blog`, and `#article/slug`. Visiting any format opens the article modal directly in full-reading view.
-
----
-
-## 6. Website Traffic & Analytics (`analyticsStore.js`)
-* **Tracking**: Automatically records daily pageviews and visitor sessions upon website entry.
-* **Admin Dashboard Integration** (`AdminPortal.jsx`):
-  * **Top Metrics Ribbon**: Displays Today's Pageviews (Live badge), Yesterday's Views, Past 7 Days Total, and All-Time Views.
-  * **Dedicated Traffic Tab**: Displays a 14-day graphical bar chart highlighting today's traffic in gold, a daily log table with percentage breakdowns, and a "Test Visitor View (+1)" simulator button.
-
----
-
-## 7. UI/UX, Typography & Design Tokens
-* **Typography**:
-  * **Headings**: `Playfair Display` & `Cinzel` (Google Fonts) — gives a regal, established luxury impression.
-  * **Body & Numbers**: `Plus Jakarta Sans` — modern, crisp, and legible across all devices.
-* **Color Palette**:
-  * **Obsidian**: `#060608` (deepest black background) / `#08080A` (cards & surface) / `#121217` (glassmorphism cards).
-  * **Royal Gold**: `#D4AF37` (primary accent), `#F3E5AB` (champagne highlights), `#AA7C11` (shadows).
-  * **Emerald**: Completed status badges, verified remittances.
-  * **Amber**: Expiration alerts, pending items.
-* **Print-to-PDF Engine (`StatementPrintView.jsx`)**:
-  * Clean CSS `@media print` rules render official statements with Royal Haven letterhead, CAC registration info, itemized deductions, and Managing Director Ibrahim Ridwan Olasunkanmi's executive sign-off.
+## 7. Article Sharing & Dynamic Open Graph Engine
+* **Serverless Social Preview Engine** (`api/article-preview.js`, `vercel.json`):
+  * When articles are shared on WhatsApp, Twitter/X, or LinkedIn via `/article/:slug`, dynamic Open Graph meta tags render the article's actual cover image and summary.
+  * Human visitors are seamlessly redirected to `/?article=:slug#blog` to open the full interactive reading modal.
+* **Share Toolbar**: Native copy-link with toast feedback and 1-click dispatch to WhatsApp, Twitter, and LinkedIn.
 
 ---
 
 ## 8. Development & Deployment Quick Reference
-* **Build Command**: `npm run build` (Vite build, output to `dist/`)
+* **Build Command**: `npm run build` (Vite build, outputs to `dist/`)
 * **Dev Server**: `npm run dev` (Vite port 5173)
 * **Git Remote**: `origin/main` (`https://github.com/royalhavenmanagers/royalhavenmanagers.git`)
 * **Deployment Workflow**:
