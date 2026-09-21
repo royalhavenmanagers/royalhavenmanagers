@@ -3,7 +3,8 @@ import {
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
   AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
-  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2, Wrench, Paperclip
+  Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2, Wrench, Paperclip,
+  ClipboardCheck, FolderArchive, Download
 } from 'lucide-react';
 import { blogStore } from '../data/blogStore';
 import { propertyStore } from '../data/propertyStore';
@@ -18,7 +19,7 @@ export default function AdminPortal({ onReturnHome }) {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
-  // Primary navigation: 'articles', 'properties', 'security'
+  // Primary navigation: 'articles', 'properties', 'inquiries', 'remittances', 'maintenance', 'vault', 'inspections', 'owners', 'traffic', 'security'
   const [activeModule, setActiveModule] = useState('articles');
 
   // Articles State
@@ -82,6 +83,7 @@ export default function AdminPortal({ onReturnHome }) {
   // Owner Accounts State
   const [owners, setOwners] = useState([]);
   const [showAddOwnerModal, setShowAddOwnerModal] = useState(false);
+  const [isSubmittingOwner, setIsSubmittingOwner] = useState(false);
   const [ownerFormData, setOwnerFormData] = useState({
     fullName: '',
     email: '',
@@ -99,6 +101,7 @@ export default function AdminPortal({ onReturnHome }) {
   // Property Onboarding Wizard & Submissions Queue State
   const [onboardingSubmissions, setOnboardingSubmissions] = useState([]);
   const [showOnboardPropertyModal, setShowOnboardPropertyModal] = useState(false);
+  const [isSubmittingOnboard, setIsSubmittingOnboard] = useState(false);
   const [activatedPropertyData, setActivatedPropertyData] = useState(null);
   const [onboardPropertyForm, setOnboardPropertyForm] = useState({
     ownerMode: 'existing', // 'existing' | 'new'
@@ -144,6 +147,35 @@ export default function AdminPortal({ onReturnHome }) {
     status: 'in_progress'
   });
 
+  // Document Vault State
+  const [documents, setDocuments] = useState([]);
+  const [showAddDocModal, setShowAddDocModal] = useState(false);
+  const [docFilterProp, setDocFilterProp] = useState('all');
+  const [docFormData, setDocFormData] = useState({
+    propertyId: '',
+    propertyName: '',
+    title: '',
+    documentType: 'Certificate of Occupancy (C of O)',
+    fileUrl: '',
+    fileName: '',
+    fileSize: ''
+  });
+
+  // Routine Inspections State
+  const [inspections, setInspections] = useState([]);
+  const [showAddInspModal, setShowAddInspModal] = useState(false);
+  const [inspFilterProp, setInspFilterProp] = useState('all');
+  const [inspFormData, setInspFormData] = useState({
+    propertyId: '',
+    propertyName: '',
+    inspectorName: 'Engr. Babajide Fasola (Lead Facility Manager)',
+    inspectionDate: new Date().toISOString().split('T')[0],
+    overallCondition: 'Excellent',
+    reportType: 'Quarterly Routine Audit',
+    notes: '',
+    photos: []
+  });
+
   const { impersonateOwner } = useAuth();
 
   const [notification, setNotification] = useState('');
@@ -177,6 +209,10 @@ export default function AdminPortal({ onReturnHome }) {
     setManagedProperties(portalStore.getProperties());
     setMaintenanceList(portalStore.getMaintenance());
 
+    // Load documents and routine inspections
+    setDocuments(portalStore.getDocuments());
+    setInspections(portalStore.getInspections());
+
     // Load inquiries, remittances & onboarding submissions
     setInquiries(portalStore.getInquiries());
     setRemittances(portalStore.getTransactions().filter(t => t.type === 'owner_remittance'));
@@ -206,11 +242,13 @@ export default function AdminPortal({ onReturnHome }) {
 
   const handleCreateOwner = async (e) => {
     e.preventDefault();
+    if (isSubmittingOwner) return;
     if (!ownerFormData.fullName || !ownerFormData.email || !ownerFormData.password) {
       alert("Please fill in Full Name, Email, and Password.");
       return;
     }
 
+    setIsSubmittingOwner(true);
     try {
       if (authApi) {
         await authApi.signUp(ownerFormData.email, ownerFormData.password, {
@@ -226,6 +264,7 @@ export default function AdminPortal({ onReturnHome }) {
       console.warn("Supabase user creation notice:", err.message);
     }
 
+    const assignedProp = ownerFormData.assignedProperty ? [ownerFormData.assignedProperty.trim()] : [];
     const newOwner = portalStore.addOwner({
       fullName: ownerFormData.fullName,
       email: ownerFormData.email,
@@ -234,7 +273,7 @@ export default function AdminPortal({ onReturnHome }) {
       bankName: ownerFormData.bankName,
       accountNumber: ownerFormData.accountNumber,
       accountName: ownerFormData.accountName,
-      assignedProperties: [ownerFormData.assignedProperty]
+      assignedProperties: assignedProp
     });
 
     setOwners(portalStore.getOwners());
@@ -245,8 +284,21 @@ export default function AdminPortal({ onReturnHome }) {
       phone: ownerFormData.phone
     });
 
+    // Reset owner form to avoid duplicate values persisting on next open
+    setOwnerFormData({
+      fullName: '',
+      email: '',
+      password: '',
+      phone: '',
+      bankName: '',
+      accountNumber: '',
+      accountName: '',
+      assignedProperty: ''
+    });
+
     setShowAddOwnerModal(false);
-    showNotification(`Account created for ${ownerFormData.fullName}! You can now send them login credentials.`);
+    setIsSubmittingOwner(false);
+    showNotification(`Account created for ${newOwner.fullName}! You can now send them login credentials.`);
   };
 
   const handleAccessClientPortal = (owner) => {
@@ -379,140 +431,284 @@ export default function AdminPortal({ onReturnHome }) {
 
   const handleAdminOnboardSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmittingOnboard) return;
     if (!onboardPropertyForm.propertyName.trim()) {
       alert("Please enter a property name.");
       return;
     }
 
+    setIsSubmittingOnboard(true);
     let targetOwnerId = onboardPropertyForm.ownerId;
     let targetOwnerName = '';
     let targetOwnerEmail = '';
     let targetOwnerPhone = '';
 
-    if (onboardPropertyForm.ownerMode === 'new') {
-      if (!onboardPropertyForm.newOwnerName || !onboardPropertyForm.newOwnerEmail) {
-        alert("Please fill in Landlord Full Name and Email.");
-        return;
-      }
-      const tempPassword = onboardPropertyForm.newOwnerPassword || ('RH-' + Math.random().toString(36).slice(-6).toUpperCase());
-
-      try {
-        if (authApi) {
-          await authApi.signUp(onboardPropertyForm.newOwnerEmail, tempPassword, {
-            full_name: onboardPropertyForm.newOwnerName,
-            phone: onboardPropertyForm.newOwnerPhone,
-            role: 'property_owner',
-            bank_name: onboardPropertyForm.newOwnerBank,
-            account_number: onboardPropertyForm.newOwnerAccount
-          });
+    try {
+      if (onboardPropertyForm.ownerMode === 'new') {
+        if (!onboardPropertyForm.newOwnerName || !onboardPropertyForm.newOwnerEmail) {
+          alert("Please fill in Landlord Full Name and Email.");
+          setIsSubmittingOnboard(false);
+          return;
         }
-      } catch (err) {
-        console.warn("Supabase user creation notice:", err.message);
-      }
+        const tempPassword = onboardPropertyForm.newOwnerPassword || ('RH-' + Math.random().toString(36).slice(-6).toUpperCase());
 
-      const created = portalStore.addOwner({
-        fullName: onboardPropertyForm.newOwnerName,
-        email: onboardPropertyForm.newOwnerEmail,
-        phone: onboardPropertyForm.newOwnerPhone,
-        password: tempPassword,
-        bankName: onboardPropertyForm.newOwnerBank,
-        accountNumber: onboardPropertyForm.newOwnerAccount,
-        assignedProperties: [onboardPropertyForm.propertyName.trim()]
-      });
+        try {
+          if (authApi) {
+            await authApi.signUp(onboardPropertyForm.newOwnerEmail, tempPassword, {
+              full_name: onboardPropertyForm.newOwnerName,
+              phone: onboardPropertyForm.newOwnerPhone,
+              role: 'property_owner',
+              bank_name: onboardPropertyForm.newOwnerBank,
+              account_number: onboardPropertyForm.newOwnerAccount
+            });
+          }
+        } catch (err) {
+          console.warn("Supabase user creation notice:", err.message);
+        }
 
-      targetOwnerId = created.id;
-      targetOwnerName = created.fullName;
-      targetOwnerEmail = created.email;
-      targetOwnerPhone = created.phone;
-    } else {
-      const existing = owners.find(o => o.id === targetOwnerId || o.email === targetOwnerId);
-      if (!existing) {
-        alert("Please select an existing Property Owner.");
-        return;
-      }
-      targetOwnerId = existing.id;
-      targetOwnerName = existing.fullName;
-      targetOwnerEmail = existing.email;
-      targetOwnerPhone = existing.phone;
+        const created = portalStore.addOwner({
+          fullName: onboardPropertyForm.newOwnerName,
+          email: onboardPropertyForm.newOwnerEmail,
+          phone: onboardPropertyForm.newOwnerPhone,
+          password: tempPassword,
+          bankName: onboardPropertyForm.newOwnerBank,
+          accountNumber: onboardPropertyForm.newOwnerAccount,
+          assignedProperties: [onboardPropertyForm.propertyName.trim()]
+        });
 
-      const currentProps = existing.assignedProperties || [];
-      if (!currentProps.includes(onboardPropertyForm.propertyName.trim())) {
-        const updatedProps = [...currentProps, onboardPropertyForm.propertyName.trim()];
-        portalStore.updateOwner(existing.id, { assignedProperties: updatedProps });
-        if (supabase) {
-          try {
-            await supabase.from('profiles').update({ assigned_properties: updatedProps }).eq('email', existing.email);
-          } catch {}
+        targetOwnerId = created.id;
+        targetOwnerName = created.fullName;
+        targetOwnerEmail = created.email;
+        targetOwnerPhone = created.phone;
+      } else {
+        const existing = owners.find(o => o.id === targetOwnerId || o.email === targetOwnerId);
+        if (!existing) {
+          alert("Please select an existing Property Owner.");
+          setIsSubmittingOnboard(false);
+          return;
+        }
+        targetOwnerId = existing.id;
+        targetOwnerName = existing.fullName;
+        targetOwnerEmail = existing.email;
+        targetOwnerPhone = existing.phone;
+
+        const currentProps = existing.assignedProperties || [];
+        if (!currentProps.some(p => p.toLowerCase().trim() === onboardPropertyForm.propertyName.trim().toLowerCase())) {
+          const updatedProps = [...currentProps, onboardPropertyForm.propertyName.trim()];
+          portalStore.updateOwner(existing.id, { assignedProperties: updatedProps });
+          if (supabase) {
+            try {
+              await supabase.from('profiles').update({ assigned_properties: updatedProps }).eq('email', existing.email);
+            } catch {}
+          }
         }
       }
-    }
 
-    const unitsCount = Math.max(1, parseInt(onboardPropertyForm.unitsCount, 10) || 1);
-    const targetRent = Number(onboardPropertyForm.targetRent) || 0;
-    const propId = `prop-${Date.now()}`;
+      const unitsCount = Math.max(1, parseInt(onboardPropertyForm.unitsCount, 10) || 1);
+      const targetRent = Number(onboardPropertyForm.targetRent) || 0;
+      const propId = `prop-${Date.now()}`;
 
-    const newProp = portalStore.addProperty({
-      id: propId,
-      name: onboardPropertyForm.propertyName.trim(),
-      address: onboardPropertyForm.address?.trim() || 'Lagos, Nigeria',
-      city: onboardPropertyForm.city || 'Lagos',
-      state: onboardPropertyForm.state || 'Lagos State',
-      propertyType: onboardPropertyForm.propertyType || 'Residential Apartment',
-      status: 'active',
-      ownerId: targetOwnerId,
-      ownerEmail: targetOwnerEmail,
-      unitsCount: unitsCount,
-      units: Array.from({ length: unitsCount }, (_, i) => ({
-        id: `unit-${propId}-${i + 1}`,
-        unitNumber: `Flat ${i + 1}`,
-        floorPlanType: onboardPropertyForm.propertyType || 'Apartment',
-        rentAmount: targetRent,
-        serviceCharge: 0,
-        bedrooms: 3,
-        bathrooms: 3,
-        status: 'occupied',
-        tenant: {
-          fullName: i === 0 && onboardPropertyForm.tenantName ? onboardPropertyForm.tenantName : `Verified Tenant ${i + 1}`,
-          phone: i === 0 && onboardPropertyForm.tenantPhone ? onboardPropertyForm.tenantPhone : '+234 800 000 0000',
-          email: i === 0 && onboardPropertyForm.tenantEmail ? onboardPropertyForm.tenantEmail : 'tenant@royalhaven.com.ng',
-          leaseStart: onboardPropertyForm.leaseStart || new Date().toISOString().split('T')[0],
-          leaseEnd: onboardPropertyForm.leaseEnd || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          paymentStatus: 'Paid'
-        }
-      }))
-    });
-
-    if (targetRent > 0) {
-      const gross = targetRent;
-      const mgmtFee = Math.round(gross * 0.10);
-      const net = gross - mgmtFee;
-      portalStore.addTransaction({
-        propertyId: propId,
-        propertyName: newProp.name,
+      const newProp = portalStore.addProperty({
+        id: propId,
+        name: onboardPropertyForm.propertyName.trim(),
+        address: onboardPropertyForm.address?.trim() || 'Lagos, Nigeria',
+        city: onboardPropertyForm.city || 'Lagos',
+        state: onboardPropertyForm.state || 'Lagos State',
+        propertyType: onboardPropertyForm.propertyType || 'Residential Apartment',
+        status: 'active',
+        ownerId: targetOwnerId,
         ownerEmail: targetOwnerEmail,
-        type: 'owner_remittance',
-        amount: net,
-        referenceCode: `RH-REM-${Date.now().toString().slice(-6)}`,
-        date: new Date().toISOString().split('T')[0],
-        status: 'completed',
-        deductions: {
-          grossRent: gross,
-          managementFee: mgmtFee,
-          maintenanceCost: 0,
-          netRemitted: net
-        }
+        unitsCount: unitsCount,
+        units: Array.from({ length: unitsCount }, (_, i) => ({
+          id: `unit-${propId}-${i + 1}`,
+          unitNumber: `Flat ${i + 1}`,
+          floorPlanType: onboardPropertyForm.propertyType || 'Apartment',
+          rentAmount: targetRent,
+          serviceCharge: 0,
+          bedrooms: 3,
+          bathrooms: 3,
+          status: 'occupied',
+          tenant: {
+            fullName: i === 0 && onboardPropertyForm.tenantName ? onboardPropertyForm.tenantName : `Verified Tenant ${i + 1}`,
+            phone: i === 0 && onboardPropertyForm.tenantPhone ? onboardPropertyForm.tenantPhone : '+234 800 000 0000',
+            email: i === 0 && onboardPropertyForm.tenantEmail ? onboardPropertyForm.tenantEmail : 'tenant@royalhaven.com.ng',
+            leaseStart: onboardPropertyForm.leaseStart || new Date().toISOString().split('T')[0],
+            leaseEnd: onboardPropertyForm.leaseEnd || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            paymentStatus: 'Paid'
+          }
+        }))
       });
+
+      if (targetRent > 0) {
+        const gross = targetRent;
+        const mgmtFee = Math.round(gross * 0.10);
+        const net = gross - mgmtFee;
+        portalStore.addTransaction({
+          propertyId: propId,
+          propertyName: newProp.name,
+          ownerEmail: targetOwnerEmail,
+          type: 'owner_remittance',
+          amount: net,
+          referenceCode: `RH-REM-${Date.now().toString().slice(-6)}`,
+          date: new Date().toISOString().split('T')[0],
+          status: 'completed',
+          deductions: {
+            grossRent: gross,
+            managementFee: mgmtFee,
+            maintenanceCost: 0,
+            netRemitted: net
+          }
+        });
+      }
+
+      loadData();
+      setShowOnboardPropertyModal(false);
+      setActivatedPropertyData({
+        ownerName: targetOwnerName,
+        ownerPhone: targetOwnerPhone,
+        ownerEmail: targetOwnerEmail,
+        propertyName: newProp.name
+      });
+      showNotification(`Property "${newProp.name}" successfully onboarded and activated for ${targetOwnerName}!`);
+    } finally {
+      setIsSubmittingOnboard(false);
     }
+  };
+
+  // -------------------------------------------------------------
+  // SAFE DELETE HANDLERS
+  // -------------------------------------------------------------
+  const handleDeleteManagedProperty = (prop) => {
+    if (window.confirm(`Are you sure you want to permanently delete "${prop.name}"? This will remove its units, tenancy records, and unassign it from the landlord.`)) {
+      portalStore.deleteProperty(prop.id);
+      loadData();
+      showNotification(`Managed building "${prop.name}" deleted successfully.`);
+    }
+  };
+
+  const handleDeleteRemittance = (rem) => {
+    if (window.confirm(`Are you sure you want to delete this remittance record (${rem.referenceCode || rem.propertyName})? This will also remove it from the landlord's statements.`)) {
+      portalStore.deleteTransaction(rem.id);
+      loadData();
+      showNotification("Remittance record deleted successfully.");
+    }
+  };
+
+  // -------------------------------------------------------------
+  // DOCUMENT VAULT HANDLERS
+  // -------------------------------------------------------------
+  const handleDocumentFileUpload = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const sizeInMb = (file.size / (1024 * 1024)).toFixed(1);
+      const ext = file.name.split('.').pop().toUpperCase();
+      setDocFormData(prev => ({
+        ...prev,
+        fileName: file.name,
+        fileSize: `${sizeInMb} MB (${ext})`,
+        fileUrl: reader.result,
+        title: prev.title || file.name.replace(/\.[^/.]+$/, "")
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveDocument = (e) => {
+    e.preventDefault();
+    if (!docFormData.propertyName || !docFormData.title) {
+      alert("Please select a managed property and provide a document title.");
+      return;
+    }
+
+    portalStore.addDocument({
+      propertyId: docFormData.propertyId,
+      propertyName: docFormData.propertyName,
+      title: docFormData.title,
+      documentType: docFormData.documentType || 'Certificate of Occupancy (C of O)',
+      fileSize: docFormData.fileSize || 'Digital Document',
+      fileUrl: docFormData.fileUrl || '#'
+    });
 
     loadData();
-    setShowOnboardPropertyModal(false);
-    setActivatedPropertyData({
-      ownerName: targetOwnerName,
-      ownerPhone: targetOwnerPhone,
-      ownerEmail: targetOwnerEmail,
-      propertyName: newProp.name
+    setShowAddDocModal(false);
+    setDocFormData({
+      propertyId: '',
+      propertyName: '',
+      title: '',
+      documentType: 'Certificate of Occupancy (C of O)',
+      fileUrl: '',
+      fileName: '',
+      fileSize: ''
     });
-    showNotification(`Property "${newProp.name}" successfully onboarded and activated for ${targetOwnerName}!`);
+    showNotification(`Document "${docFormData.title}" uploaded to vault and synced to Landlord!`);
+  };
+
+  const handleDeleteDocument = (doc) => {
+    if (window.confirm(`Are you sure you want to remove "${doc.title}" from the Document Vault? This will also remove it from the owner's portal.`)) {
+      portalStore.deleteDocument(doc.id);
+      loadData();
+      showNotification("Document removed from vault.");
+    }
+  };
+
+  // -------------------------------------------------------------
+  // ROUTINE INSPECTIONS HANDLERS
+  // -------------------------------------------------------------
+  const handleInspectionPhotoUpload = (files) => {
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files);
+    fileArray.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setInspFormData(prev => ({
+          ...prev,
+          photos: [...(prev.photos || []), reader.result]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSaveInspection = (e) => {
+    e.preventDefault();
+    if (!inspFormData.propertyName || !inspFormData.notes) {
+      alert("Please select a property and enter inspection audit notes.");
+      return;
+    }
+
+    portalStore.addInspection({
+      propertyId: inspFormData.propertyId,
+      propertyName: inspFormData.propertyName,
+      inspectorName: inspFormData.inspectorName || 'Royal Haven Facility Manager',
+      inspectionDate: inspFormData.inspectionDate || new Date().toISOString().split('T')[0],
+      overallCondition: inspFormData.overallCondition || 'Excellent',
+      reportType: inspFormData.reportType || 'Quarterly Routine Audit',
+      notes: inspFormData.notes,
+      photos: inspFormData.photos || []
+    });
+
+    loadData();
+    setShowAddInspModal(false);
+    setInspFormData({
+      propertyId: '',
+      propertyName: '',
+      inspectorName: 'Engr. Babajide Fasola (Lead Facility Manager)',
+      inspectionDate: new Date().toISOString().split('T')[0],
+      overallCondition: 'Excellent',
+      reportType: 'Quarterly Routine Audit',
+      notes: '',
+      photos: []
+    });
+    showNotification("Routine property inspection audit logged and published to Owner Portal!");
+  };
+
+  const handleDeleteInspection = (insp) => {
+    if (window.confirm(`Are you sure you want to delete this inspection audit report for "${insp.propertyName}"?`)) {
+      portalStore.deleteInspection(insp.id);
+      loadData();
+      showNotification("Inspection report removed.");
+    }
   };
 
   const handleApproveSubmission = (sub) => {
@@ -1205,6 +1401,32 @@ export default function AdminPortal({ onReturnHome }) {
             >
               <Wrench className="w-4 h-4" />
               <span>Maintenance &amp; Invoices ({maintenanceList.length})</span>
+            </button>
+
+            {/* Document Vault Module */}
+            <button
+              onClick={() => setActiveModule('vault')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'vault'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <FolderArchive className="w-4 h-4" />
+              <span>Document Vault ({documents.length})</span>
+            </button>
+
+            {/* Routine Inspections Module */}
+            <button
+              onClick={() => setActiveModule('inspections')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 ${
+                activeModule === 'inspections'
+                  ? 'bg-slate-900 text-gold-400 shadow-sm'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+              }`}
+            >
+              <ClipboardCheck className="w-4 h-4" />
+              <span>Inspections ({inspections.length})</span>
             </button>
 
             {/* Owner Accounts Module */}
@@ -2101,11 +2323,12 @@ export default function AdminPortal({ onReturnHome }) {
                     <th className="p-3 text-right">Management Fee</th>
                     <th className="p-3 text-right">Net Remitted</th>
                     <th className="p-3 text-center">Beneficiary Bank</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {remittances.map((rem) => (
-                    <tr key={rem.id} className="hover:bg-slate-50">
+                    <tr key={rem.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-3 text-slate-600">{rem.date}</td>
                       <td className="p-3 font-bold text-slate-900">{rem.propertyName}</td>
                       <td className="p-3 font-mono text-slate-500">{rem.referenceCode}</td>
@@ -2120,6 +2343,16 @@ export default function AdminPortal({ onReturnHome }) {
                       </td>
                       <td className="p-3 text-center text-slate-600 font-medium">
                         {rem.beneficiaryBank}
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRemittance(rem)}
+                          className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Remittance Record"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -2389,6 +2622,517 @@ export default function AdminPortal({ onReturnHome }) {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE: SECURE ASSET DOCUMENT VAULT                       */}
+        {/* ========================================================= */}
+        {activeModule === 'vault' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <FolderArchive className="w-5 h-5 text-gold-600" />
+                  <span>Secure Asset Document Vault</span>
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Upload official title deeds, survey plans, C of O, and executed tenancy agreements. These documents are directly accessible to property owners in their portal.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <select
+                  value={docFilterProp}
+                  onChange={(e) => setDocFilterProp(e.target.value)}
+                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
+                >
+                  <option value="all">All Managed Buildings ({documents.length})</option>
+                  {managedProperties.map(p => (
+                    <option key={p.id} value={p.name}>{p.name}</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDocFormData({
+                      propertyId: managedProperties[0]?.id || '',
+                      propertyName: managedProperties[0]?.name || '',
+                      title: '',
+                      documentType: 'Certificate of Occupancy (C of O)',
+                      fileUrl: '',
+                      fileName: '',
+                      fileSize: ''
+                    });
+                    setShowAddDocModal(true);
+                  }}
+                  className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-md hover:brightness-110 flex items-center space-x-1.5 cursor-pointer transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Upload Document</span>
+                </button>
+              </div>
+            </div>
+
+            {(() => {
+              const filteredDocs = docFilterProp === 'all' 
+                ? documents 
+                : documents.filter(d => d.propertyName?.toLowerCase() === docFilterProp.toLowerCase() || d.propertyId === docFilterProp);
+
+              if (filteredDocs.length === 0) {
+                return (
+                  <div className="p-16 text-center text-slate-600 space-y-3">
+                    <FolderArchive className="w-12 h-12 mx-auto text-slate-400" />
+                    <h4 className="text-base font-bold text-slate-900">No documents in the vault yet</h4>
+                    <p className="text-xs text-slate-600 max-w-md mx-auto">
+                      Click "Upload Document" to archive official title deeds, tenancy agreements, or financial statements.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="p-6 pt-0 overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-950 uppercase tracking-wider font-extrabold border-b border-slate-200">
+                      <tr>
+                        <th className="p-3">Document Title</th>
+                        <th className="p-3">Building / Asset</th>
+                        <th className="p-3">Document Type</th>
+                        <th className="p-3">Date Added</th>
+                        <th className="p-3">File Size</th>
+                        <th className="p-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredDocs.map((doc) => (
+                        <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-3">
+                            <div className="flex items-center space-x-2.5">
+                              <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
+                                <FileText className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <strong className="text-slate-950 font-bold block text-sm">{doc.title}</strong>
+                                {doc.fileName && <span className="text-[10px] text-slate-400 block">{doc.fileName}</span>}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 font-semibold text-slate-900">
+                            {doc.propertyName}
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                              {doc.documentType || 'Title Deed'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-600 font-medium">
+                            {doc.date || '—'}
+                          </td>
+                          <td className="p-3 text-slate-500 font-mono text-[11px]">
+                            {doc.fileSize || 'Digital PDF'}
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              {doc.fileUrl && doc.fileUrl !== '#' ? (
+                                <a
+                                  href={doc.fileUrl}
+                                  download={doc.fileName || `${doc.title}.pdf`}
+                                  className="p-1.5 text-slate-700 hover:text-gold-700 hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center gap-1 font-bold text-xs"
+                                  title="Download Document"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  <span>Download</span>
+                                </a>
+                              ) : null}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDocument(doc)}
+                                className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Delete Document from Vault"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
+
+            {/* Modal: Upload Document */}
+            {showAddDocModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center space-x-2">
+                      <FolderArchive className="w-5 h-5 text-gold-600" />
+                      <h4 className="font-serif text-lg font-bold text-slate-950">Upload Document to Vault</h4>
+                    </div>
+                    <button onClick={() => setShowAddDocModal(false)} className="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+                  </div>
+
+                  <form onSubmit={handleSaveDocument} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Select Managed Building *</label>
+                      <select
+                        value={docFormData.propertyName}
+                        onChange={(e) => {
+                          const selected = managedProperties.find(p => p.name === e.target.value);
+                          setDocFormData(prev => ({
+                            ...prev,
+                            propertyName: e.target.value,
+                            propertyId: selected ? selected.id : ''
+                          }));
+                        }}
+                        required
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-semibold"
+                      >
+                        <option value="">— Select Building —</option>
+                        {managedProperties.map(p => (
+                          <option key={p.id} value={p.name}>{p.name} ({p.city || 'Lagos'})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Document Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Certificate of Occupancy (C of O) & Building Approval"
+                        value={docFormData.title}
+                        onChange={(e) => setDocFormData(prev => ({ ...prev, title: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Document Category / Classification</label>
+                      <select
+                        value={docFormData.documentType}
+                        onChange={(e) => setDocFormData(prev => ({ ...prev, documentType: e.target.value }))}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                      >
+                        <option value="Certificate of Occupancy (C of O)">Certificate of Occupancy (C of O)</option>
+                        <option value="Governor's Consent & Title Deed">Governor's Consent & Title Deed</option>
+                        <option value="Executed Tenancy Agreement">Executed Tenancy Agreement</option>
+                        <option value="Registered Survey Plan">Registered Survey Plan</option>
+                        <option value="Comprehensive Financial Statement">Comprehensive Financial Statement</option>
+                        <option value="Building Insurance & Tax Clearance">Building Insurance & Tax Clearance</option>
+                        <option value="Facility Condition Audit">Facility Condition Audit</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Attach Document File (PDF or Image)</label>
+                      <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition-colors">
+                        <Upload className="w-6 h-6 mx-auto text-slate-400 mb-1" />
+                        <p className="text-slate-600 font-medium">Click to choose PDF, DOC, or Image file</p>
+                        {docFormData.fileName && (
+                          <p className="text-xs font-bold text-emerald-700 mt-2">
+                            Attached: {docFormData.fileName} ({docFormData.fileSize})
+                          </p>
+                        )}
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,image/*"
+                          className="mt-2 block w-full text-xs text-slate-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-gold-400 cursor-pointer"
+                          onChange={(e) => handleDocumentFileUpload(e.target.files[0])}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddDocModal(false)}
+                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 cursor-pointer shadow-md"
+                      >
+                        Save to Vault
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* MODULE: ROUTINE PHYSICAL INSPECTION SESSIONS             */}
+        {/* ========================================================= */}
+        {activeModule === 'inspections' && (
+          <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden space-y-6">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-950 flex items-center space-x-2">
+                  <ClipboardCheck className="w-5 h-5 text-gold-600" />
+                  <span>Routine Property Inspection Sessions</span>
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Conduct structural reviews, physical audits, and preventive facility assessments. Published audits appear directly on the landlord's dashboard.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <select
+                  value={inspFilterProp}
+                  onChange={(e) => setInspFilterProp(e.target.value)}
+                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
+                >
+                  <option value="all">All Managed Buildings ({inspections.length})</option>
+                  {managedProperties.map(p => (
+                    <option key={p.id} value={p.name}>{p.name}</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInspFormData({
+                      propertyId: managedProperties[0]?.id || '',
+                      propertyName: managedProperties[0]?.name || '',
+                      inspectorName: 'Engr. Babajide Fasola (Lead Facility Manager)',
+                      inspectionDate: new Date().toISOString().split('T')[0],
+                      overallCondition: 'Excellent',
+                      reportType: 'Quarterly Routine Audit',
+                      notes: '',
+                      photos: []
+                    });
+                    setShowAddInspModal(true);
+                  }}
+                  className="px-4 py-2 bg-gold-gradient text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl shadow-md hover:brightness-110 flex items-center space-x-1.5 cursor-pointer transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Log Inspection Audit</span>
+                </button>
+              </div>
+            </div>
+
+            {(() => {
+              const filteredInsps = inspFilterProp === 'all'
+                ? inspections
+                : inspections.filter(i => i.propertyName?.toLowerCase() === inspFilterProp.toLowerCase() || i.propertyId === inspFilterProp);
+
+              if (filteredInsps.length === 0) {
+                return (
+                  <div className="p-16 text-center text-slate-600 space-y-3">
+                    <ClipboardCheck className="w-12 h-12 mx-auto text-slate-400" />
+                    <h4 className="text-base font-bold text-slate-900">No inspection audits logged yet</h4>
+                    <p className="text-xs text-slate-600 max-w-md mx-auto">
+                      Click "Log Inspection Audit" to record a physical condition review, structural observations, and field photos.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="p-6 pt-0 space-y-4">
+                  {filteredInsps.map((insp) => (
+                    <div key={insp.id} className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
+                        <div>
+                          <h4 className="font-serif text-base font-bold text-slate-950">{insp.propertyName}</h4>
+                          <p className="text-xs text-slate-500">
+                            Inspected by: <strong className="text-slate-800">{insp.inspectorName}</strong> • {insp.reportType || 'Routine Audit'}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-3 text-xs">
+                          <span className="text-slate-500 font-medium">{insp.inspectionDate}</span>
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            insp.overallCondition === 'Excellent' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                            insp.overallCondition === 'Good' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                            insp.overallCondition === 'Fair' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                            'bg-red-100 text-red-800 border border-red-300'
+                          }`}>
+                            Condition: {insp.overallCondition}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteInspection(insp)}
+                            className="p-1.5 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title="Delete Inspection"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+                        "{insp.notes}"
+                      </div>
+
+                      {insp.photos && insp.photos.length > 0 && (
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">Field Photos ({insp.photos.length})</span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                            {insp.photos.map((ph, idx) => (
+                              <div key={idx} className="h-24 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                                <img src={ph} alt="Inspection" className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Modal: Log Inspection */}
+            {showAddInspModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+                <div className="bg-white max-w-xl w-full rounded-2xl p-6 sm:p-8 shadow-2xl border border-amber-300 space-y-4 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center space-x-2">
+                      <ClipboardCheck className="w-5 h-5 text-gold-600" />
+                      <h4 className="font-serif text-lg font-bold text-slate-950">Log Routine Inspection Audit</h4>
+                    </div>
+                    <button onClick={() => setShowAddInspModal(false)} className="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+                  </div>
+
+                  <form onSubmit={handleSaveInspection} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Select Managed Building *</label>
+                      <select
+                        value={inspFormData.propertyName}
+                        onChange={(e) => {
+                          const selected = managedProperties.find(p => p.name === e.target.value);
+                          setInspFormData(prev => ({
+                            ...prev,
+                            propertyName: e.target.value,
+                            propertyId: selected ? selected.id : ''
+                          }));
+                        }}
+                        required
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-semibold"
+                      >
+                        <option value="">— Select Building —</option>
+                        {managedProperties.map(p => (
+                          <option key={p.id} value={p.name}>{p.name} ({p.city || 'Lagos'})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Inspector Full Name &amp; Role</label>
+                        <input
+                          type="text"
+                          required
+                          value={inspFormData.inspectorName}
+                          onChange={(e) => setInspFormData(prev => ({ ...prev, inspectorName: e.target.value }))}
+                          placeholder="e.g. Engr. Babajide Fasola"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Inspection Date</label>
+                        <input
+                          type="date"
+                          required
+                          value={inspFormData.inspectionDate}
+                          onChange={(e) => setInspFormData(prev => ({ ...prev, inspectionDate: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Overall Condition Rating</label>
+                        <select
+                          value={inspFormData.overallCondition}
+                          onChange={(e) => setInspFormData(prev => ({ ...prev, overallCondition: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold"
+                        >
+                          <option value="Excellent">Excellent — Optimal Standard</option>
+                          <option value="Good">Good — Normal Wear &amp; Tear</option>
+                          <option value="Fair">Fair — Minor Attention Required</option>
+                          <option value="Needs Attention">Needs Attention — Immediate Repair</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-900 mb-1">Audit Type</label>
+                        <select
+                          value={inspFormData.reportType}
+                          onChange={(e) => setInspFormData(prev => ({ ...prev, reportType: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
+                        >
+                          <option value="Quarterly Routine Audit">Quarterly Routine Audit</option>
+                          <option value="Move-in Condition Audit">Move-in Condition Audit</option>
+                          <option value="Move-out Tenancy Audit">Move-out Tenancy Audit</option>
+                          <option value="Structural &amp; Safety Check">Structural &amp; Safety Check</option>
+                          <option value="Annual Preventive Check">Annual Preventive Check</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Audit Notes &amp; Observations *</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={inspFormData.notes}
+                        onChange={(e) => setInspFormData(prev => ({ ...prev, notes: e.target.value }))}
+                        placeholder="Detailed observations regarding roof drainage, plumbing, electrical distribution, fixtures, and tenant occupancy state..."
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-gold-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-900 mb-1">Upload Site Inspection Photos</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleInspectionPhotoUpload(e.target.files)}
+                        className="block w-full text-xs text-slate-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-gold-400 cursor-pointer"
+                      />
+                      {inspFormData.photos && inspFormData.photos.length > 0 && (
+                        <div className="flex gap-2 mt-2 overflow-x-auto py-1">
+                          {inspFormData.photos.map((p, i) => (
+                            <div key={i} className="w-14 h-14 rounded-lg overflow-hidden border border-slate-300 shrink-0">
+                              <img src={p} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddInspModal(false)}
+                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2 bg-gold-gradient text-slate-950 rounded-xl font-bold uppercase tracking-wider hover:brightness-105 cursor-pointer shadow-md"
+                      >
+                        Publish Inspection
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
           </div>
@@ -2807,6 +3551,16 @@ export default function AdminPortal({ onReturnHome }) {
                               Enter Portal
                             </button>
                           )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteManagedProperty(prop)}
+                            className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1 ml-auto"
+                            title="Delete Managed Building"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
                         </div>
                       </div>
                     );
@@ -3173,8 +3927,8 @@ export default function AdminPortal({ onReturnHome }) {
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900"
                         >
                           <option value="">— Select Managed Property or Leave Pending —</option>
-                          {properties.map(p => (
-                            <option key={p.id} value={p.name || p.title}>{p.name || p.title} ({p.city || p.location || 'Managed'})</option>
+                          {managedProperties.map(p => (
+                            <option key={p.id} value={p.name}>{p.name} ({p.city || 'Lagos'})</option>
                           ))}
                         </select>
                       </div>
@@ -3398,10 +4152,10 @@ export default function AdminPortal({ onReturnHome }) {
                         <span className="text-[10px] text-slate-400">Click to add/remove</span>
                       </div>
 
-                      {/* Quick Toggle Pills from Active Properties */}
-                      {properties && properties.length > 0 && (
+                      {/* Quick Toggle Pills from Active Managed Properties */}
+                      {managedProperties && managedProperties.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-slate-50 rounded-xl border border-slate-200">
-                          {properties.map(p => {
+                          {managedProperties.map(p => {
                             const pTitle = p.name || p.title;
                             const currentList = editingOwner.assignedPropertiesText
                               ? editingOwner.assignedPropertiesText.split(',').map(s => s.trim()).filter(Boolean)
@@ -3416,7 +4170,7 @@ export default function AdminPortal({ onReturnHome }) {
                                   if (isAssigned) {
                                     next = currentList.filter(item => item.toLowerCase() !== pTitle.toLowerCase());
                                   } else {
-                                    next = [...currentList, pTitle];
+                                    next = Array.from(new Set([...currentList, pTitle]));
                                   }
                                   setEditingOwner(prev => ({
                                     ...prev,

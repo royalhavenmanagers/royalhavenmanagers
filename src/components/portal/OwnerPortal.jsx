@@ -84,9 +84,18 @@ export default function OwnerPortal({ onReturnHome }) {
       (t.propertyName && propNames.has(t.propertyName.toLowerCase().trim())) ||
       (ownerEmail && t.ownerEmail && t.ownerEmail.toLowerCase().trim() === ownerEmail)
     ));
-    setMaintenance(portalStore.getMaintenance().filter(m => propIds.has(m.propertyId)));
-    setInspections(portalStore.getInspections().filter(i => propIds.has(i.propertyId)));
-    setDocuments(portalStore.getDocuments().filter(d => propIds.has(d.propertyId)));
+    setMaintenance(portalStore.getMaintenance().filter(m => 
+      propIds.has(m.propertyId) || 
+      (m.propertyName && propNames.has(m.propertyName.toLowerCase().trim()))
+    ));
+    setInspections(portalStore.getInspections().filter(i => 
+      (i.propertyId && propIds.has(i.propertyId)) || 
+      (i.propertyName && propNames.has(i.propertyName.toLowerCase().trim()))
+    ));
+    setDocuments(portalStore.getDocuments().filter(d => 
+      (d.propertyId && propIds.has(d.propertyId)) || 
+      (d.propertyName && propNames.has(d.propertyName.toLowerCase().trim()))
+    ));
   };
 
   useEffect(() => {
@@ -1371,17 +1380,29 @@ export default function OwnerPortal({ onReturnHome }) {
                         <p className="text-xs text-slate-400">Added: {doc.date} • Size: {doc.fileSize}</p>
                       </div>
 
-                      <a
-                        href={doc.fileUrl}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          alert(`Accessing encrypted document: "${doc.title}". In cloud deployment, this generates an authorized signed URL.`);
-                        }}
-                        className="w-full py-2.5 rounded-xl bg-obsidian-900 border border-gold-500/40 text-amber-300 hover:bg-gold-gradient hover:text-obsidian-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-sm"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Download Document</span>
-                      </a>
+                      {doc.fileUrl && doc.fileUrl !== '#' ? (
+                        <a
+                          href={doc.fileUrl}
+                          download={doc.fileName || `${doc.title}.pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 rounded-xl bg-obsidian-900 border border-gold-500/40 text-amber-300 hover:bg-gold-gradient hover:text-obsidian-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-sm"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Document</span>
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            alert(`Accessing encrypted document: "${doc.title}". In cloud deployment, this generates an authorized signed URL.`);
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-obsidian-900 border border-gold-500/40 text-amber-300 hover:bg-gold-gradient hover:text-obsidian-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-sm cursor-pointer"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Document</span>
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

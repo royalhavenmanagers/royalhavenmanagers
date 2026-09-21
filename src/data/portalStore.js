@@ -31,7 +31,7 @@ const isDemoId = (id) => {
 };
 
 export const portalStore = {
-  // Read All Properties
+  // Read All Properties (with deduplication)
   getProperties: () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PROPERTIES);
@@ -39,10 +39,24 @@ export const portalStore = {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           const cleaned = parsed.filter(p => !isDemoId(p.id));
-          if (cleaned.length !== parsed.length) {
-            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(cleaned));
+          // Deduplicate by ID and by (name + owner)
+          const seenIds = new Set();
+          const seenKey = new Set();
+          const deduplicated = [];
+          for (const p of cleaned) {
+            if (!p || !p.id) continue;
+            const normKey = `${(p.name || '').toLowerCase().trim()}:::${(p.ownerEmail || p.ownerId || '').toLowerCase().trim()}`;
+            if (seenIds.has(p.id) || (normKey !== ':::' && seenKey.has(normKey))) {
+              continue;
+            }
+            seenIds.add(p.id);
+            if (normKey !== ':::') seenKey.add(normKey);
+            deduplicated.push(p);
           }
-          return cleaned;
+          if (deduplicated.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(deduplicated));
+          }
+          return deduplicated;
         }
       }
       return [];
@@ -152,9 +166,28 @@ export const portalStore = {
     return updated;
   },
 
-  // Add new property
+  // Add new property (Idempotent - avoids accidental duplication)
   addProperty: (property) => {
     const properties = portalStore.getProperties();
+    const cleanName = (property.name || '').toLowerCase().trim();
+    const cleanEmail = (property.ownerEmail || '').toLowerCase().trim();
+
+    const existingIndex = properties.findIndex(p => 
+      (property.id && p.id === property.id) ||
+      (cleanName && p.name?.toLowerCase().trim() === cleanName && (!cleanEmail || p.ownerEmail?.toLowerCase().trim() === cleanEmail))
+    );
+
+    if (existingIndex >= 0) {
+      // Merge & update existing record rather than creating a duplicate
+      properties[existingIndex] = {
+        ...properties[existingIndex],
+        ...property,
+        units: property.units && property.units.length > 0 ? property.units : properties[existingIndex].units
+      };
+      localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(properties));
+      return properties[existingIndex];
+    }
+
     const newProp = {
       ...property,
       id: property.id || `prop-${Date.now()}`,
@@ -175,8 +208,24 @@ export const portalStore = {
 
   deleteProperty: (id) => {
     const properties = portalStore.getProperties();
+    const target = properties.find(p => p.id === id);
     const updated = properties.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+
+    // Also unassign from owners so their profiles don't reference a deleted property
+    if (target) {
+      const owners = portalStore.getOwners();
+      const updatedOwners = owners.map(o => {
+        if (!o.assignedProperties || !Array.isArray(o.assignedProperties)) return o;
+        return {
+          ...o,
+          assignedProperties: o.assignedProperties.filter(
+            name => name && name.toLowerCase().trim() !== target.name.toLowerCase().trim() && name !== id
+          )
+        };
+      });
+      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(updatedOwners));
+    }
     return updated;
   },
 
@@ -185,13 +234,21 @@ export const portalStore = {
     const transactions = portalStore.getTransactions();
     const newTx = {
       ...tx,
-      id: `tx-${Date.now()}`,
+      id: tx.id || `tx-${Date.now()}`,
       date: tx.date || new Date().toISOString().split('T')[0],
       status: tx.status || 'completed'
     };
     transactions.unshift(newTx);
     localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
     return newTx;
+  },
+
+  // Delete remittance transaction
+  deleteTransaction: (id) => {
+    const transactions = portalStore.getTransactions();
+    const updated = transactions.filter(t => t.id !== id);
+    localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(updated));
+    return updated;
   },
 
   // Add maintenance ticket
@@ -300,7 +357,15 @@ export const portalStore = {
   getOwners: () => {
     try {
       const saved = localStorage.getItem("royalhaven_portal_owners");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const list = JSON.parse(saved);
+        if (Array.isArray(list)) {
+          return list.map(o => ({
+            ...o,
+            assignedProperties: Array.from(new Set((o.assignedProperties || []).map(p => typeof p === 'string' ? p.trim() : '').filter(Boolean)))
+          }));
+        }
+      }
       return [];
     } catch {
       return [];
@@ -309,15 +374,19 @@ export const portalStore = {
 
   addOwner: (owner) => {
     const list = portalStore.getOwners();
+    const sanitizedAssigned = Array.from(new Set((owner.assignedProperties || []).map(p => typeof p === 'string' ? p.trim() : '').filter(Boolean)));
     const newOwner = {
       ...owner,
       id: owner.id || `owner-${Date.now()}`,
+      assignedProperties: sanitizedAssigned,
       createdDate: owner.createdDate || new Date().toISOString().split('T')[0]
     };
     // If owner with same email already exists, update them
     const existingIndex = list.findIndex(o => o.email?.toLowerCase().trim() === newOwner.email?.toLowerCase().trim());
     if (existingIndex >= 0) {
-      list[existingIndex] = { ...list[existingIndex], ...newOwner };
+      const prevAssigned = list[existingIndex].assignedProperties || [];
+      const mergedAssigned = Array.from(new Set([...prevAssigned, ...sanitizedAssigned].map(p => typeof p === 'string' ? p.trim() : '').filter(Boolean)));
+      list[existingIndex] = { ...list[existingIndex], ...newOwner, assignedProperties: mergedAssigned };
     } else {
       list.unshift(newOwner);
     }
@@ -347,7 +416,15 @@ export const portalStore = {
       (updatedData.email && o.email?.toLowerCase().trim() === updatedData.email?.toLowerCase().trim())
     );
     if (idx >= 0) {
-      list[idx] = { ...list[idx], ...updatedData };
+      let finalAssigned = list[idx].assignedProperties || [];
+      if (updatedData.assignedProperties) {
+        finalAssigned = Array.from(new Set(updatedData.assignedProperties.map(p => typeof p === 'string' ? p.trim() : '').filter(Boolean)));
+      }
+      list[idx] = { 
+        ...list[idx], 
+        ...updatedData, 
+        assignedProperties: finalAssigned 
+      };
       localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
       return list[idx];
     }
