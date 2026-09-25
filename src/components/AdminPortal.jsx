@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Lock, LogOut, Plus, Edit, Trash2, CheckCircle, 
-  AlertCircle, Eye, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
+  AlertCircle, Eye, EyeOff, FileText, ArrowLeft, Image as ImageIcon, Save, KeyRound, 
   ShieldCheck, Home, Upload, MapPin, Tag, DollarSign, BedDouble, Bath, Sparkles,
   Inbox, Phone, Mail, Calendar, Send, Users, Copy, BarChart3, TrendingUp, Activity, RefreshCw, RotateCcw, ExternalLink, Building2, Wrench, Paperclip,
   ClipboardCheck, FolderArchive, Download
@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 export default function AdminPortal({ onReturnHome }) {
   const [isAuth, setIsAuth] = useState(false);
   const [password, setPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [authError, setAuthError] = useState('');
 
   // Primary navigation: 'articles', 'properties', 'inquiries', 'remittances', 'maintenance', 'vault', 'inspections', 'owners', 'traffic', 'security'
@@ -187,6 +188,20 @@ export default function AdminPortal({ onReturnHome }) {
     if (authStatus) {
       loadData();
     }
+
+    const handleSyncUpdate = () => {
+      if (blogStore.isAuthenticated()) {
+        loadData();
+      }
+    };
+
+    window.addEventListener('portalStoreUpdated', handleSyncUpdate);
+    window.addEventListener('storage', handleSyncUpdate);
+
+    return () => {
+      window.removeEventListener('portalStoreUpdated', handleSyncUpdate);
+      window.removeEventListener('storage', handleSyncUpdate);
+    };
   }, []);
 
   const loadData = () => {
@@ -1248,15 +1263,27 @@ export default function AdminPortal({ onReturnHome }) {
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1.5">
                 Admin Password
               </label>
-              <input
-                type="password"
-                required
-                autoFocus
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={showAdminPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-11 py-3 text-base sm:text-sm text-slate-950 placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPassword(!showAdminPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-amber-600 p-1 transition-colors"
+                  aria-label={showAdminPassword ? "Hide password" : "Show password"}
+                >
+                  {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button

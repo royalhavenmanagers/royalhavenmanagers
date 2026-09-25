@@ -168,6 +168,40 @@ export function AuthProvider({ children }) {
       console.warn('Supabase auth sign in notice:', err.message);
     }
 
+    // 3. Fallback: Check if account exists in cloud state (e.g. created on another device)
+    try {
+      await portalStore.syncWithCloud();
+      const syncedOwner = portalStore.validateOwnerCredentials(normalizedEmail, password);
+      if (syncedOwner) {
+        const activeUser = {
+          id: syncedOwner.id,
+          email: syncedOwner.email
+        };
+        const activeProfile = {
+          id: syncedOwner.id,
+          email: syncedOwner.email,
+          full_name: syncedOwner.fullName,
+          phone: syncedOwner.phone || '',
+          role: 'property_owner',
+          bank_name: syncedOwner.bankName || '',
+          account_number: syncedOwner.accountNumber || '',
+          account_name: syncedOwner.accountName || syncedOwner.fullName,
+          assignedProperties: (syncedOwner.assignedProperties || []).filter(p => !p.includes('Royal Crest') && !p.includes('Haven Terraces'))
+        };
+
+        setUser(activeUser);
+        setProfile(activeProfile);
+        localStorage.setItem(
+          STORAGE_AUTH_USER,
+          JSON.stringify({ user: activeUser, profile: activeProfile })
+        );
+        setLoading(false);
+        return { success: true };
+      }
+    } catch (syncErr) {
+      console.warn('Login cloud fallback sync notice:', syncErr.message);
+    }
+
     setLoading(false);
     return { 
       success: false, 

@@ -100,6 +100,19 @@ export default function OwnerPortal({ onReturnHome }) {
 
   useEffect(() => {
     loadPortalData();
+
+    // Listen for cloud sync and local store update events for real-time reactivity
+    const handleStoreUpdate = () => {
+      loadPortalData();
+    };
+
+    window.addEventListener('portalStoreUpdated', handleStoreUpdate);
+    window.addEventListener('storage', handleStoreUpdate);
+
+    return () => {
+      window.removeEventListener('portalStoreUpdated', handleStoreUpdate);
+      window.removeEventListener('storage', handleStoreUpdate);
+    };
   }, [profile]);
 
   // Format currency helper supporting NGN, USD, CAD, GBP, EUR

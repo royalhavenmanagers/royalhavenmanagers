@@ -8,6 +8,27 @@ const STORAGE_KEY_INSPECTIONS = "royalhaven_portal_inspections";
 const STORAGE_KEY_DOCUMENTS = "royalhaven_portal_documents";
 const STORAGE_KEY_INQUIRIES = "royalhaven_leads_inbox";
 const STORAGE_KEY_ONBOARDING_SUBMISSIONS = "royalhaven_portal_onboarding_submissions";
+const STORAGE_KEY_OWNERS = "royalhaven_portal_owners";
+
+let isSyncing = false;
+let syncDebounceTimer = null;
+
+const notifyListeners = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('portalStoreUpdated', {
+      detail: {
+        properties: portalStore.getProperties(),
+        transactions: portalStore.getTransactions(),
+        inspections: portalStore.getInspections(),
+        documents: portalStore.getDocuments(),
+        maintenance: portalStore.getMaintenance(),
+        owners: portalStore.getOwners(),
+        onboardingSubmissions: portalStore.getOnboardingSubmissions()
+      }
+    }));
+    window.dispatchEvent(new Event('storage'));
+  }
+};
 
 // Clean production store with zero demo accounts or fake sample data
 const DEFAULT_PORTAL_DATA = {
@@ -156,6 +177,8 @@ export const portalStore = {
     };
     list.unshift(newDoc);
     localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(list));
+    notifyListeners();
+    portalStore.pushToCloud();
     return newDoc;
   },
 
@@ -163,6 +186,8 @@ export const portalStore = {
     const list = portalStore.getDocuments();
     const updated = list.filter(d => d.id !== id);
     localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -177,6 +202,7 @@ export const portalStore = {
       (cleanName && p.name?.toLowerCase().trim() === cleanName && (!cleanEmail || p.ownerEmail?.toLowerCase().trim() === cleanEmail))
     );
 
+    let result;
     if (existingIndex >= 0) {
       // Merge & update existing record rather than creating a duplicate
       properties[existingIndex] = {
@@ -185,17 +211,21 @@ export const portalStore = {
         units: property.units && property.units.length > 0 ? property.units : properties[existingIndex].units
       };
       localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(properties));
-      return properties[existingIndex];
+      result = properties[existingIndex];
+    } else {
+      const newProp = {
+        ...property,
+        id: property.id || `prop-${Date.now()}`,
+        units: property.units || []
+      };
+      properties.unshift(newProp);
+      localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(properties));
+      result = newProp;
     }
 
-    const newProp = {
-      ...property,
-      id: property.id || `prop-${Date.now()}`,
-      units: property.units || []
-    };
-    properties.unshift(newProp);
-    localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(properties));
-    return newProp;
+    notifyListeners();
+    portalStore.pushToCloud();
+    return result;
   },
 
   // Update existing property & its units
@@ -203,6 +233,8 @@ export const portalStore = {
     const properties = portalStore.getProperties();
     const updated = properties.map(p => (p.id === id ? { ...p, ...updates } : p));
     localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -224,8 +256,10 @@ export const portalStore = {
           )
         };
       });
-      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(updatedOwners));
+      localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(updatedOwners));
     }
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -240,6 +274,8 @@ export const portalStore = {
     };
     transactions.unshift(newTx);
     localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
+    notifyListeners();
+    portalStore.pushToCloud();
     return newTx;
   },
 
@@ -248,6 +284,8 @@ export const portalStore = {
     const transactions = portalStore.getTransactions();
     const updated = transactions.filter(t => t.id !== id);
     localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -262,6 +300,8 @@ export const portalStore = {
     };
     list.unshift(newItem);
     localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(list));
+    notifyListeners();
+    portalStore.pushToCloud();
     return newItem;
   },
 
@@ -270,6 +310,8 @@ export const portalStore = {
     const list = portalStore.getMaintenance();
     const updated = list.map(m => (m.id === id ? { ...m, ...updates } : m));
     localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -277,6 +319,8 @@ export const portalStore = {
     const list = portalStore.getMaintenance();
     const updated = list.filter(m => m.id !== id);
     localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -290,6 +334,8 @@ export const portalStore = {
     };
     list.unshift(newItem);
     localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(list));
+    notifyListeners();
+    portalStore.pushToCloud();
     return newItem;
   },
 
@@ -297,6 +343,8 @@ export const portalStore = {
     const list = portalStore.getInspections();
     const updated = list.map(i => (i.id === id ? { ...i, ...updates } : i));
     localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -304,6 +352,8 @@ export const portalStore = {
     const list = portalStore.getInspections();
     const updated = list.filter(i => i.id !== id);
     localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -356,7 +406,7 @@ export const portalStore = {
 
   getOwners: () => {
     try {
-      const saved = localStorage.getItem("royalhaven_portal_owners");
+      const saved = localStorage.getItem(STORAGE_KEY_OWNERS);
       if (saved) {
         const list = JSON.parse(saved);
         if (Array.isArray(list)) {
@@ -372,7 +422,7 @@ export const portalStore = {
     }
   },
 
-  addOwner: (owner) => {
+  addOwner: (owner, autoSyncCloud = true) => {
     const list = portalStore.getOwners();
     const sanitizedAssigned = Array.from(new Set((owner.assignedProperties || []).map(p => typeof p === 'string' ? p.trim() : '').filter(Boolean)));
     const newOwner = {
@@ -390,7 +440,11 @@ export const portalStore = {
     } else {
       list.unshift(newOwner);
     }
-    localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
+    localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(list));
+    notifyListeners();
+    if (autoSyncCloud) {
+      portalStore.pushToCloud(newOwner);
+    }
     return newOwner;
   },
 
@@ -425,7 +479,9 @@ export const portalStore = {
         ...updatedData, 
         assignedProperties: finalAssigned 
       };
-      localStorage.setItem("royalhaven_portal_owners", JSON.stringify(list));
+      localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(list));
+      notifyListeners();
+      portalStore.pushToCloud();
       return list[idx];
     }
     return null;
@@ -434,7 +490,9 @@ export const portalStore = {
   deleteOwner: (id) => {
     const list = portalStore.getOwners();
     const updated = list.filter(o => o.id !== id);
-    localStorage.setItem("royalhaven_portal_owners", JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -462,6 +520,8 @@ export const portalStore = {
     };
     list.unshift(newSub);
     localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(list));
+    notifyListeners();
+    portalStore.pushToCloud();
     return newSub;
   },
 
@@ -469,6 +529,8 @@ export const portalStore = {
     const list = portalStore.getOnboardingSubmissions();
     const updated = list.map(item => item.id === id ? { ...item, status } : item);
     localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
   },
 
@@ -533,6 +595,8 @@ export const portalStore = {
     // Mark submission approved
     const updated = list.map(item => item.id === id ? { ...item, status: 'approved', propertyId: propId } : item);
     localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
 
     return { property: newProperty, submission: sub };
   },
@@ -541,7 +605,215 @@ export const portalStore = {
     const list = portalStore.getOnboardingSubmissions();
     const updated = list.filter(item => item.id !== id);
     localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(updated));
+    notifyListeners();
+    portalStore.pushToCloud();
     return updated;
+  },
+
+  // -------------------------------------------------------------
+  // Real-Time Cloud Synchronization Engine
+  // -------------------------------------------------------------
+  syncWithCloud: async () => {
+    if (isSyncing) return false;
+    isSyncing = true;
+
+    try {
+      const res = await fetch('/api/portal-sync', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        isSyncing = false;
+        return false;
+      }
+
+      const json = await res.json();
+      if (!json.success) {
+        isSyncing = false;
+        return false;
+      }
+
+      const cloudData = json.data;
+      const cloudProfiles = json.profiles || [];
+      let hasChanges = false;
+
+      // 1. Sync Owners & Profiles
+      const localOwners = portalStore.getOwners();
+      const ownersMap = new Map();
+      localOwners.forEach(o => {
+        if (o.email) ownersMap.set(o.email.toLowerCase().trim(), o);
+      });
+
+      // Incorporate cloud state owners
+      if (cloudData && Array.isArray(cloudData.owners)) {
+        cloudData.owners.forEach(co => {
+          if (!co || !co.email) return;
+          const key = co.email.toLowerCase().trim();
+          const existing = ownersMap.get(key);
+          if (!existing) {
+            ownersMap.set(key, co);
+            hasChanges = true;
+          } else {
+            const mergedProps = Array.from(new Set([...(existing.assignedProperties || []), ...(co.assignedProperties || [])]));
+            ownersMap.set(key, { ...co, ...existing, assignedProperties: mergedProps });
+          }
+        });
+      }
+
+      // Incorporate Supabase profiles
+      cloudProfiles.forEach(cp => {
+        if (!cp || !cp.email) return;
+        const key = cp.email.toLowerCase().trim();
+        const existing = ownersMap.get(key);
+        if (!existing) {
+          ownersMap.set(key, {
+            id: cp.id,
+            fullName: cp.full_name || 'Property Owner',
+            email: cp.email,
+            phone: cp.phone || '',
+            role: cp.role || 'property_owner',
+            bankName: cp.bank_name || '',
+            accountNumber: cp.account_number || '',
+            accountName: cp.account_name || cp.full_name || '',
+            assignedProperties: cp.assigned_properties || [],
+            createdDate: cp.created_at ? cp.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
+          });
+          hasChanges = true;
+        } else {
+          if (cp.assigned_properties && Array.isArray(cp.assigned_properties) && cp.assigned_properties.length > 0) {
+            const mergedProps = Array.from(new Set([...(existing.assignedProperties || []), ...cp.assigned_properties]));
+            ownersMap.set(key, { ...existing, assignedProperties: mergedProps });
+          }
+        }
+      });
+
+      const updatedOwnersList = Array.from(ownersMap.values());
+      localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(updatedOwnersList));
+
+      // 2. Sync Properties
+      if (cloudData && Array.isArray(cloudData.properties)) {
+        const localProps = portalStore.getProperties();
+        const propsMap = new Map();
+        localProps.forEach(p => propsMap.set(p.id, p));
+
+        cloudData.properties.forEach(cp => {
+          if (!cp || !cp.id) return;
+          if (!propsMap.has(cp.id)) {
+            propsMap.set(cp.id, cp);
+            hasChanges = true;
+          } else {
+            const localP = propsMap.get(cp.id);
+            propsMap.set(cp.id, {
+              ...localP,
+              ...cp,
+              units: cp.units && cp.units.length > 0 ? cp.units : localP.units
+            });
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(Array.from(propsMap.values())));
+      }
+
+      // 3. Sync Transactions / Remittances
+      if (cloudData && Array.isArray(cloudData.transactions)) {
+        const localTx = portalStore.getTransactions();
+        const txMap = new Map();
+        localTx.forEach(t => txMap.set(t.id, t));
+
+        cloudData.transactions.forEach(ct => {
+          if (!ct || !ct.id) return;
+          if (!txMap.has(ct.id)) {
+            txMap.set(ct.id, ct);
+            hasChanges = true;
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(Array.from(txMap.values())));
+      }
+
+      // 4. Sync Inspections
+      if (cloudData && Array.isArray(cloudData.inspections)) {
+        const localInsp = portalStore.getInspections();
+        const inspMap = new Map();
+        localInsp.forEach(i => inspMap.set(i.id, i));
+
+        cloudData.inspections.forEach(ci => {
+          if (!ci || !ci.id) return;
+          if (!inspMap.has(ci.id)) {
+            inspMap.set(ci.id, ci);
+            hasChanges = true;
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(Array.from(inspMap.values())));
+      }
+
+      // 5. Sync Documents
+      if (cloudData && Array.isArray(cloudData.documents)) {
+        const localDocs = portalStore.getDocuments();
+        const docsMap = new Map();
+        localDocs.forEach(d => docsMap.set(d.id, d));
+
+        cloudData.documents.forEach(cd => {
+          if (!cd || !cd.id) return;
+          if (!docsMap.has(cd.id)) {
+            docsMap.set(cd.id, cd);
+            hasChanges = true;
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(Array.from(docsMap.values())));
+      }
+
+      // 6. Sync Maintenance
+      if (cloudData && Array.isArray(cloudData.maintenance)) {
+        const localMaint = portalStore.getMaintenance();
+        const maintMap = new Map();
+        localMaint.forEach(m => maintMap.set(m.id, m));
+
+        cloudData.maintenance.forEach(cm => {
+          if (!cm || !cm.id) return;
+          if (!maintMap.has(cm.id)) {
+            maintMap.set(cm.id, cm);
+            hasChanges = true;
+          }
+        });
+        localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(Array.from(maintMap.values())));
+      }
+
+      notifyListeners();
+      isSyncing = false;
+      return true;
+    } catch (err) {
+      console.warn('Real-time cloud sync notice:', err.message);
+      isSyncing = false;
+      return false;
+    }
+  },
+
+  // Push local state to cloud asynchronously (debounced)
+  pushToCloud: (newOwnerPayload = null) => {
+    if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+
+    syncDebounceTimer = setTimeout(async () => {
+      try {
+        const payload = {
+          properties: portalStore.getProperties(),
+          transactions: portalStore.getTransactions(),
+          inspections: portalStore.getInspections(),
+          documents: portalStore.getDocuments(),
+          maintenance: portalStore.getMaintenance(),
+          owners: portalStore.getOwners(),
+          onboardingSubmissions: portalStore.getOnboardingSubmissions(),
+          newOwner: newOwnerPayload
+        };
+
+        await fetch('/api/portal-sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn('Cloud state push notice:', err.message);
+      }
+    }, 400);
   },
 
   seedDemoData: (demoOwnerId = 'owner-demo-adeleke', demoEmail = 'demo.landlord@royalhaven.com.ng') => {
@@ -730,3 +1002,30 @@ export const portalStore = {
     }
   }
 };
+
+// Auto-sync initialization and background event listeners
+if (typeof window !== 'undefined') {
+  // 1. Initial background sync
+  setTimeout(() => {
+    portalStore.syncWithCloud();
+  }, 100);
+
+  // 2. Sync whenever window or mobile tab gains focus
+  window.addEventListener('focus', () => {
+    portalStore.syncWithCloud();
+  });
+
+  // 3. Sync on visibility change (mobile switching between apps/tabs)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      portalStore.syncWithCloud();
+    }
+  });
+
+  // 4. Periodic background sync every 20 seconds while tab is active
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      portalStore.syncWithCloud();
+    }
+  }, 20000);
+}

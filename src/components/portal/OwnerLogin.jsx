@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, Sparkles, AlertCircle, CheckCircle, User, Phone, Landmark, CreditCard, Check } from 'lucide-react';
+import { Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, Sparkles, AlertCircle, CheckCircle, User, Phone, Landmark, CreditCard, Check, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authApi, isSupabaseConfigured, supabase } from '../../lib/supabaseClient';
 import { companyData } from '../../data/companyData';
@@ -26,6 +26,13 @@ export default function OwnerLogin({ onReturnHome }) {
   // New Password fields (for recovery from email link)
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -284,15 +291,26 @@ export default function OwnerLogin({ onReturnHome }) {
                   New Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    type="password"
+                    type={showNewPassword ? 'text' : 'password'}
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password (min. 6 characters)"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-11 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 transition-colors"
+                    aria-label={showNewPassword ? "Hide password" : "Show password"}
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -301,15 +319,26 @@ export default function OwnerLogin({ onReturnHome }) {
                   Confirm New Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    type="password"
+                    type={showConfirmNewPassword ? 'text' : 'password'}
                     required
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     placeholder="Confirm new password"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-11 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 transition-colors"
+                    aria-label={showConfirmNewPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -353,14 +382,17 @@ export default function OwnerLogin({ onReturnHome }) {
                   Registered Email
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. owner@example.com"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
               </div>
@@ -383,15 +415,26 @@ export default function OwnerLogin({ onReturnHome }) {
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-11 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -444,14 +487,15 @@ export default function OwnerLogin({ onReturnHome }) {
                   Full Name / Entity Name *
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Chief Adeleke Johnson"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    autoCorrect="off"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
               </div>
@@ -462,14 +506,17 @@ export default function OwnerLogin({ onReturnHome }) {
                     Email Address *
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="owner@gmail.com"
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                 </div>
@@ -479,14 +526,14 @@ export default function OwnerLogin({ onReturnHome }) {
                     Phone Number *
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       type="tel"
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+234 800 000 0000"
-                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-10 pr-4 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                 </div>
@@ -498,28 +545,54 @@ export default function OwnerLogin({ onReturnHome }) {
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
                     Create Password *
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    placeholder="Min. 6 chars"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showSignupPassword ? 'text' : 'password'}
+                      required
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      placeholder="Min. 6 chars"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-3.5 pr-10 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 transition-colors"
+                      aria-label={showSignupPassword ? "Hide password" : "Show password"}
+                    >
+                      {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-amber-200/90 uppercase tracking-wider mb-1">
                     Confirm Password *
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat password"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repeat password"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl pl-3.5 pr-10 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-300 p-1 transition-colors"
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -537,7 +610,7 @@ export default function OwnerLogin({ onReturnHome }) {
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
                       placeholder="Bank (e.g. Zenith)"
-                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                   <div>
@@ -546,7 +619,7 @@ export default function OwnerLogin({ onReturnHome }) {
                       value={accountNumber}
                       onChange={(e) => setAccountNumber(e.target.value)}
                       placeholder="10-Digit NUBAN"
-                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                   <div>
@@ -555,7 +628,7 @@ export default function OwnerLogin({ onReturnHome }) {
                       value={accountName}
                       onChange={(e) => setAccountName(e.target.value)}
                       placeholder="Account Name"
-                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                      className="w-full bg-obsidian-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                     />
                   </div>
                 </div>
@@ -636,7 +709,10 @@ export default function OwnerLogin({ onReturnHome }) {
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   placeholder="e.g. owner@example.com"
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                 />
               </div>
 
