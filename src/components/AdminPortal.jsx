@@ -187,6 +187,7 @@ export default function AdminPortal({ onReturnHome }) {
     setIsAuth(authStatus);
     if (authStatus) {
       loadData();
+      portalStore.syncWithCloud();
     }
 
     const handleSyncUpdate = () => {

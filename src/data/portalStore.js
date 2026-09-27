@@ -618,9 +618,13 @@ export const portalStore = {
     isSyncing = true;
 
     try {
-      const res = await fetch('/api/portal-sync', {
+      const res = await fetch(`/api/portal-sync?t=${Date.now()}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
       });
 
       if (!res.ok) {
@@ -636,7 +640,6 @@ export const portalStore = {
 
       const cloudData = json.data;
       const cloudProfiles = json.profiles || [];
-      let hasChanges = false;
 
       // 1. Sync Owners & Profiles
       const localOwners = portalStore.getOwners();
@@ -653,7 +656,6 @@ export const portalStore = {
           const existing = ownersMap.get(key);
           if (!existing) {
             ownersMap.set(key, co);
-            hasChanges = true;
           } else {
             const mergedProps = Array.from(new Set([...(existing.assignedProperties || []), ...(co.assignedProperties || [])]));
             ownersMap.set(key, { ...co, ...existing, assignedProperties: mergedProps });
@@ -679,7 +681,6 @@ export const portalStore = {
             assignedProperties: cp.assigned_properties || [],
             createdDate: cp.created_at ? cp.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
           });
-          hasChanges = true;
         } else {
           if (cp.assigned_properties && Array.isArray(cp.assigned_properties) && cp.assigned_properties.length > 0) {
             const mergedProps = Array.from(new Set([...(existing.assignedProperties || []), ...cp.assigned_properties]));
@@ -691,91 +692,34 @@ export const portalStore = {
       const updatedOwnersList = Array.from(ownersMap.values());
       localStorage.setItem(STORAGE_KEY_OWNERS, JSON.stringify(updatedOwnersList));
 
-      // 2. Sync Properties
+      // 2. Authoritative Cloud Sync for Managed Properties
       if (cloudData && Array.isArray(cloudData.properties)) {
-        const localProps = portalStore.getProperties();
-        const propsMap = new Map();
-        localProps.forEach(p => propsMap.set(p.id, p));
-
-        cloudData.properties.forEach(cp => {
-          if (!cp || !cp.id) return;
-          if (!propsMap.has(cp.id)) {
-            propsMap.set(cp.id, cp);
-            hasChanges = true;
-          } else {
-            const localP = propsMap.get(cp.id);
-            propsMap.set(cp.id, {
-              ...localP,
-              ...cp,
-              units: cp.units && cp.units.length > 0 ? cp.units : localP.units
-            });
-          }
-        });
-        localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(Array.from(propsMap.values())));
+        localStorage.setItem(STORAGE_KEY_PROPERTIES, JSON.stringify(cloudData.properties));
       }
 
-      // 3. Sync Transactions / Remittances
+      // 3. Authoritative Cloud Sync for Transactions / Remittances
       if (cloudData && Array.isArray(cloudData.transactions)) {
-        const localTx = portalStore.getTransactions();
-        const txMap = new Map();
-        localTx.forEach(t => txMap.set(t.id, t));
-
-        cloudData.transactions.forEach(ct => {
-          if (!ct || !ct.id) return;
-          if (!txMap.has(ct.id)) {
-            txMap.set(ct.id, ct);
-            hasChanges = true;
-          }
-        });
-        localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(Array.from(txMap.values())));
+        localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(cloudData.transactions));
       }
 
-      // 4. Sync Inspections
+      // 4. Authoritative Cloud Sync for Inspections
       if (cloudData && Array.isArray(cloudData.inspections)) {
-        const localInsp = portalStore.getInspections();
-        const inspMap = new Map();
-        localInsp.forEach(i => inspMap.set(i.id, i));
-
-        cloudData.inspections.forEach(ci => {
-          if (!ci || !ci.id) return;
-          if (!inspMap.has(ci.id)) {
-            inspMap.set(ci.id, ci);
-            hasChanges = true;
-          }
-        });
-        localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(Array.from(inspMap.values())));
+        localStorage.setItem(STORAGE_KEY_INSPECTIONS, JSON.stringify(cloudData.inspections));
       }
 
-      // 5. Sync Documents
+      // 5. Authoritative Cloud Sync for Documents
       if (cloudData && Array.isArray(cloudData.documents)) {
-        const localDocs = portalStore.getDocuments();
-        const docsMap = new Map();
-        localDocs.forEach(d => docsMap.set(d.id, d));
-
-        cloudData.documents.forEach(cd => {
-          if (!cd || !cd.id) return;
-          if (!docsMap.has(cd.id)) {
-            docsMap.set(cd.id, cd);
-            hasChanges = true;
-          }
-        });
-        localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(Array.from(docsMap.values())));
+        localStorage.setItem(STORAGE_KEY_DOCUMENTS, JSON.stringify(cloudData.documents));
       }
 
-      // 6. Sync Maintenance
+      // 6. Authoritative Cloud Sync for Maintenance
       if (cloudData && Array.isArray(cloudData.maintenance)) {
-        const localMaint = portalStore.getMaintenance();
-        const maintMap = new Map();
-        localMaint.forEach(m => maintMap.set(m.id, m));
+        localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(cloudData.maintenance));
+      }
 
-        cloudData.maintenance.forEach(cm => {
-          if (!cm || !cm.id) return;
-          if (!maintMap.has(cm.id)) {
-            maintMap.set(cm.id, cm);
-            hasChanges = true;
-          }
-        });
-        localStorage.setItem(STORAGE_KEY_MAINTENANCE, JSON.stringify(Array.from(maintMap.values())));
+      // 7. Authoritative Cloud Sync for Onboarding Submissions
+      if (cloudData && Array.isArray(cloudData.onboardingSubmissions)) {
+        localStorage.setItem(STORAGE_KEY_ONBOARDING_SUBMISSIONS, JSON.stringify(cloudData.onboardingSubmissions));
       }
 
       notifyListeners();

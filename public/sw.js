@@ -1,4 +1,4 @@
-const CACHE_NAME = 'royalhaven-pwa-v1';
+const CACHE_NAME = 'royalhaven-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/admin',
@@ -36,6 +36,18 @@ self.addEventListener('fetch', (event) => {
 
   // Skip non-GET requests or browser extension schemes
   if (request.method !== 'GET' || !request.url.startsWith('http')) {
+    return;
+  }
+
+  const url = new URL(request.url);
+
+  // Bypass cache completely for API endpoints, Supabase cloud queries, and dynamic sync requests
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.hostname.includes('supabase.co') ||
+    url.searchParams.has('nocache') ||
+    url.searchParams.has('t')
+  ) {
     return;
   }
 

@@ -18,18 +18,18 @@ export default function WhyChooseUs({ onOpenContact }) {
   ];
 
   return (
-    <section className="hidden md:block py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
+    <section id="process" className="py-16 sm:py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14 sm:mb-16">
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
             Why Choose <span className="text-gold-gradient">Royal Haven</span>
           </h2>
         </div>
 
-        {/* 3 Grid Cards (Desktop/Tablet only) */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* 3 Grid Cards */}
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {points.map((pt, idx) => (
             <motion.div
               key={idx}

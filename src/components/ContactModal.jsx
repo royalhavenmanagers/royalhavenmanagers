@@ -175,7 +175,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="Enter your full name"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
 
@@ -189,7 +189,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="e.g. 08153785297"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
               </div>
@@ -205,7 +205,10 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. name@domain.com"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                   />
                 </div>
 
@@ -216,7 +219,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                   <select
                     value={formData.propertyType}
                     onChange={(e) => setFormData({ ...formData, propertyType: e.target.value })}
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-gold-500 transition-colors"
                   >
                     <option value="Full Property Management">Full Property Management</option>
                     <option value="Facility & Maintenance Management">Facility & Maintenance Management</option>
@@ -240,7 +243,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="e.g. Lekki, Lagos or Abeokuta, Ogun State"
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
                 />
               </div>
 
@@ -253,7 +256,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   placeholder="Describe your property management requirements..."
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors resize-none"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors resize-none"
                 ></textarea>
               </div>
 

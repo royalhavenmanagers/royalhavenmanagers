@@ -56,7 +56,8 @@ export default function PropertySlider({ onOpenContact }) {
     : properties.filter(p => p.propertyType?.toLowerCase() === activeCategory.toLowerCase());
 
   return (
-    <section id="properties" className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
+    <section id="portfolio" className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
+      <div id="properties" className="absolute -top-24 left-0 pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}

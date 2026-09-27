@@ -100,6 +100,7 @@ export default function OwnerPortal({ onReturnHome }) {
 
   useEffect(() => {
     loadPortalData();
+    portalStore.syncWithCloud();
 
     // Listen for cloud sync and local store update events for real-time reactivity
     const handleStoreUpdate = () => {
@@ -1459,7 +1460,7 @@ export default function OwnerPortal({ onReturnHome }) {
                   value={onboardFormData.propertyName}
                   onChange={(e) => setOnboardFormData({ ...onboardFormData, propertyName: e.target.value })}
                   placeholder="e.g. Adeleke Palm Court, Horizon Apartments"
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -1474,7 +1475,7 @@ export default function OwnerPortal({ onReturnHome }) {
                     value={onboardFormData.address}
                     onChange={(e) => setOnboardFormData({ ...onboardFormData, address: e.target.value })}
                     placeholder="e.g. 14 Admiralty Way, Lekki Phase 1"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
 
@@ -1487,7 +1488,7 @@ export default function OwnerPortal({ onReturnHome }) {
                     value={onboardFormData.city}
                     onChange={(e) => setOnboardFormData({ ...onboardFormData, city: e.target.value })}
                     placeholder="e.g. Lagos, Abeokuta, Sagamu"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
               </div>
@@ -1500,7 +1501,7 @@ export default function OwnerPortal({ onReturnHome }) {
                   <select
                     value={onboardFormData.propertyType}
                     onChange={(e) => setOnboardFormData({ ...onboardFormData, propertyType: e.target.value })}
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-gold-500"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3 py-2.5 text-base sm:text-xs text-white focus:outline-none focus:border-gold-500"
                   >
                     <option value="Residential Block of Flats">Block of Flats</option>
                     <option value="Terrace Duplexes">Terrace Duplexes</option>
@@ -1521,7 +1522,7 @@ export default function OwnerPortal({ onReturnHome }) {
                     value={onboardFormData.unitsCount}
                     onChange={(e) => setOnboardFormData({ ...onboardFormData, unitsCount: e.target.value })}
                     placeholder="e.g. 6"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500"
                   />
                 </div>
 
@@ -1534,7 +1535,7 @@ export default function OwnerPortal({ onReturnHome }) {
                     value={onboardFormData.targetRent}
                     onChange={(e) => setOnboardFormData({ ...onboardFormData, targetRent: e.target.value })}
                     placeholder="e.g. 2500000"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 font-mono"
+                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 font-mono"
                   />
                 </div>
               </div>
@@ -1547,7 +1548,7 @@ export default function OwnerPortal({ onReturnHome }) {
                   type="date"
                   value={onboardFormData.preferredInspectionDate}
                   onChange={(e) => setOnboardFormData({ ...onboardFormData, preferredInspectionDate: e.target.value })}
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-gold-500"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -1560,7 +1561,7 @@ export default function OwnerPortal({ onReturnHome }) {
                   value={onboardFormData.notes}
                   onChange={(e) => setOnboardFormData({ ...onboardFormData, notes: e.target.value })}
                   placeholder="e.g. Some tenants are currently owing rent; building needs plumbing inspection."
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 leading-relaxed"
+                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 leading-relaxed resize-none"
                 ></textarea>
               </div>
 

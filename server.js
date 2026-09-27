@@ -3,6 +3,25 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleContactSubmission } from './server/apiHandler.js';
+import portalSyncHandler from './api/portal-sync.js';
+
+function wrapResponse(res) {
+  if (!res.status) {
+    res.status = function(code) {
+      this.statusCode = code;
+      return this;
+    };
+  }
+  if (!res.json) {
+    res.json = function(data) {
+      if (!this.getHeader('Content-Type')) {
+        this.setHeader('Content-Type', 'application/json');
+      }
+      return this.end(JSON.stringify(data));
+    };
+  }
+  return res;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +98,37 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
       }
     });
+    return;
+  }
+
+  // Real-time portal sync endpoint (GET & POST)
+  if (url.pathname === '/api/portal-sync') {
+    wrapResponse(res);
+    if (req.method === 'POST') {
+      let bodyStr = '';
+      req.on('data', chunk => {
+        bodyStr += chunk;
+      });
+      req.on('end', async () => {
+        try {
+          req.body = JSON.parse(bodyStr || '{}');
+        } catch {
+          req.body = {};
+        }
+        try {
+          await portalSyncHandler(req, res);
+        } catch (err) {
+          res.status(500).json({ success: false, error: err.message });
+        }
+      });
+      return;
+    }
+
+    try {
+      await portalSyncHandler(req, res);
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
     return;
   }
 
