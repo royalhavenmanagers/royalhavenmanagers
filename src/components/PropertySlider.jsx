@@ -43,9 +43,63 @@ export default function PropertySlider({ onOpenContact }) {
     };
   }, [selectedProperty]);
 
-  // If there are no properties yet, hide section (no fake default properties)
+  // If there are no listings yet, render an inviting onboarding showcase for prospective property owners
   if (!properties || properties.length === 0) {
-    return null;
+    return (
+      <section id="portfolio" className="py-20 sm:py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
+        <div id="properties" className="absolute -top-24 left-0 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="glass-card p-8 sm:p-14 border-gold-glow rounded-3xl text-center max-w-4xl mx-auto space-y-6 shadow-gold-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-gold-glow pointer-events-none blur-3xl opacity-20"></div>
+            
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-gold-500/40 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-bold mx-auto">
+              <Home className="w-4 h-4" />
+              <span>Managed Properties Portfolio</span>
+            </div>
+
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+              Onboarding Premier <span className="text-gold-gradient">Properties</span>
+            </h2>
+
+            <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              We are currently onboarding selected residential and commercial assets across Lekki Phase 1, Ikoyi, Victoria Island, Ikeja GRA, and Abeokuta into our management register.
+            </p>
+
+            <div className="grid sm:grid-cols-3 gap-4 pt-4 max-w-2xl mx-auto text-left">
+              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
+                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">90% Net Payout</span>
+                <span className="text-xs text-slate-300">Prompt remittance directly to your bank account</span>
+              </div>
+              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
+                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">Vetted Tenants</span>
+                <span className="text-xs text-slate-300">Verified identification, income, and solvent guarantors</span>
+              </div>
+              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
+                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">24/7 Portal</span>
+                <span className="text-xs text-slate-300">Real-time digital statements and photo inspections</span>
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => onOpenContact && onOpenContact({ service: 'Full Property Management' })}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gold-gradient text-slate-950 font-bold text-sm uppercase tracking-wider hover:brightness-110 transition-all flex items-center justify-center space-x-2 shadow-gold-sm"
+              >
+                <span>Onboard Your Property</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              
+              <a
+                href="#calculator"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-obsidian-900 border border-gold-500/40 text-amber-200 font-bold text-sm uppercase tracking-wider hover:bg-gold-500/20 transition-all text-center"
+              >
+                Calculate Rental Yield
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   // Derive unique categories dynamically from actual properties

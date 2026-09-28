@@ -1,7 +1,6 @@
 const CACHE_NAME = 'royalhaven-pwa-v2';
 const STATIC_ASSETS = [
   '/',
-  '/admin',
   '/manifest.json',
   '/images/logo-emblem.jpg'
 ];

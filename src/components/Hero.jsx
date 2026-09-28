@@ -86,7 +86,7 @@ export default function Hero({ onOpenContact }) {
               <div className="relative bg-white rounded-3xl p-6 border border-amber-200 shadow-xl overflow-hidden">
                 <div className="relative h-72 sm:h-80 rounded-2xl overflow-hidden border border-slate-200">
                   <img 
-                    src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80" 
+                    src="/images/hero-property.jpg" 
                     alt="Royal Haven Modern Property Management"
                     className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
                   />
@@ -129,6 +129,9 @@ export default function Hero({ onOpenContact }) {
 
         </div>
       </div>
+
+      {/* Elegant Transition to Dark Sections */}
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-[#060608]/20 pointer-events-none"></div>
     </section>
   );
 }

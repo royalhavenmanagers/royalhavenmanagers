@@ -86,7 +86,7 @@ Professional estate surveying gives investors and property owners total confiden
 const STORAGE_KEY = "royalhaven_blog_posts";
 const AUTH_KEY = "royalhaven_admin_auth";
 const ADMIN_PASSWORD_KEY = "royalhaven_admin_password";
-const DEFAULT_PASSWORD = "royalhaven2026";
+const DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "royalhaven2026";
 
 export const blogStore = {
   getPosts: () => {
