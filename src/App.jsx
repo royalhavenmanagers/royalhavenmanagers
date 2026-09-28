@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -10,35 +10,49 @@ import WhyChooseUs from './components/WhyChooseUs';
 import PartnersSection from './components/PartnersSection';
 import Testimonials from './components/Testimonials';
 import BlogSection from './components/BlogSection';
-import AdminPortal from './components/AdminPortal';
 import ContactModal from './components/ContactModal';
 import WhatsAppWidget from './components/WhatsAppWidget';
 import Footer from './components/Footer';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import OwnerPortal from './components/portal/OwnerPortal';
-import OwnerLogin from './components/portal/OwnerLogin';
 import { companyData } from './data/companyData';
 import { analyticsStore } from './data/analyticsStore';
+
+// Code-split heavy management portals to optimize landing page load speed & eliminate large chunks
+const AdminPortal = lazy(() => import('./components/AdminPortal'));
+const OwnerPortal = lazy(() => import('./components/portal/OwnerPortal'));
+const OwnerLogin = lazy(() => import('./components/portal/OwnerLogin'));
+
+function VaultLoader({ message = "Accessing Royal Haven Secure Vault..." }) {
+  return (
+    <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center text-amber-300 font-serif space-y-3">
+      <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-xs uppercase tracking-widest font-sans font-bold text-slate-300">
+        {message}
+      </p>
+    </div>
+  );
+}
 
 function OwnerPortalShell({ onReturnHome }) {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center text-amber-300 font-serif space-y-3">
-        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs uppercase tracking-widest font-sans font-bold text-slate-300">
-          Accessing Royal Haven Secure Vault...
-        </p>
-      </div>
-    );
+    return <VaultLoader message="Verifying Landlord Credentials..." />;
   }
 
   if (!isAuthenticated) {
-    return <OwnerLogin onReturnHome={onReturnHome} />;
+    return (
+      <Suspense fallback={<VaultLoader message="Loading Landlord Access..." />}>
+        <OwnerLogin onReturnHome={onReturnHome} />
+      </Suspense>
+    );
   }
 
-  return <OwnerPortal onReturnHome={onReturnHome} />;
+  return (
+    <Suspense fallback={<VaultLoader message="Loading Secure Landlord Vault..." />}>
+      <OwnerPortal onReturnHome={onReturnHome} />
+    </Suspense>
+  );
 }
 
 function MainApp() {
@@ -98,7 +112,11 @@ function MainApp() {
 
   // If viewing admin route, render AdminPortal
   if (currentRoute === 'admin') {
-    return <AdminPortal onReturnHome={handleReturnHome} />;
+    return (
+      <Suspense fallback={<VaultLoader message="Loading Admin Workspace..." />}>
+        <AdminPortal onReturnHome={handleReturnHome} />
+      </Suspense>
+    );
   }
 
   // If viewing owner portal route, render OwnerPortalShell

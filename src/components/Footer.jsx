@@ -187,6 +187,7 @@ export default function Footer({ onOpenContact }) {
               )}
               <li><a href="#process" className="text-slate-200 hover:text-gold-400 transition-colors">Management Process</a></li>
               <li><a href="#leadership" className="text-slate-200 hover:text-gold-400 transition-colors">Executive Leadership</a></li>
+              <li><a href="#testimonials" className="text-slate-200 hover:text-gold-400 transition-colors">Client Reviews</a></li>
               <li><a href="#blog" className="text-slate-200 hover:text-gold-400 transition-colors">Insights & Articles</a></li>
               <li>
                 <a href="#portal" className="text-amber-300 hover:text-white transition-colors font-bold flex items-center space-x-1.5 pt-1">

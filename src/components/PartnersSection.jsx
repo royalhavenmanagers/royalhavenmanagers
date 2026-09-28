@@ -12,7 +12,7 @@ export default function PartnersSection() {
   const sliderPartners = [...companyData.partners, ...companyData.partners];
 
   return (
-    <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <section id="partners" className="py-20 bg-slate-900 text-white relative overflow-hidden">
       {/* Background Subtle Radial Glow */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 pointer-events-none blur-3xl"></div>
       <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-gold-glow pointer-events-none blur-3xl opacity-15"></div>
