@@ -209,7 +209,7 @@ export default function OwnerLogin({ onReturnHome }) {
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         
         {/* Brand Header */}
-        <div className="text-center space-y-3 mb-6">
+        <div className="text-center space-y-3 mb-6 mt-12 sm:mt-0">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-200 via-gold-500 to-amber-700 p-0.5 shadow-gold-md">
             <div className="w-full h-full bg-obsidian-950 rounded-[14px] flex items-center justify-center">
               <Lock className="w-7 h-7 text-amber-300" />
