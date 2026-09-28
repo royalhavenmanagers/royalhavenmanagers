@@ -98,6 +98,7 @@ export const companyData = {
       id: "property-management",
       title: "PROPERTY MANAGEMENT",
       icon: "Building2",
+      image: "/images/services/property-management.jpg",
       description: "We manage your property with professionalism, transparency, and maximum care to ensure value and peace of mind.",
       features: ["Professional upkeep & care", "Day-to-day oversight", "Regular property reporting", "Peace of mind for owners"]
     },
@@ -105,6 +106,7 @@ export const companyData = {
       id: "facility-maintenance",
       title: "FACILITY & MAINTENANCE MANAGEMENT",
       icon: "Wrench",
+      image: "/images/services/facility-maintenance.jpg",
       description: "We coordinate routine upkeep, rapid repair response, and vetted artisan supervision to ensure your property remains in pristine condition.",
       features: ["Routine property upkeep", "Vetted contractor supervision", "Prompt emergency repairs", "Cost-effective asset care"]
     },
@@ -112,6 +114,7 @@ export const companyData = {
       id: "lettings-leasing",
       title: "LETTINGS & LEASING",
       icon: "Key",
+      image: "/images/services/lettings-leasing.jpg",
       description: "We connect landlords with quality tenants and handle all leasing processes professionally and efficiently.",
       features: ["Landlord & tenant matching", "Leasing documentation", "Efficient lease execution", "Professional tenant relations"]
     },
@@ -119,6 +122,7 @@ export const companyData = {
       id: "surveying-valuation",
       title: "ESTATE SURVEYING & VALUATION",
       icon: "Compass",
+      image: "/images/services/surveying-valuation.jpg",
       description: "We provide accurate survey and valuation reports to support informed decisions and secure property investments.",
       features: ["Accurate survey reports", "Valuation assessments", "Investment decision support", "Asset verification"]
     },
@@ -126,6 +130,7 @@ export const companyData = {
       id: "tenant-screening",
       title: "TENANT SCREENING",
       icon: "UserCheck",
+      image: "/images/services/tenant-screening.jpg",
       description: "We conduct thorough background checks to ensure reliable tenants and protect your investments.",
       features: ["Thorough background checks", "Document verification", "Reliable tenant selection", "Investment protection"]
     },
@@ -133,6 +138,7 @@ export const companyData = {
       id: "property-documentation",
       title: "PROPERTY DOCUMENTATION",
       icon: "FileText",
+      image: "/images/services/property-documentation.jpg",
       description: "We handle documentation and verification with accuracy, ensuring your property is legally protected.",
       features: ["Legal verification", "Document handling", "Accuracy & compliance", "Legal property protection"]
     },
@@ -140,6 +146,7 @@ export const companyData = {
       id: "property-inspection",
       title: "PROPERTY INSPECTION",
       icon: "ClipboardCheck",
+      image: "/images/services/property-inspection.jpg",
       description: "We carry out regular property inspections and provide reports to maintain standards and prevent issues.",
       features: ["Regular physical inspections", "Detailed condition reports", "Preventative maintenance", "Standard enforcement"]
     },
@@ -147,6 +154,7 @@ export const companyData = {
       id: "property-advisory",
       title: "PROPERTY MANAGEMENT ADVISORY",
       icon: "TrendingUp",
+      image: "/images/services/property-advisory.jpg",
       description: "We provide expert advice on rental yield maximization, tenant retention strategies, and optimizing your property ROI.",
       features: ["Rental yield optimization", "Tenant retention strategies", "Preventative care planning", "Tailored owner guidance"]
     }
