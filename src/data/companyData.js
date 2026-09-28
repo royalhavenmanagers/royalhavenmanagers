@@ -81,6 +81,16 @@ export const companyData = {
       name: "Marvel Develops",
       category: "Software & Digital Partner",
       logo: "/images/partners/marvel-develops.svg"
+    },
+    {
+      name: "Primelle Hub",
+      category: "Brand Strategy & Digital Partner",
+      logo: "/images/partners/primelle-hub.jpg"
+    },
+    {
+      name: "Crovation Limited",
+      category: "Real Estate & Development Partner",
+      logo: "/images/partners/crovation.jpg"
     }
   ],
   services: [

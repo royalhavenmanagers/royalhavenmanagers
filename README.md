@@ -21,7 +21,6 @@ Website: https://www.royalhaven.com.ng
 - Public Website: https://www.royalhaven.com.ng/
 - Income Calculator: https://www.royalhaven.com.ng/#calculator
 - Owner Portal: https://www.royalhaven.com.ng/#portal
-- Staff Admin: https://www.royalhaven.com.ng/#admin (Password: royalhaven2026)
 - Knowledge Hub Articles: https://www.royalhaven.com.ng/?article=slug#blog
 
 ---
@@ -45,8 +44,8 @@ Located at `#portal`, this provides a secure dashboard for registered landlords.
 - Routine inspection reports with photo evidence
 - Document vault for title deeds, tenancy agreements, and survey plans
 
-### Staff Admin Portal
-Located at `#admin`, this gives management complete operational control.
+### Operations & Management Backoffice
+Secure internal workspace providing complete operational control:
 - Property and tenant directory
 - Remittance creation and payout tracking
 - Confirmation prompts before deleting properties, remittances, documents, or inspections
