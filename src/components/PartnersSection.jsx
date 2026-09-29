@@ -1,12 +1,11 @@
 import React, { useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 import { Handshake, Building, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { companyData } from '../data/companyData';
 
 export default function PartnersSection() {
-  const prevRef = useRef(null);
-  const nextRef = useRef(null);
+  const swiperRef = useRef(null);
 
   // Duplicate list to ensure seamless infinite looping on all screen widths
   const sliderPartners = [...companyData.partners, ...companyData.partners];
@@ -27,48 +26,44 @@ export default function PartnersSection() {
             </h2>
           </div>
 
-          {/* Swipe Hint & Nav Buttons */}
+          {/* Auto-scroll Hint & Nav Buttons */}
           <div className="flex items-center space-x-3 self-start md:self-end">
             <span className="text-xs text-amber-200/80 font-medium hidden sm:inline-flex items-center">
-              <Sparkles className="w-3.5 h-3.5 text-gold-400 mr-1.5" />
-              Swipe or drag to explore
+              <Sparkles className="w-3.5 h-3.5 text-gold-400 mr-1.5 animate-pulse" />
+              Auto-scrolling showcase
             </span>
             <button
-              ref={prevRef}
+              onClick={() => swiperRef.current?.slidePrev()}
               aria-label="Previous partner"
-              className="p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-gold-500/60 text-gold-400 hover:bg-gold-gradient hover:text-obsidian-950 transition-all duration-300 shadow-md cursor-pointer"
+              className="p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-gold-500/60 text-gold-400 hover:bg-gold-gradient hover:text-obsidian-950 transition-all duration-300 shadow-md cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
-              ref={nextRef}
+              onClick={() => swiperRef.current?.slideNext()}
               aria-label="Next partner"
-              className="p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-gold-500/60 text-gold-400 hover:bg-gold-gradient hover:text-obsidian-950 transition-all duration-300 shadow-md cursor-pointer"
+              className="p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-gold-500/60 text-gold-400 hover:bg-gold-gradient hover:text-obsidian-950 transition-all duration-300 shadow-md cursor-pointer active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Swipeable Swiper Carousel */}
+        {/* Swipeable & Auto-scrolling Swiper Carousel */}
         <div className="relative pt-2 pb-6">
           <Swiper
-            modules={[Autoplay, Pagination, Navigation]}
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            modules={[Autoplay, Pagination]}
             spaceBetween={20}
             slidesPerView={1.3}
             loop={true}
+            speed={800}
             autoplay={{
-              delay: 3200,
+              delay: 2400,
               disableOnInteraction: false,
               pauseOnMouseEnter: true,
-            }}
-            navigation={{
-              prevEl: prevRef.current,
-              nextEl: nextRef.current,
-            }}
-            onBeforeInit={(swiper) => {
-              swiper.params.navigation.prevEl = prevRef.current;
-              swiper.params.navigation.nextEl = nextRef.current;
             }}
             pagination={{ 
               clickable: true,
