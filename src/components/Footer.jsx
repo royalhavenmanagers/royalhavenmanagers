@@ -17,7 +17,7 @@ export default function Footer({ onOpenContact }) {
         {/* ========================================================= */}
         {/* OFFICE LOCATION & INTERACTIVE GOOGLE MAPS SECTION         */}
         {/* ========================================================= */}
-        <div className="glass-card p-6 sm:p-10 border-gold-glow rounded-3xl overflow-hidden shadow-gold-md">
+        <div className="bg-slate-900/90 p-6 sm:p-10 border border-gold-500/30 rounded-3xl overflow-hidden shadow-xl">
           <div className="grid lg:grid-cols-12 gap-8 items-center">
             
             {/* Location Details */}

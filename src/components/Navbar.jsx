@@ -32,28 +32,28 @@ export default function Navbar({ onOpenContact }) {
   return (
     <>
       {/* Top Announcement & Direct Contact Bar */}
-      <div className="bg-slate-950 border-b border-amber-500/20 text-sm py-2.5 text-slate-300 hidden md:block">
+      <div className="bg-amber-50/95 border-b border-amber-200/80 text-sm py-2 text-slate-700 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="flex items-center space-x-6">
-            <span className="flex items-center text-amber-200 font-semibold">
-              <ShieldCheck className="w-4 h-4 text-gold-400 mr-2 shrink-0" />
-              Royal Haven Realty & Property Managers Ltd.
+            <span className="flex items-center text-amber-950 font-bold">
+              <ShieldCheck className="w-4 h-4 text-gold-600 mr-2 shrink-0" />
+              Royal Haven Realty &amp; Property Managers Ltd.
             </span>
-            <span className="text-slate-700">|</span>
-            <span className="text-slate-300">Lagos State & Ogun State Environs</span>
+            <span className="text-amber-300">|</span>
+            <span className="text-slate-600 font-medium">Lagos State &amp; Ogun State Environs</span>
           </div>
 
           <div className="flex items-center space-x-6">
-            <a href={`tel:${companyData.phones[0]}`} className="flex items-center hover:text-gold-400 transition-colors font-medium">
-              <Phone className="w-4 h-4 text-gold-400 mr-1.5" />
+            <a href={`tel:${companyData.phones[0]}`} className="flex items-center text-slate-700 hover:text-gold-700 transition-colors font-medium">
+              <Phone className="w-4 h-4 text-gold-600 mr-1.5" />
               <span>{companyData.formattedPhones[0]}</span>
             </a>
-            <a href={`mailto:${companyData.email}`} className="flex items-center hover:text-gold-400 transition-colors font-medium">
-              <Mail className="w-4 h-4 text-gold-400 mr-1.5" />
+            <a href={`mailto:${companyData.email}`} className="flex items-center text-slate-700 hover:text-gold-700 transition-colors font-medium">
+              <Mail className="w-4 h-4 text-gold-600 mr-1.5" />
               <span>{companyData.email}</span>
             </a>
-            <a href="#portal" className="flex items-center text-amber-300 hover:text-white transition-colors font-bold border-l border-slate-800 pl-4">
-              <Lock className="w-3.5 h-3.5 mr-1 text-gold-400" />
+            <a href="#portal" className="flex items-center text-amber-900 hover:text-gold-700 transition-colors font-bold border-l border-amber-200 pl-4">
+              <Lock className="w-3.5 h-3.5 mr-1 text-gold-600" />
               <span>Owner Portal</span>
             </a>
           </div>

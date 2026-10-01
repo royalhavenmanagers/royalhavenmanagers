@@ -18,13 +18,13 @@ export default function WhyChooseUs({ onOpenContact }) {
   ];
 
   return (
-    <section id="process" className="py-16 sm:py-24 bg-obsidian-900 bg-[#0a0a0e] text-white relative overflow-hidden">
+    <section id="process" className="py-16 sm:py-24 bg-white text-slate-900 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-14 sm:mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-            Why Choose <span className="text-gold-gradient">Royal Haven</span>
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+            Why Choose <span className="text-gold-gradient-light">Royal Haven</span>
           </h2>
         </div>
 
@@ -37,14 +37,14 @@ export default function WhyChooseUs({ onOpenContact }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="glass-card p-8 border-gold-glow flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300"
+              className="bg-white p-8 border border-amber-200/80 hover:border-gold-500/60 rounded-2xl flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 shadow-sm hover:shadow-md"
             >
               <div className="space-y-4">
-                <h3 className="font-serif text-xl font-bold text-white group-hover:text-amber-200 transition-colors">
+                <h3 className="font-serif text-xl font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
                   {pt.title}
                 </h3>
 
-                <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
                   {pt.description}
                 </p>
               </div>

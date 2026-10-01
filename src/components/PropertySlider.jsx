@@ -46,44 +46,44 @@ export default function PropertySlider({ onOpenContact }) {
   // If there are no listings yet, render an inviting onboarding showcase for prospective property owners
   if (!properties || properties.length === 0) {
     return (
-      <section id="portfolio" className="py-20 sm:py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
+      <section id="portfolio" className="py-20 sm:py-24 bg-white text-slate-900 relative overflow-hidden">
         <div id="properties" className="absolute -top-24 left-0 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="glass-card p-8 sm:p-14 border-gold-glow rounded-3xl text-center max-w-4xl mx-auto space-y-6 shadow-gold-md relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-gold-glow pointer-events-none blur-3xl opacity-20"></div>
+          <div className="bg-white p-8 sm:p-14 border border-amber-200/80 rounded-3xl text-center max-w-4xl mx-auto space-y-6 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-amber-200/20 pointer-events-none blur-3xl opacity-50"></div>
             
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-gold-500/40 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-bold mx-auto">
-              <Home className="w-4 h-4" />
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-amber-300/80 bg-amber-50 text-amber-900 text-xs uppercase tracking-widest font-bold mx-auto shadow-sm">
+              <Home className="w-4 h-4 text-gold-600" />
               <span>Managed Properties Portfolio</span>
             </div>
 
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              Onboarding Premier <span className="text-gold-gradient">Properties</span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+              Onboarding Premier <span className="text-gold-gradient-light">Properties</span>
             </h2>
 
-            <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-700 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
               We are currently onboarding selected residential and commercial assets across Lekki Phase 1, Ikoyi, Victoria Island, Ikeja GRA, and Abeokuta into our management register.
             </p>
 
             <div className="grid sm:grid-cols-3 gap-4 pt-4 max-w-2xl mx-auto text-left">
-              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
-                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">90% Net Payout</span>
-                <span className="text-xs text-slate-300">Prompt remittance directly to your bank account</span>
+              <div className="bg-amber-50/70 p-4 rounded-xl border border-amber-200/80">
+                <span className="text-amber-900 font-bold text-xs uppercase tracking-wider block">90% Net Payout</span>
+                <span className="text-xs text-slate-600">Prompt remittance directly to your bank account</span>
               </div>
-              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
-                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">Vetted Tenants</span>
-                <span className="text-xs text-slate-300">Verified identification, income, and solvent guarantors</span>
+              <div className="bg-amber-50/70 p-4 rounded-xl border border-amber-200/80">
+                <span className="text-amber-900 font-bold text-xs uppercase tracking-wider block">Vetted Tenants</span>
+                <span className="text-xs text-slate-600">Verified identification, income, and solvent guarantors</span>
               </div>
-              <div className="bg-obsidian-900/80 p-4 rounded-xl border border-white/10">
-                <span className="text-gold-400 font-bold text-xs uppercase tracking-wider block">24/7 Portal</span>
-                <span className="text-xs text-slate-300">Real-time digital statements and photo inspections</span>
+              <div className="bg-amber-50/70 p-4 rounded-xl border border-amber-200/80">
+                <span className="text-amber-900 font-bold text-xs uppercase tracking-wider block">24/7 Portal</span>
+                <span className="text-xs text-slate-600">Real-time digital statements and photo inspections</span>
               </div>
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => onOpenContact && onOpenContact({ service: 'Full Property Management' })}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gold-gradient text-slate-950 font-bold text-sm uppercase tracking-wider hover:brightness-110 transition-all flex items-center justify-center space-x-2 shadow-gold-sm"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gold-gradient text-slate-950 font-bold text-sm uppercase tracking-wider hover:brightness-110 transition-all flex items-center justify-center space-x-2 shadow-md"
               >
                 <span>Onboard Your Property</span>
                 <ArrowRight className="w-4 h-4" />
@@ -91,7 +91,7 @@ export default function PropertySlider({ onOpenContact }) {
               
               <a
                 href="#calculator"
-                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-obsidian-900 border border-gold-500/40 text-amber-200 font-bold text-sm uppercase tracking-wider hover:bg-gold-500/20 transition-all text-center"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-900 font-bold text-sm uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 transition-all text-center"
               >
                 Calculate Rental Yield
               </a>
@@ -110,20 +110,20 @@ export default function PropertySlider({ onOpenContact }) {
     : properties.filter(p => p.propertyType?.toLowerCase() === activeCategory.toLowerCase());
 
   return (
-    <section id="portfolio" className="py-24 bg-obsidian-950 bg-[#060608] text-white relative overflow-hidden">
+    <section id="portfolio" className="py-24 bg-white text-slate-900 relative overflow-hidden">
       <div id="properties" className="absolute -top-24 left-0 pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-white/10 pb-6 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-slate-200 pb-6 gap-6">
           <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-400 text-xs uppercase tracking-widest font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full border border-amber-300/80 bg-amber-50 text-amber-900 text-xs uppercase tracking-widest font-bold shadow-sm">
               <span>MANAGED PORTFOLIO &amp; LISTINGS</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              Featured <span className="text-gold-gradient">Properties</span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+              Featured <span className="text-gold-gradient-light">Properties</span>
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
               Explore managed residences, commercial spaces, and premier developments under Royal Haven care.
             </p>
           </div>
@@ -138,7 +138,7 @@ export default function PropertySlider({ onOpenContact }) {
                   className={`px-4 py-2 text-xs uppercase tracking-wider font-bold rounded-xl transition-all duration-300 ${
                     activeCategory === cat
                       ? 'bg-gold-gradient text-slate-950 shadow-sm'
-                      : 'bg-slate-900 text-slate-300 border border-slate-700 hover:border-gold-500/60'
+                      : 'bg-amber-50/80 text-slate-700 border border-amber-200/80 hover:border-gold-500/60'
                   }`}
                 >
                   {cat}
@@ -168,11 +168,11 @@ export default function PropertySlider({ onOpenContact }) {
               <SwiperSlide key={prop.id} className="h-auto">
                 <div 
                   onClick={() => setSelectedProperty(prop)}
-                  className="glass-card overflow-hidden h-full flex flex-col justify-between border-gold-glow group cursor-pointer hover:-translate-y-1.5 transition-all duration-300"
+                  className="bg-white rounded-2xl overflow-hidden h-full flex flex-col justify-between border border-amber-200/80 hover:border-gold-500/60 shadow-sm hover:shadow-md group cursor-pointer hover:-translate-y-1.5 transition-all duration-300"
                 >
                   <div>
                     {/* Property Image Container */}
-                    <div className="relative h-64 overflow-hidden bg-slate-900">
+                    <div className="relative h-64 overflow-hidden bg-slate-100">
                       <img 
                         src={prop.coverImage || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80'} 
                         alt={prop.title} 
@@ -182,13 +182,13 @@ export default function PropertySlider({ onOpenContact }) {
                       
                       {/* Top Badges */}
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                        <span className="bg-slate-950/90 border border-gold-500/40 text-amber-300 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider backdrop-blur-md">
+                        <span className="bg-white/95 border border-amber-200/80 text-amber-950 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider backdrop-blur-md shadow-sm">
                           {prop.propertyType}
                         </span>
                         <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider backdrop-blur-md ${
-                          prop.status === 'Available' ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50' :
-                          prop.status === 'Rented' ? 'bg-amber-950/90 text-amber-300 border border-amber-500/50' :
-                          'bg-slate-900/90 text-slate-300 border border-slate-700'
+                          prop.status === 'Available' ? 'bg-emerald-900/90 text-emerald-100 border border-emerald-500/50' :
+                          prop.status === 'Rented' ? 'bg-amber-900/90 text-amber-100 border border-amber-500/50' :
+                          'bg-slate-900/90 text-slate-100 border border-slate-700'
                         }`}>
                           {prop.listingType} &bull; {prop.status}
                         </span>
@@ -196,7 +196,7 @@ export default function PropertySlider({ onOpenContact }) {
 
                       {/* Bottom Price in Cover */}
                       <div className="absolute bottom-3 left-4 right-4">
-                        <span className="text-xl font-bold font-serif text-white text-gold-gradient block">
+                        <span className="text-xl font-bold font-serif text-white block drop-shadow-sm">
                           {prop.price}
                         </span>
                       </div>
@@ -204,27 +204,27 @@ export default function PropertySlider({ onOpenContact }) {
 
                     {/* Content Details */}
                     <div className="p-6 space-y-3">
-                      <div className="flex items-center text-xs text-amber-200/90 font-medium">
-                        <MapPin className="w-3.5 h-3.5 mr-1 shrink-0 text-gold-400" />
+                      <div className="flex items-center text-xs text-amber-800 font-semibold">
+                        <MapPin className="w-3.5 h-3.5 mr-1 shrink-0 text-gold-600" />
                         <span className="truncate">{prop.location}</span>
                       </div>
 
-                      <h3 className="font-serif text-lg sm:text-xl font-bold text-white group-hover:text-amber-200 transition-colors leading-snug line-clamp-2">
+                      <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-900 group-hover:text-amber-800 transition-colors leading-snug line-clamp-2">
                         {prop.title}
                       </h3>
 
                       {/* Specs Row */}
                       {(prop.bedrooms > 0 || prop.bathrooms > 0) && (
-                        <div className="flex items-center space-x-4 pt-2 text-xs text-slate-300">
+                        <div className="flex items-center space-x-4 pt-2 text-xs text-slate-600">
                           {prop.bedrooms > 0 && (
                             <span className="flex items-center">
-                              <BedDouble className="w-4 h-4 text-gold-400 mr-1.5" />
+                              <BedDouble className="w-4 h-4 text-gold-600 mr-1.5" />
                               {prop.bedrooms} {prop.bedrooms === 1 ? 'Bed' : 'Beds'}
                             </span>
                           )}
                           {prop.bathrooms > 0 && (
                             <span className="flex items-center">
-                              <Bath className="w-4 h-4 text-gold-400 mr-1.5" />
+                              <Bath className="w-4 h-4 text-gold-600 mr-1.5" />
                               {prop.bathrooms} {prop.bathrooms === 1 ? 'Bath' : 'Baths'}
                             </span>
                           )}
@@ -241,7 +241,7 @@ export default function PropertySlider({ onOpenContact }) {
                         e.stopPropagation();
                         setSelectedProperty(prop);
                       }}
-                      className="w-full py-2.5 rounded-xl border border-gold-500/40 text-amber-300 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 hover:border-transparent transition-all duration-300 flex items-center justify-center space-x-1.5 group-hover:shadow-sm cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-amber-50 border border-amber-300/80 text-amber-950 text-xs font-bold uppercase tracking-wider hover:bg-gold-gradient hover:text-slate-950 transition-all duration-300 flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer"
                     >
                       <Eye className="w-4 h-4" />
                       <span>View Full Details</span>

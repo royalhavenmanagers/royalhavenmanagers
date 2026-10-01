@@ -128,45 +128,45 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/90 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      <div className="relative w-full max-w-2xl glass-card border-gold-glow p-6 sm:p-10 my-8 shadow-gold-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-white border border-amber-200/90 rounded-3xl p-6 sm:p-10 my-8 shadow-2xl text-slate-900">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-gold-400 transition-colors rounded-xl hover:bg-white/5 border border-white/10"
+          className="absolute top-5 right-5 p-2 text-slate-500 hover:text-slate-950 transition-colors rounded-xl hover:bg-slate-100 border border-slate-200"
         >
           <X className="w-6 h-6" />
         </button>
 
         {submitted ? (
           <div className="text-center py-12 space-y-4">
-            <div className="w-16 h-16 bg-gold-500/20 text-gold-400 border border-gold-500/40 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-300 rounded-full flex items-center justify-center mx-auto shadow-sm">
               <CheckCircle className="w-10 h-10" />
             </div>
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">Consultation Request Received!</h3>
-            <p className="text-slate-200 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-              Thank you for contacting Royal Haven Realty & Property Managers Ltd. Our team will get back to you promptly.
+            <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-slate-950">Consultation Request Received!</h3>
+            <p className="text-slate-700 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+              Thank you for contacting Royal Haven Realty &amp; Property Managers Ltd. Our team will get back to you promptly.
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             <div className="space-y-2">
-              <div className="inline-block px-3.5 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs uppercase font-bold tracking-widest">
+              <div className="inline-block px-3.5 py-1 rounded-full bg-amber-50 border border-amber-300/80 text-amber-950 text-xs uppercase font-bold tracking-widest shadow-sm">
                 DIRECT CONSULTATION
               </div>
-              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">
-                Contact <span className="text-gold-gradient">Royal Haven</span>
+              <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-slate-950">
+                Contact <span className="text-gold-gradient-light">Royal Haven</span>
               </h3>
-              <p className="text-sm sm:text-base text-slate-300">
-                Send us a message below for inquiries.
+              <p className="text-sm sm:text-base text-slate-600">
+                Send us a message below for inquiries and consultations.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                     Full Name *
                   </label>
                   <input
@@ -175,12 +175,12 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="Enter your full name"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                     Phone Number *
                   </label>
                   <input
@@ -189,14 +189,14 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="e.g. 08153785297"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
                   />
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                     Email Address *
                   </label>
                   <input
@@ -208,18 +208,18 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                     Service Required
                   </label>
                   <select
                     value={formData.propertyType}
                     onChange={(e) => setFormData({ ...formData, propertyType: e.target.value })}
-                    className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-gold-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
                   >
                     <option value="Full Property Management">Full Property Management</option>
                     <option value="Facility & Maintenance Management">Facility & Maintenance Management</option>
@@ -235,7 +235,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Property Location (City / State)
                 </label>
                 <input
@@ -243,12 +243,12 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="e.g. Lekki, Lagos or Abeokuta, Ogun State"
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Your Message / Inquiries
                 </label>
                 <textarea
@@ -256,12 +256,12 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   placeholder="Describe your property management requirements..."
-                  className="w-full bg-obsidian-900 border border-gold-500/30 rounded-xl px-4 py-3 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-500 transition-colors resize-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gold-500 focus:bg-white transition-colors resize-none"
                 ></textarea>
               </div>
 
               {errorMessage && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-600 font-semibold">
                   {errorMessage}
                 </div>
               )}
@@ -269,7 +269,7 @@ export default function ContactModal({ isOpen, onClose, initialData = null }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 text-xs uppercase tracking-widest font-bold rounded-xl text-obsidian-900 bg-gold-gradient hover:brightness-110 shadow-gold-md transition-all flex items-center justify-center space-x-2 disabled:opacity-60 cursor-pointer"
+                className="w-full py-4 text-xs uppercase tracking-widest font-bold rounded-xl text-slate-950 bg-gold-gradient hover:brightness-110 shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-60 cursor-pointer"
               >
                 <span>{submitting ? 'Dispatching Inquiry...' : 'Send Consultation Request'}</span>
                 <Send className="w-4 h-4" />
